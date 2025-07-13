@@ -22,6 +22,7 @@ h2 { margin: 20px; font-size: 1.5em; }
   .chart {
     height: auto;
     overflow-x: auto;
+    overflow-y: auto;
     padding-top: 50px;
   }
   .Treant .node {

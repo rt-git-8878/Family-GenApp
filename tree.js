@@ -1,4 +1,3 @@
-
 function createNodeHTML(node) {
   const name = node.text.name || "";
   const title = node.text.title || "";
