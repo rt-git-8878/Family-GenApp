@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Family Tree</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/treant-js@1.0.0/Treant.css">
+<link rel="stylesheet" href="custom.css">
+</head>
+<body>
+
+<h2>📜परिवार वंशावली</h2>
+<select id="nodeSelect" style="margin-bottom: 10px; padding: 5px; font-size: 1.3em;">
+  <option value="">Select a person</option>
+</select>
+<div id="tree-simple" class="chart"></div>
+
+<!-- Modal Structure -->
+<div id="nodeModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close">&times;</span>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/raphael@2.3.0/raphael.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/treant-js@1.0.0/Treant.min.js"></script>
+<script src="tree.js"></script>
+</body>
+</html>
