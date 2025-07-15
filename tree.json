@@ -2,7 +2,7 @@
   {
     "text": {
       "name": "देव चरण (तीन शादी)",
-      "title": "1920 - 1980"
+      "title": ""
     },
     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
     "children": [
@@ -62,7 +62,30 @@
                               "name": "शंकर",
                               "title": ""
                             },
+                            "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                         "children": [
+                          {
+                            "text": {
+                              "name": "मदनलाल",
+                              "title": ""
+                            },
                             "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                          },
+                          {
+                            "text": {
+                              "name": "विशेष",
+                              "title": ""
+                            },
+                            "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                          },
+                          {
+                            "text": {
+                              "name": "दिनेश",
+                              "title": ""
+                            },
+                            "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                          }
+                        ]
                           },
                           {
                             "text": {
@@ -325,14 +348,32 @@
                       "name": "अंबिका",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                 "children": [
+                  {
+                    "text": {
+                      "name": "अभयराज",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   },
                   {
                     "text": {
                       "name": "महेश्वरी",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                   "children": [
+                  {
+                    "text": {
+                      "name": "सुचिव्रत",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   },
                   {
                     "text": {
@@ -467,7 +508,37 @@
                           "name": "रामानुज",
                           "title": ""
                         },
-                        "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                        "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                         "children": [
+                        {
+                          "text": {
+                            "name": "प्रेम",
+                            "title": ""
+                          },
+                          "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                        },
+                        {
+                          "text": {
+                            "name": "संतोष",
+                            "title": ""
+                          },
+                          "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                        },
+                        {
+                          "text": {
+                            "name": "नारेंद्र",
+                            "title": ""
+                          },
+                          "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                        },
+                        {
+                          "text": {
+                            "name": "शैलेन्द्र",
+                            "title": ""
+                          },
+                          "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                        }
+                     ]
                       }
                     ]
                   }
@@ -501,21 +572,111 @@
                       "name": "बद्रीप्रसाद",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                 "children": [
+                  {
+                    "text": {
+                      "name": "इन्द्रमणि",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "राममणि",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "राजेन्द्र",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "अखिलेश",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   },
                   {
                     "text": {
                       "name": "चूड़ामणि",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                 "children": [
+                  {
+                    "text": {
+                      "name": "बालेंद्र",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "बृजेन्द्र",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "देवेन्द्र",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "शिवेन्द्र",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   },
                   {
                     "text": {
                       "name": "सूर्यमणि",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                    "children": [
+                  {
+                    "text": {
+                      "name": "अजय",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "अजीत",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "सुनील",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "सुजीत",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   }
                 ]
               }
