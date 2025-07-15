@@ -1,3 +1,5 @@
+const IMAGE_URL = "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png";
+
 function createNodeHTML(node) {
   const name = node.text.name || "";
   const title = node.text.title || "";
@@ -9,7 +11,7 @@ function createNodeHTML(node) {
 
   return `
     <div class="node-content" style="text-align:center; display:flex; flex-direction: column; align-items: center;">
-      <img src="${node.image}" alt="${name}" style="display:block !important; margin: 0 auto 10px auto !important;" />
+      <img src="${IMAGE_URL}" alt="${name}" style="display:block !important; margin: 0 auto 10px auto !important;" />
       <div class="node-text" style="text-align:center;">
         <div class="node-name">${linkHTML}</div>
         <div class="node-title">${title}</div>
