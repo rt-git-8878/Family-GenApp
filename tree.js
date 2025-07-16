@@ -1,5 +1,5 @@
-const IMAGE_URL = "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png";
-
+//const IMAGE_URL = "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png";
+const IMAGE_URL="Images\\No_Photo.png";
 function createNodeHTML(node) {
   const name = node.text.name || "";
   const title = node.text.title || "";

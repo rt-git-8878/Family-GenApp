@@ -464,7 +464,7 @@
                   },
                   {
                     "text": {
-                      "name": "मुन्ना",
+                      "name": "विजय शंकर (मुन्ना)",
                       "title": ""
                     },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
@@ -515,7 +515,16 @@
                             "name": "प्रेम",
                             "title": ""
                           },
+                          "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                       "children": [
+                        {
+                          "text": {
+                            "name": "अमित (राहुल)",
+                            "title": ""
+                          },
                           "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                        }
+                      ]
                         },
                         {
                           "text": {
@@ -593,28 +602,78 @@
                       "name": "इन्द्रमणि",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                  "children": [
+                  {
+                    "text": {
+                      "name": "श्रवण",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "पवन",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "रोहित (राहुल)",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   },
                   {
                     "text": {
                       "name": "राममणि",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                  "children": [
+                  {
+                    "text": {
+                      "name": "विकास (सीनू)",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   },
                   {
                     "text": {
                       "name": "राजेन्द्र",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                 "children": [
+                  {
+                    "text": {
+                      "name": "नीरज (नीटू)",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   },
                   {
                     "text": {
                       "name": "अखिलेश",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                  "children": [
+                  {
+                    "text": {
+                      "name": "ओमप्रकाश",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   }
                 ]
                   },
@@ -630,28 +689,92 @@
                       "name": "बालेंद्र",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                  "children": [
+                  {
+                    "text": {
+                      "name": "संजय (पिंटू)",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "रावेंद्र (मिंटू)",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "त्रिदेव (बिट्टू)",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   },
                   {
                     "text": {
                       "name": "बृजेन्द्र",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                  "children": [
+                  {
+                    "text": {
+                      "name": "राकेश",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "रोशन",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   },
                   {
                     "text": {
                       "name": "देवेन्द्र",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                "children": [
+                  {
+                    "text": {
+                      "name": "आयुष (बेटू)",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "(मानू)",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   },
                   {
                     "text": {
                       "name": "शिवेन्द्र",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                  "children": [
+                  {
+                    "text": {
+                      "name": "आकाश (शिंटू)",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   }
                 ]
                   },
@@ -667,28 +790,71 @@
                       "name": "अजय",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                  "children": [
+                  {
+                    "text": {
+                      "name": "अमन",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   },
                   {
                     "text": {
                       "name": "अजीत",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                    "children": [
+                  {
+                    "text": {
+                      "name": "अतुल",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "अनुराग",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   },
                   {
                     "text": {
                       "name": "सुनील",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                   "children": [
+                  {
+                    "text": {
+                      "name": "हर्षित (किट्टू)",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   },
                   {
                     "text": {
                       "name": "सुजीत",
                       "title": ""
                     },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+                   "children": [
+                  {
+                    "text": {
+                      "name": "छोटा भाई",
+                      "title": ""
+                    },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
                   }
                 ]
                   }
@@ -722,14 +888,60 @@
                   "name": "भुवनेश्वरी",
                   "title": ""
                 },
-                "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+              "children": [
+                  {
+                    "text": {
+                      "name": "बृजेश (बबलू)",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "अनसुइया",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "राजेश",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
               },
               {
                 "text": {
                   "name": "अंजनी",
                   "title": ""
                 },
-                "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png",
+              "children": [
+                  {
+                    "text": {
+                      "name": "राकेश",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "पंकज",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  },
+                  {
+                    "text": {
+                      "name": "नीरज",
+                      "title": ""
+                    },
+                    "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
+                  }
+                ]
               }
             ]
               },
@@ -765,14 +977,14 @@
                 "children": [
                   {
                     "text": {
-                      "name": "सुरसरी(मुन्ना)",
+                      "name": "सुरसरी (मुन्ना)",
                       "title": ""
                     },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
                   },
                   {
                     "text": {
-                      "name": "देवसरी(रज्जन)",
+                      "name": "देवसरी (रज्जन)",
                       "title": ""
                     },
                     "image": "https://cdn.pixabay.com/photo/2020/07/14/13/07/icon-5404125_1280.png"
