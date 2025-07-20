@@ -1,0 +1,45 @@
+
+ul.tree, ul.tree ul {
+  list-style-type: none;
+  padding-left: 1rem;
+  position: relative;
+}
+ul.tree ul { margin-left: .5rem; }
+ul.tree li::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -1rem;
+  border-left: 1px solid #ccc;
+  height: 100%;
+}
+ul.tree li {
+  margin: .3rem 0;
+  position: relative;
+  padding-left: .8rem;
+}
+ul.tree li span {
+  cursor: pointer;
+  user-select: none;
+}
+.caret::before {
+  content: "▶";
+  display: inline-block;
+  margin-right: .3rem;
+  transform: rotate(0deg);
+  transition: transform 0.2s;
+}
+.caret-down::before { transform: rotate(90deg); }
+.nested { display: none; }
+.active { display: block; }
+
+/* Center topContent horizontally when body has class list-view */
+body.list-view #topContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Highlight for list view nodes */
+/* Removed as per user request */
