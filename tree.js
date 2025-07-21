@@ -106,10 +106,10 @@ function populateDropdown(treeData) {
     const selectedName = select.value;
     highlightNode(selectedName);
 
-    // Also highlight in list view if visible
+    // Also expand and focus in list view if visible
     if (document.getElementById('listView').checked) {
-      if (window.highlightListNode) {
-        window.highlightListNode(selectedName);
+      if (window.expandAndFocusListNode) {
+        window.expandAndFocusListNode(selectedName);
       }
     }
   });
