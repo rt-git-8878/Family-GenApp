@@ -41,7 +41,7 @@ fetch('tree.json')
     document.getElementById('list-simple').textContent = 'Failed to load data.';
   });
 
-// Function to toggle views based on radio button selection
+
 function toggleView() {
   const treeView = document.getElementById('treeView').checked;
   const listSimple = document.getElementById('list-simple');
@@ -74,7 +74,6 @@ function toggleView() {
   }
 }
 
-// Highlight node in list view by name
 function highlightListNode(name) {
   // Function removed as per user request
 }
