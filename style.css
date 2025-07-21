@@ -1,10 +1,9 @@
-
 ul.tree, ul.tree ul {
   list-style-type: none;
   padding-left: 1rem;
   position: relative;
 }
-ul.tree ul { margin-left: .5rem; }
+
 ul.tree li::before {
   content: '';
   position: absolute;
@@ -41,5 +40,12 @@ body.list-view #topContent {
   text-align: center;
 }
 
+/* Add padding-top to body.list-view to preserve initial vertical spacing */
+body.list-view {
+  background: url('https://img.freepik.com/free-vector/leaves-pattern-white-background-design_1017-36619.jpg?semt=ais_hybrid&w=740') no-repeat center center fixed;
+  background-size: cover;
+  padding-top: 50px;
+}
+h2 { margin: 20px; font-size: 1.5em; }
 /* Highlight for list view nodes */
 /* Removed as per user request */
