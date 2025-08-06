@@ -42,9 +42,15 @@ body.list-view #topContent {
 
 /* Add padding-top to body.list-view to preserve initial vertical spacing */
 body.list-view {
-  background: url('https://img.freepik.com/free-vector/leaves-pattern-white-background-design_1017-36619.jpg?semt=ais_hybrid&w=740') no-repeat center center fixed;
+  /* background: url('https://img.freepik.com/free-vector/leaves-pattern-white-background-design_1017-36619.jpg?semt=ais_hybrid&w=740') no-repeat center center fixed; */
+  background: url('Images//background_img_3.jpg');
   background-size: cover;
-  padding-top: 50px;
+  background-position: center;
+  background-attachment: fixed;
+  margin: 0;
+  padding: 50px 10px 10px 10px;
+  min-height: 100vh;
+  width: 100%;
 }
 h2 { margin: 20px; font-size: 1.5em; }
 

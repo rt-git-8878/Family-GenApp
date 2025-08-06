@@ -48,36 +48,47 @@ function processNodes(nodes) {
   });
 }
 
-fetch('tree.json')
-  .then(res => res.json())
-  .then(treeData => {
-    populateDropdown(treeData);
-    if (treeData.length === 1) {
-      processNodes([treeData[0]]);
-      const chart_config = {
-        chart: {
-          container: "#tree-simple",
-          connectors: { type: 'step' },
-          animation: { nodeAnimation: "easeOutBounce", nodeSpeed: 700 }
-        },
-        nodeStructure: treeData[0]
-      };
-      const chart = new Treant(chart_config);
-      addNodeClickEvents();
-    } else {
-      processNodes(treeData);
-      const chart_config = {
-        chart: {
-          container: "#tree-simple",
-          connectors: { type: 'step' },
-          animation: { nodeAnimation: "easeOutBounce", nodeSpeed: 700 }
-        },
-        nodeStructure: { text: { name: "Family" }, children: treeData }
-      };
-      const chart = new Treant(chart_config);
-      addNodeClickEvents();
-    }
-  });
+function initTree() {
+  fetch('tree.json')
+    .then(res => res.json())
+    .then(treeData => {
+      populateDropdown(treeData);
+      if (treeData.length === 1) {
+        processNodes([treeData[0]]);
+        const chart_config = {
+          chart: {
+            container: "#tree-simple",
+            connectors: { type: 'step' },
+            animation: { nodeAnimation: "easeOutBounce", nodeSpeed: 700 },
+            nodeSpacing: 40,
+            siblingSeparation: 30,
+            subTeeSeparation: 30,
+            levelSeparation: 50
+          },
+          nodeStructure: treeData[0]
+        };
+        const chart = new Treant(chart_config);
+        addNodeClickEvents();
+      } else {
+        processNodes(treeData);
+        const chart_config = {
+          chart: {
+            container: "#tree-simple",
+            connectors: { type: 'step' },
+            animation: { nodeAnimation: "easeOutBounce", nodeSpeed: 700 },
+            nodeSpacing: 40,
+            siblingSeparation: 30,
+            subTeeSeparation: 30,
+            levelSeparation: 50
+          },
+          nodeStructure: { text: { name: "Family" }, children: treeData }
+        };
+        const chart = new Treant(chart_config);
+        addNodeClickEvents();
+      }
+    });
+}
+window.initTree = initTree;
 
 function populateDropdown(treeData) {
   const select = document.getElementById('nodeSelect');
