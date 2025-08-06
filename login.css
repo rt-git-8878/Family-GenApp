@@ -4,14 +4,14 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #e58484;
-  background: url('https://img.freepik.com/free-vector/leaves-pattern-white-background-design_1017-36619.jpg?semt=ais_hybrid&w=740') no-repeat center center fixed;
+  background-color: #e0dfdf;
+  /* background: url('https://img.freepik.com/free-vector/leaves-pattern-white-background-design_1017-36619.jpg?semt=ais_hybrid&w=740') no-repeat center center fixed; */
   background: url('Images//background_img_3.jpg');
   overflow: hidden;
 }
 
 #loginSection .login-form {
-  background: rgba(152, 194, 233, 0.786);
+  background: rgba(203, 226, 221, 0.786);
   padding: 40px;
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0,0,0,0.1);
@@ -42,7 +42,7 @@
 #loginSection .btn-login {
   width: 100%;
   padding: 12px;
-  background-color: #007bff;
+  background-color: #03631c;
   color: white;
   border: none;
   border-radius: 5px;
