@@ -52,6 +52,9 @@ function initTree() {
   fetch('tree.json')
     .then(res => res.json())
     .then(treeData => {
+      // Store tree data globally for DOB lookup
+      window.treeData = treeData;
+      
       populateDropdown(treeData);
       if (treeData.length === 1) {
         processNodes([treeData[0]]);
@@ -88,6 +91,28 @@ function initTree() {
       }
     });
 }
+
+// Helper function to find node data by name
+function findNodeDataByName(name) {
+  // Get the tree data from the global scope
+  let treeData = window.treeData || [];
+  
+  function searchNode(nodes) {
+    for (let node of nodes) {
+      if (node.text && node.text.name === name) {
+        return node;
+      }
+      if (node.children) {
+        const found = searchNode(node.children);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+  
+  return searchNode(treeData);
+}
+
 window.initTree = initTree;
 
 function populateDropdown(treeData) {
@@ -153,21 +178,30 @@ function addNodeClickEvents() {
     nodes.forEach(node => {
       node.style.cursor = 'pointer';
       node.addEventListener('click', () => {
-        const name = node.querySelector('.node-name')?.textContent || '';
-        const title = node.querySelector('.node-title')?.textContent || '';
-        const contact = node.querySelector('.node-contact')?.textContent || '';
-        const imgSrc = node.querySelector('img')?.src || '';
+        // Find the corresponding node data to check for DOB
+        const nodeName = node.querySelector('.node-name')?.textContent || '';
+        const nodeData = findNodeDataByName(nodeName);
+        
+        // Only show modal if node has DOB
+        if (nodeData && nodeData.text) {
+          const name = nodeData.text.name || '';
+          const title = nodeData.text.title || '';
+          const contact = nodeData.text.contact || '';
+          const dob = nodeData.text.DOB || 'उपलब्ध नहीं है|';
+          const imgSrc = node.querySelector('img')?.src || '';
 
-        const modalBody = document.getElementById('modalBody');
-        modalBody.innerHTML = `
-          <img src="${imgSrc}" alt="${name}" style="width:100px; height:100px; border-radius:50%; display:block; margin: 0 auto 10px auto;" />
-          <h2 style="text-align:center;">${name}</h2>
-          <p style="text-align:center; font-style: italic;">${title}</p>
-          <p style="text-align:center;">${contact}</p>
-        `;
+          const modalBody = document.getElementById('modalBody');
+          modalBody.innerHTML = `
+            <img src="${imgSrc}" alt="${name}" style="width:100px; height:100px; border-radius:50%; display:block; margin: 0 auto 10px auto;" />
+            <h2 style="text-align:center;">${name}</h2>
+            <p style="text-align:center; font-style: italic;">${title}</p>
+            ${contact ? `<p style="text-align:center;"><strong>Contact:</strong> ${contact}</p>` : ''}
+            <p style="text-align:center; font-size: 1.2em; color: #007bff;"><strong>जन्म तिथि:</strong> ${dob}</p>
+          `;
 
-        const modal = document.getElementById('nodeModal');
-        modal.style.display = 'block';
+          const modal = document.getElementById('nodeModal');
+          modal.style.display = 'block';
+        }
       });
     });
 
