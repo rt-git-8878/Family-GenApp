@@ -12,10 +12,8 @@
  <link rel="stylesheet" href="login.css">
 </head>
 <body class="bg-light">
-  <!-- Logout Button -->
-  <button id="logoutBtn" style="background-color: crimson;color: aliceblue;">Logout</button>
-  
   <!-- Login Section -->
+     <h2 style="margin: 0;">📜तिवारी परिवार-वंशावली 📜</h2>
   <div id="loginSection">
     <div class="login-form">
       <img src="Images/FamilyFavicon.gif" alt="Family Tree" class="login-tree-image" />
@@ -32,16 +30,17 @@
       <div class="error-message" id="errorMessage">Invalid username or password. Please try again.</div>
     </div>
   </div>
-  
+  <button id="logoutBtn" style="background-color: crimson; color: aliceblue; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Logout</button>
+
   <!-- Main Content (Hidden until login) -->
   <div id="mainContent">
-    <div id="topContent">
-      <h2>📜तिवारी परिवार-वंशावली 📜</h2>
-     <select id="nodeSelect" style="margin-bottom: 10px; padding: 5px; font-size: 1.3em;">
-        <option value="">Select a person</option>
-      </select>
-      <div class="container my-4">
-        <div class="mb-3"  style="margin-bottom: 10px; padding: 5px; font-size: 1.3em;">
+    <div id="topContent" >
+  
+      <div style="text-align: center;">
+        <select id="nodeSelect" style="padding: 5px; font-size: 1.3em;">
+          <option value="">Select a person</option>
+        </select>
+        <div class="mb-3" style="margin-bottom: 0; padding: 5px; font-size: 1.3em;">
           <input type="radio" id="treeView" name="viewMode" value="tree" checked>
           <label for="treeView">Tree View</label>
           <input type="radio" id="listView" name="viewMode" value="list">
