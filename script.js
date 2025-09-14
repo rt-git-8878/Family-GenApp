@@ -28,14 +28,30 @@ function buildTree(data) {
 
   return ul;
 }
-
-fetch('tree.json')
+//=============  For local Json testing==============
+// fetch('tree.json')
+//   .then(response => response.json())
+//   .then(data => {
+//     document.getElementById('list-simple').innerHTML = '';
+//     const tree = buildTree(data);
+//     document.getElementById('list-simple').appendChild(tree);
+//   })
+  // Uncomment below code and comment above local json code block to fetch from online source
+  
+  //============= For online Json testing==============
+fetch('https://api.jsonbin.io/v3/b/68bbe92943b1c97be938b7fc', {
+  headers: {
+    'X-Master-Key': '$2a$10$zd5OnnzULMOHwt53g09IGOVReBWUY4QORY1bHHV/P4cZ.i06kcxLO'
+  }
+})
   .then(response => response.json())
   .then(data => {
+    const treeData = data.record;
     document.getElementById('list-simple').innerHTML = '';
-    const tree = buildTree(data);
+    const tree = buildTree(treeData);
     document.getElementById('list-simple').appendChild(tree);
   })
+   //============= For online Json testing==============
   .catch(error => {
     console.error('Error loading tree:', error);
     document.getElementById('list-simple').textContent = 'Failed to load data.';

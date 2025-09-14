@@ -8,9 +8,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const password = document.getElementById('password').value;
     
     // Fetch credentials from JSON file
-    fetch('credentials.json')
+    fetch('https://api.jsonbin.io/v3/b/68bbf86ad0ea881f4073aef9', {
+      headers: {
+        'X-Master-Key': '$2a$10$zd5OnnzULMOHwt53g09IGOVReBWUY4QORY1bHHV/P4cZ.i06kcxLO'
+      }
+    })
       .then(response => response.json())
-      .then(credentials => {
+      .then(data => {
+        const credentials = data.record;
         if (username === credentials.username && password === credentials.password) {
           // Login successful
           localStorage.setItem('loggedIn', 'true');
