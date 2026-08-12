@@ -1,0 +1,2238 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Family-GenApp | Authentication & Genealogy Portal</title>
+  
+  <!-- PWA Manifest & Meta -->
+  <meta name="theme-color" content="#050B20">
+  <meta name="description" content="Family-GenApp: Community Family Directory & Genealogy Management System">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="./manifest.json">
+
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: {
+              950: '#050B20',
+              900: '#0C1838',
+              800: '#14244E',
+              700: '#1E3266',
+            },
+            primary: '#5C6CFF',
+            secondary: '#8B5CF6',
+            accent: '#38BDF8',
+            birthday: '#F59E0B',
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Standalone React 18 & ReactDOM 18 Local Bundle with CDN Fallback -->
+  <script src="./vendor/react.bundle.js"></script>
+  <script>
+    if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin><\/script>');
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin><\/script>');
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #050B20;
+      color: #F8FAFC;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+    @keyframes successBounce {
+      0% { transform: scale(0); }
+      60% { transform: scale(1.12); }
+      100% { transform: scale(1); }
+    }
+    .animate-fadeIn { animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .animate-pulseGlow { animation: pulseGlow 4s ease-in-out infinite; }
+    .animate-successBounce { animation: successBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    
+    .glass-card {
+      background: linear-gradient(135deg, rgba(12, 24, 56, 0.95) 0%, rgba(8, 16, 40, 0.98) 100%);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(92, 108, 255, 0.22);
+      border-radius: 24px;
+    }
+    .btn-gradient {
+      background: linear-gradient(135deg, #5C6CFF 0%, #8B5CF6 100%);
+      box-shadow: 0 8px 20px -6px rgba(92, 108, 255, 0.45);
+    }
+    .btn-gradient:hover {
+      background: linear-gradient(135deg, #4A5BFF 0%, #7C4DFF 100%);
+      box-shadow: 0 12px 25px -4px rgba(92, 108, 255, 0.6);
+    }
+    
+    .tree-connector-line {
+      border-left: 1.5px dashed rgba(92, 108, 255, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-[#050B20] text-slate-100 antialiased selection:bg-indigo-500 selection:text-white overflow-x-hidden min-h-screen">
+
+  <div id="root">
+    <div class="min-h-screen flex flex-col items-center justify-center p-4 text-center">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-indigo-500/30 mb-3 animate-bounce">
+        F
+      </div>
+      <h2 class="text-xl font-bold text-white">Family-GenApp Loading...</h2>
+      <p class="text-xs text-indigo-300 mt-2">Connecting to Real-Time Mobile OTP Authentication Core...</p>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      try {
+        const e = React.createElement;
+        const { useState, useMemo, useEffect } = React;
+
+    const DEFAULT_AVATAR = './default_avatar.png';
+    const SUPER_ADMIN_MOBILE = '8871174576';
+    const API_BASE_URL = (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) 
+      ? `${window.location.origin}/api` 
+      : 'http://localhost:3001/api';
+
+    const SUPER_ADMIN_USER = {
+      id: 'U_SUPER_ADMIN',
+      first_name: 'Rohit',
+      surname: 'Tiwari',
+      full_name: 'Rohit Tiwari (Super Admin)',
+      dob: '15/08/1995',
+      mobile_number: '8871174576',
+      email: 'rohit.tiwari@familygen.com',
+      role: 'SUPER_ADMIN',
+      status: 'Active',
+      mobile_verified: true,
+      created_at: '2026-01-01'
+    };
+
+    const INITIAL_USERS = [
+      SUPER_ADMIN_USER,
+      {
+        id: 'U_002',
+        first_name: 'आयुष',
+        surname: 'बेटू',
+        full_name: 'आयुष (बेटू)',
+        dob: '17/12/2001',
+        mobile_number: '9876543210',
+        email: 'ayush@village.com',
+        role: 'MEMBER',
+        status: 'Active',
+        mobile_verified: true,
+        created_at: '2026-02-14'
+      }
+    ];
+
+    const INITIAL_AUDIT_LOGS = [
+      {
+        id: 'LOG_001',
+        action_type: 'System Initialization & Database Migration',
+        user_modified: '8871174576 (Rohit Tiwari)',
+        old_role: 'N/A',
+        new_role: 'SUPER_ADMIN',
+        changed_by: 'System Core',
+        date_time: '2026-01-01 00:00:00'
+      }
+    ];
+
+    function appendTiwariSurname(str) {
+      if (!str) return '';
+      const trimmed = str.trim();
+      if (!trimmed) return '';
+
+      const isHindi = /[\u0900-\u097F]/.test(trimmed);
+
+      if (isHindi) {
+        if (!trimmed.endsWith('तिवारी')) {
+          return trimmed + ' तिवारी';
+        }
+        return trimmed;
+      } else {
+        if (!trimmed.toLowerCase().endsWith('tiwari')) {
+          return trimmed + ' Tiwari';
+        }
+        return trimmed;
+      }
+    }
+
+    function compressImageFile(file, callback) {
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) {
+        alert('फ़ोटो की साइज 10 MB से कम होनी चाहिए (Maximum 10MB)');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 600;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+          callback(compressedBase64);
+        };
+        img.onerror = () => callback(e.target.result);
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    const HINDI_MONTHS = {
+      'जनवरी': 1, 'फरवरी': 2, 'मार्च': 3, 'अप्रैल': 4, 'मई': 5, 'जून': 6,
+      'जुलाई': 7, 'अगस्त': 8, 'सितंबर': 9, 'अक्टूबर': 10, 'नवंबर': 11, 'दिसंबर': 12
+    };
+
+    const ENGLISH_MONTHS = {
+      'jan': 1, 'january': 1, 'feb': 2, 'february': 2, 'mar': 3, 'march': 3,
+      'apr': 4, 'april': 4, 'may': 5, 'june': 6, 'jun': 6,
+      'jul': 7, 'july': 7, 'aug': 8, 'august': 8, 'sep': 9, 'september': 9,
+      'oct': 10, 'october': 10, 'nov': 11, 'november': 11, 'dec': 12, 'december': 12
+    };
+
+    const MONTH_NAMES_ENGLISH = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    const MONTH_NAMES_HINDI = [
+      'जनवरी', 'फरवरी', 'मार्च', 'अप्रैल', 'मई', 'जून',
+      'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर'
+    ];
+
+    function parseDobDayMonth(dobStr) {
+      if (!dobStr) return null;
+      const str = String(dobStr).trim();
+      
+      if (str.match(/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/)) {
+        const parts = str.split(/[\/\-]/);
+        return { day: parseInt(parts[0], 10), month: parseInt(parts[1], 10) };
+      }
+      
+      const tokens = str.replace(/[,]/g, '').split(/[\s\-]+/);
+      let day = null;
+      let month = null;
+
+      for (let tok of tokens) {
+        const num = parseInt(tok, 10);
+        if (!isNaN(num) && num >= 1 && num <= 31 && day === null) {
+          day = num;
+        }
+        const lowerTok = tok.toLowerCase();
+        if (HINDI_MONTHS[lowerTok]) month = HINDI_MONTHS[lowerTok];
+        else if (ENGLISH_MONTHS[lowerTok]) month = ENGLISH_MONTHS[lowerTok];
+      }
+
+      if (day !== null && month !== null) {
+        return { day, month };
+      }
+      return null;
+    }
+
+    function extractDetailsFromName(rawName) {
+      let cleanName = rawName.trim();
+      let notes = [];
+      let marriagesCount = 1;
+      let marriageNote = null;
+
+      const matches = rawName.match(/\(([^)]+)\)/g);
+      if (matches) {
+        matches.forEach(m => {
+          const note = m.replace(/[\(\)]/g, '').trim();
+          if (note.includes('शादी')) {
+            marriageNote = note;
+            if (note.includes('तीन') || note.includes('3')) marriagesCount = 3;
+            else if (note.includes('दो') || note.includes('2')) marriagesCount = 2;
+            else if (note.includes('चार') || note.includes('4')) marriagesCount = 4;
+          } else {
+            notes.push(note);
+          }
+        });
+      }
+
+      let nameOnly = cleanName.replace(/\(.*\)/g, '').trim();
+      if (nameOnly && !nameOnly.endsWith('तिवारी')) {
+        nameOnly += ' तिवारी';
+      }
+      return { rawName, cleanName: nameOnly, notes, marriagesCount, marriageNote };
+    }
+
+    function parseTree(rawTreeData) {
+      let idCounter = 1;
+      const members = [];
+      const memberMap = new Map();
+
+      function traverse(node, fatherId = null, gen = 1) {
+        const rawName = node.text?.name || 'अज्ञात';
+        const title = node.text?.title || '';
+        const dob = node.text?.DOB || null;
+        const pid = node.id || `P_${String(idCounter++).padStart(3, '0')}`;
+
+        const { cleanName, notes, marriagesCount, marriageNote } = extractDetailsFromName(rawName);
+
+        const person = {
+          Person_ID: pid,
+          Full_Name: cleanName,
+          Raw_Name: rawName,
+          Father_ID: fatherId,
+          DOB: dob,
+          Gender: 'Male',
+          Occupation: title || (notes.includes('शास्त्री') ? 'ज्योतिषाचार्य / शास्त्री' : 'कृषि एवं समाज सेवा'),
+          Profile_Image: DEFAULT_AVATAR,
+          Notes: notes,
+          Marriages_Count: marriagesCount,
+          Marriage_Note: marriageNote,
+          Generation_Level: gen,
+          Children_IDs: []
+        };
+
+        members.push(person);
+        memberMap.set(pid, person);
+
+        if (fatherId && memberMap.has(fatherId)) {
+          memberMap.get(fatherId).Children_IDs.push(pid);
+        }
+
+        if (node.children && Array.isArray(node.children)) {
+          node.children.forEach(c => traverse(c, pid, gen + 1));
+        }
+      }
+
+      rawTreeData.forEach(r => traverse(r, null, 1));
+      return { members, memberMap };
+    }
+
+    function hasMatchingDescendant(node, query) {
+      if (!query || !query.trim()) return false;
+      const q = query.toLowerCase().trim();
+      const name = (node.text?.name || '').toLowerCase();
+
+      if (name.includes(q)) return true;
+
+      if (node.children && Array.isArray(node.children) && node.children.length > 0) {
+        return node.children.some(child => hasMatchingDescendant(child, query));
+      }
+      return false;
+    }
+
+    // COMPONENT: HIERARCHY TREE NODE
+    function TreeNodeItem({ node, highlightName, onSelectMember }) {
+      const hasChildren = node.children && node.children.length > 0;
+      const queryTrimmed = highlightName ? highlightName.trim() : '';
+
+      const isDirectMatch = Boolean(queryTrimmed && node.text?.name && 
+        node.text.name.toLowerCase().includes(queryTrimmed.toLowerCase()));
+
+      const childMatches = Boolean(queryTrimmed && hasChildren && 
+        hasMatchingDescendant(node, queryTrimmed));
+
+      const [userCollapsed, setUserCollapsed] = useState(false);
+      const shouldBeOpen = queryTrimmed ? (childMatches || isDirectMatch) : !userCollapsed;
+
+      return e('div', { className: 'flex flex-col text-xs my-0.5 select-none animate-fadeIn' },
+        e('div', { className: 'flex items-center gap-1.5 py-0.5 group cursor-pointer' },
+          hasChildren ? e('button', {
+            onClick: (ev) => { ev.stopPropagation(); setUserCollapsed(shouldBeOpen ? true : false); },
+            className: 'w-4 h-4 rounded hover:bg-slate-800 flex items-center justify-center text-primary font-bold text-[10px]'
+          }, shouldBeOpen ? '▼' : '▶') : e('span', { className: 'w-4 inline-block' }),
+
+          e('span', {
+            onClick: () => onSelectMember && onSelectMember(node.text?.name),
+            className: `px-2 py-1 rounded-md font-semibold transition-all ${
+              isDirectMatch 
+                ? 'bg-amber-400 text-slate-950 font-black shadow-lg shadow-amber-400/50 ring-2 ring-amber-300 scale-105' 
+                : (childMatches ? 'text-indigo-300 font-bold bg-indigo-950/40' : 'text-slate-200 hover:text-indigo-300 hover:bg-slate-900/60')
+            }`
+          }, node.text?.name || '')
+        ),
+
+        (hasChildren && shouldBeOpen) ? e('div', { className: 'ml-4 pl-2 tree-connector-line flex flex-col' },
+          node.children.map((child, idx) => e(TreeNodeItem, {
+            key: idx,
+            node: child,
+            highlightName,
+            onSelectMember
+          }))
+        ) : null
+      );
+    }
+
+    // COMPONENT: RESPONSIVE CUSTOM CALENDAR DATE PICKER
+    function ResponsiveDatePicker({ value, onChange, placeholder = 'जन्म तिथि चुनें (Select DOB)' }) {
+      const [isOpen, setIsOpen] = useState(false);
+
+      const today = new Date();
+      const todayYear = today.getFullYear();
+      const todayMonth = today.getMonth();
+      const todayDay = today.getDate();
+
+      const [navYear, setNavYear] = useState(() => {
+        if (value) {
+          const parts = String(value).split(/[\/\-]/);
+          if (parts.length === 3 && parts[0].length === 4) return parseInt(parts[0], 10);
+        }
+        return todayYear;
+      });
+
+      const [navMonth, setNavMonth] = useState(() => {
+        if (value) {
+          const parts = String(value).split(/[\/\-]/);
+          if (parts.length === 3 && parts[0].length === 4) return parseInt(parts[1], 10) - 1;
+        }
+        return todayMonth;
+      });
+
+      const yearOptions = useMemo(() => {
+        const list = [];
+        for (let y = todayYear; y >= 1920; y--) list.push(y);
+        return list;
+      }, [todayYear]);
+
+      const daysGrid = useMemo(() => {
+        const firstDayIndex = new Date(navYear, navMonth, 1).getDay();
+        const totalDaysInMonth = new Date(navYear, navMonth + 1, 0).getDate();
+
+        const grid = [];
+        for (let i = 0; i < firstDayIndex; i++) grid.push(null);
+        for (let day = 1; day <= totalDaysInMonth; day++) grid.push(day);
+        return grid;
+      }, [navYear, navMonth]);
+
+      const handleSelectDay = (day) => {
+        if (!day) return;
+        const selectedDate = new Date(navYear, navMonth, day);
+        if (selectedDate > today) return;
+
+        const mStr = String(navMonth + 1).padStart(2, '0');
+        const dStr = String(day).padStart(2, '0');
+        const formatted = `${navYear}-${mStr}-${dStr}`;
+        onChange(formatted);
+        setIsOpen(false);
+      };
+
+      const displayFormattedDate = useMemo(() => {
+        if (!value) return '';
+        const parts = String(value).split(/[\/\-]/);
+        if (parts.length === 3 && parts[0].length === 4) {
+          return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+        return value;
+      }, [value]);
+
+      return e('div', { className: 'relative w-full' },
+        e('div', {
+          onClick: () => setIsOpen(!isOpen),
+          className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-mono cursor-pointer flex items-center justify-between shadow-inner hover:border-indigo-500 transition-all'
+        },
+          e('span', { className: displayFormattedDate ? 'font-bold text-indigo-200' : 'text-slate-400 font-sans text-xs' },
+            displayFormattedDate || placeholder
+          ),
+          e('span', { className: 'text-amber-400 text-sm' }, '📅')
+        ),
+
+        isOpen && e('div', { className: 'absolute left-0 top-14 z-50 w-full max-w-xs sm:w-80 glass-card p-4 shadow-2xl border-2 border-indigo-500/80 animate-fadeIn' },
+          e('div', { className: 'flex items-center justify-between gap-1.5 mb-3 pb-2 border-b border-slate-800' },
+            e('select', {
+              value: navMonth,
+              onChange: (ev) => setNavMonth(parseInt(ev.target.value, 10)),
+              className: 'bg-navy-900 border border-slate-700 rounded-lg text-white text-xs p-1.5 font-bold outline-none'
+            },
+              MONTH_NAMES_ENGLISH.map((mName, idx) => e('option', { key: idx, value: idx }, `${mName} (${MONTH_NAMES_HINDI[idx]})`))
+            ),
+
+            e('select', {
+              value: navYear,
+              onChange: (ev) => setNavYear(parseInt(ev.target.value, 10)),
+              className: 'bg-navy-900 border border-slate-700 rounded-lg text-white text-xs p-1.5 font-bold outline-none font-mono'
+            },
+              yearOptions.map(y => e('option', { key: y, value: y }, y))
+            ),
+
+            e('button', {
+              type: 'button',
+              onClick: () => setIsOpen(false),
+              className: 'w-6 h-6 rounded-full bg-slate-800 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center'
+            }, '✕')
+          ),
+
+          e('div', { className: 'grid grid-cols-7 text-center text-[10px] font-bold text-slate-400 mb-1' },
+            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => e('div', { key: d, className: d === 'Sun' ? 'text-rose-400' : '' }, d))
+          ),
+
+          e('div', { className: 'grid grid-cols-7 gap-1 text-center text-xs' },
+            daysGrid.map((day, idx) => {
+              if (!day) return e('div', { key: idx });
+              const cellDate = new Date(navYear, navMonth, day);
+              const isFuture = cellDate > today;
+              const isToday = navYear === todayYear && navMonth === todayMonth && day === todayDay;
+              
+              let isSelected = false;
+              if (value) {
+                const parts = String(value).split(/[\/\-]/);
+                if (parts.length === 3 && parts[0].length === 4) {
+                  isSelected = (parseInt(parts[0], 10) === navYear && (parseInt(parts[1], 10) - 1) === navMonth && parseInt(parts[2], 10) === day);
+                }
+              }
+
+              return e('button', {
+                key: idx,
+                type: 'button',
+                disabled: isFuture,
+                onClick: () => handleSelectDay(day),
+                className: `h-8 rounded-lg font-bold text-xs flex items-center justify-center transition-all ${
+                  isFuture ? 'text-slate-600 cursor-not-allowed opacity-30' : (
+                    isSelected ? 'bg-indigo-600 text-white font-black shadow-lg shadow-indigo-500/50 scale-105 border border-indigo-300' : (
+                      isToday ? 'bg-amber-500/20 text-amber-300 border border-amber-500/50' : 'text-slate-200 hover:bg-navy-800 hover:text-indigo-300'
+                    )
+                  )
+                }`
+              }, day);
+            })
+          ),
+
+          e('div', { className: 'mt-3 pt-2 border-t border-slate-800 flex justify-between items-center text-[10px]' },
+            e('button', {
+              type: 'button',
+              onClick: () => { setNavYear(todayYear); setNavMonth(todayMonth); handleSelectDay(todayDay); },
+              className: 'text-amber-400 font-bold hover:underline'
+            }, 'Today (आज)'),
+            e('span', { className: 'text-slate-500 font-mono' }, 'Future dates blocked')
+          )
+        )
+      );
+    }
+
+    function App() {
+      const [treeSourceData, setTreeSourceData] = useState([]);
+      const [dbConnected, setDbConnected] = useState(false);
+
+      // Pending Birth Requests State
+      const [pendingRequests, setPendingRequests] = useState([]);
+
+      // Fetch Tree & Pending Requests from Database REST API
+      const refreshDataFromDb = () => {
+        fetch(`${API_BASE_URL}/tree`)
+          .then(res => res.ok ? res.json() : Promise.reject())
+          .then(resData => {
+            if (resData.success && Array.isArray(resData.data)) {
+              setTreeSourceData(resData.data);
+              setDbConnected(true);
+            }
+          })
+          .catch(() => setDbConnected(false));
+
+        fetch(`${API_BASE_URL}/pending-requests`)
+          .then(res => res.ok ? res.json() : null)
+          .then(resData => {
+            if (resData && resData.success) {
+              setPendingRequests(resData.data);
+            }
+          })
+          .catch(() => {});
+      };
+
+      useEffect(() => {
+        refreshDataFromDb();
+      }, []);
+
+      const { members, memberMap } = useMemo(() => parseTree(treeSourceData), [treeSourceData]);
+
+      // Registered Users State
+      const [users, setUsers] = useState(() => {
+        try {
+          const saved = localStorage.getItem('familygen_users');
+          let userList = saved ? JSON.parse(saved) : INITIAL_USERS;
+          let saIndex = userList.findIndex(u => u.mobile_number === SUPER_ADMIN_MOBILE);
+          if (saIndex !== -1) {
+            userList[saIndex] = { ...userList[saIndex], first_name: 'Rohit', surname: 'Tiwari', full_name: 'Rohit Tiwari (Super Admin)', role: 'SUPER_ADMIN' };
+          } else {
+            userList.unshift(SUPER_ADMIN_USER);
+          }
+          return userList;
+        } catch(err) { return INITIAL_USERS; }
+      });
+
+      // Audit Logs State
+      const [auditLogs, setAuditLogs] = useState(() => {
+        try {
+          const saved = localStorage.getItem('familygen_audit_logs');
+          return saved ? JSON.parse(saved) : INITIAL_AUDIT_LOGS;
+        } catch(err) { return INITIAL_AUDIT_LOGS; }
+      });
+
+      // Session Management (Restored Hardcoded Demo OTP Flow)
+      const [currentUser, setCurrentUser] = useState(() => {
+        try {
+          const saved = localStorage.getItem('familygen_auth_user');
+          if (saved) {
+            let u = JSON.parse(saved);
+            if (u && typeof u === 'object' && u.mobile_number) {
+              if (u.mobile_number === SUPER_ADMIN_MOBILE) {
+                return { ...u, role: 'SUPER_ADMIN', full_name: 'Rohit Tiwari (Super Admin)' };
+              }
+              return u;
+            }
+          }
+          return null;
+        } catch(err) { return null; }
+      });
+
+      const [view, setView] = useState(() => (currentUser && currentUser.mobile_number) ? 'dashboard' : 'login');
+      
+      // Email OTP Login State
+      const [loginEmail, setLoginEmail] = useState('');
+      const [loginOtpSent, setLoginOtpSent] = useState(false);
+      const [loginOtpVal, setLoginOtpVal] = useState('');
+      const [loginError, setLoginError] = useState('');
+      const [authSuccessMsg, setAuthSuccessMsg] = useState('');
+      const [isAuthLoading, setIsAuthLoading] = useState(false);
+      const [resendCooldown, setResendCooldown] = useState(0);
+      const [attemptsLeft, setAttemptsLeft] = useState(5);
+
+      // Multi-step Registration Form State
+      const [regStep, setRegStep] = useState(1);
+      const [regForm, setRegForm] = useState({ first_name: '', surname: '', dob: '', mobile_number: '', email: '' });
+      const [regErrors, setRegErrors] = useState({});
+
+      // Dashboard Tabs & Directory / Tree Search & Mobile Navigation
+      const [activeTab, setActiveTab] = useState('dashboard');
+      const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+      const [treeZoom, setTreeZoom] = useState(1);
+      const [treePan, setTreePan] = useState({ x: 0, y: 0 });
+      const [selectedTreeFocusId, setSelectedTreeFocusId] = useState('P_001');
+      const [searchDirectoryQuery, setSearchDirectoryQuery] = useState('');
+      const [treeSearchQuery, setTreeSearchQuery] = useState('');
+      
+      // Birthdays Modal State
+      const [showBirthdayModal, setShowBirthdayModal] = useState(false);
+      const [birthdaySearchQuery, setBirthdaySearchQuery] = useState('');
+
+      // WORKFLOW MODALS STATE
+      const [showRequestModal, setShowRequestModal] = useState(false);
+      const [showDirectAddModal, setShowDirectAddModal] = useState(false);
+      const [showEditMemberModal, setShowEditMemberModal] = useState(false);
+      const [editingMember, setEditingMember] = useState(null);
+
+      // Rejection Reason Prompt Modal
+      const [showRejectModal, setShowRejectModal] = useState(false);
+      const [selectedRequestForReject, setSelectedRequestForReject] = useState(null);
+      const [rejectionReasonInput, setRejectionReasonInput] = useState('');
+
+      // Toast Notification Banner
+      const [toastMsg, setToastMsg] = useState('');
+      const [isSubmitting, setIsSubmitting] = useState(false);
+
+      // Form Inputs State for Request & Direct Add
+      const [formChildName, setFormChildName] = useState('');
+      const [formDob, setFormDob] = useState('');
+      const [formFatherSearch, setFormFatherSearch] = useState('');
+      const [formSelectedFather, setFormSelectedFather] = useState(null);
+      const [formPhotoData, setFormPhotoData] = useState('./default_avatar.png');
+
+      // Sync state with localStorage & API
+      useEffect(() => {
+        try { localStorage.setItem('familygen_users', JSON.stringify(users)); } catch(e){}
+      }, [users]);
+
+      useEffect(() => {
+        try { localStorage.setItem('familygen_audit_logs', JSON.stringify(auditLogs)); } catch(e){}
+      }, [auditLogs]);
+
+      // Resend Cooldown Timer Effect
+      useEffect(() => {
+        if (resendCooldown > 0) {
+          const t = setTimeout(() => setResendCooldown(c => c - 1), 1000);
+          return () => clearTimeout(t);
+        }
+      }, [resendCooldown]);
+
+      // Real-Time Heartbeat & Online Status Sync Effect (Every 20 Seconds)
+      useEffect(() => {
+        if (!currentUser || !currentUser.email) return;
+
+        const pingHeartbeat = () => {
+          fetch(`${API_BASE_URL}/auth/heartbeat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: currentUser.email, userId: currentUser.id })
+          })
+            .then(res => res.json())
+            .then(resData => {
+              if (resData.success && resData.users) {
+                setUsers(resData.users);
+              }
+            })
+            .catch(() => {});
+        };
+
+        pingHeartbeat();
+        const intervalId = setInterval(pingHeartbeat, 20000);
+        return () => clearInterval(intervalId);
+      }, [currentUser]);
+
+      const showToast = (msg) => {
+        setToastMsg(msg);
+        setTimeout(() => setToastMsg(''), 4500);
+      };
+
+      // Filtered Fathers for Searchable Autocomplete Dropdown
+      const filteredFathers = useMemo(() => {
+        if (!formFatherSearch.trim()) return members;
+        const q = formFatherSearch.toLowerCase().trim();
+        return members.filter(m => 
+          m.Full_Name.toLowerCase().includes(q) || 
+          m.Raw_Name.toLowerCase().includes(q)
+        );
+      }, [formFatherSearch, members]);
+
+      // DYNAMIC BIRTHDAYS THIS MONTH CALCULATION LOGIC
+      const { birthdaysThisMonth, nextUpcomingPerson, currentMonthNameEng, currentMonthNameHin } = useMemo(() => {
+        const today = new Date();
+        const curMonth = today.getMonth() + 1;
+        const curDay = today.getDate();
+
+        const curEngName = MONTH_NAMES_ENGLISH[curMonth - 1];
+        const curHinName = MONTH_NAMES_HINDI[curMonth - 1];
+
+        const allPeopleList = [];
+
+        members.forEach(m => {
+          if (m.DOB) {
+            const parsed = parseDobDayMonth(m.DOB);
+            if (parsed && parsed.month === curMonth) {
+              allPeopleList.push({
+                id: m.Person_ID,
+                name: m.Full_Name,
+                dobRaw: m.DOB,
+                day: parsed.day,
+                month: parsed.month,
+                image: m.Profile_Image
+              });
+            }
+          }
+        });
+
+        allPeopleList.sort((a, b) => a.day - b.day);
+
+        let nextUpcoming = allPeopleList.find(p => p.day >= curDay);
+        if (!nextUpcoming && allPeopleList.length > 0) {
+          nextUpcoming = allPeopleList[0];
+        }
+
+        return {
+          birthdaysThisMonth: allPeopleList,
+          nextUpcomingPerson: nextUpcoming,
+          currentMonthNameEng: curEngName,
+          currentMonthNameHin: curHinName
+        };
+      }, [members]);
+
+      const filteredBirthdays = useMemo(() => {
+        if (!birthdaySearchQuery.trim()) return birthdaysThisMonth;
+        const q = birthdaySearchQuery.toLowerCase().trim();
+        return birthdaysThisMonth.filter(p => p.name.toLowerCase().includes(q));
+      }, [birthdaySearchQuery, birthdaysThisMonth]);
+
+      // Directory Filter
+      const filteredVillageMembers = useMemo(() => {
+        if (!searchDirectoryQuery.trim()) return members;
+        const q = searchDirectoryQuery.toLowerCase().trim();
+        return members.filter(m => 
+          m.Full_Name.toLowerCase().includes(q) || 
+          m.Raw_Name.toLowerCase().includes(q)
+        );
+      }, [searchDirectoryQuery, members]);
+
+      // EMAIL-BASED OTP LOGIN HANDLERS
+      const handleSendLoginOtp = () => {
+        if (!loginEmail || !loginEmail.trim().includes('@') || !loginEmail.trim().includes('.')) {
+          setLoginError('वैध रजिस्टर्ड ईमेल आईडी दर्ज करें (Valid registered email address required)');
+          return;
+        }
+
+        const cleanEmail = loginEmail.trim().toLowerCase();
+        setLoginError('');
+        setIsAuthLoading(true);
+
+        fetch(`${API_BASE_URL}/auth/send-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: cleanEmail })
+        })
+          .then(res => res.json())
+          .then(resData => {
+            setIsAuthLoading(false);
+            if (resData.success) {
+              setLoginOtpSent(true);
+              setLoginOtpVal(''); // OTP input left blank for user email entry
+              setResendCooldown(resData.resendCooldownSeconds || 30);
+              setAttemptsLeft(5);
+              setAuthSuccessMsg(resData.message || 'OTP has been sent to your registered email. Please check your email inbox.');
+            } else {
+              setLoginError(resData.message || 'Verification email failed to send.');
+            }
+          })
+          .catch(err => {
+            setIsAuthLoading(false);
+            setLoginError('Server connection error. Please try again.');
+          });
+      };
+
+      const handleVerifyLoginOtp = () => {
+        if (!loginOtpVal || loginOtpVal.trim().length !== 6) {
+          setLoginError('6 अंकों का OTP दर्ज करें (6-digit OTP required)');
+          return;
+        }
+
+        const cleanEmail = loginEmail.trim().toLowerCase();
+        setLoginError('');
+        setIsAuthLoading(true);
+
+        fetch(`${API_BASE_URL}/auth/verify-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: cleanEmail, otp: loginOtpVal.trim() })
+        })
+          .then(res => res.json())
+          .then(resData => {
+            setIsAuthLoading(false);
+            if (resData.success && resData.user) {
+              const authUser = resData.user;
+              try {
+                if (resData.token) localStorage.setItem('familygen_jwt_token', resData.token);
+                localStorage.setItem('familygen_auth_user', JSON.stringify(authUser));
+              } catch(e){}
+
+              // Mark User Online locally
+              const updatedUsers = users.map(u => u.id === authUser.id ? { ...u, is_online: true, last_login: new Date().toISOString() } : u);
+              setUsers(updatedUsers);
+
+              setCurrentUser(authUser);
+              showToast(`Login Successful! Welcome ${authUser.full_name}`);
+              setActiveTab('dashboard');
+              setView('dashboard');
+            } else {
+              if (resData.remainingAttempts !== undefined) {
+                setAttemptsLeft(resData.remainingAttempts);
+              }
+              setLoginError(resData.message || 'Invalid OTP code. Please try again.');
+            }
+          })
+          .catch(err => {
+            setIsAuthLoading(false);
+            setLoginError('Server verification error.');
+          });
+      };
+
+      const handleResendLoginOtp = () => {
+        if (resendCooldown > 0) return;
+        handleSendLoginOtp();
+      };
+
+      const handleLogout = () => {
+        if (currentUser && currentUser.email) {
+          fetch(`${API_BASE_URL}/auth/logout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: currentUser.email, userId: currentUser.id })
+          }).catch(() => {});
+        }
+
+        try {
+          localStorage.removeItem('familygen_jwt_token');
+          localStorage.removeItem('familygen_auth_user');
+        } catch(e){}
+
+        if (currentUser) {
+          setUsers(users.map(u => u.id === currentUser.id ? { ...u, is_online: false } : u));
+        }
+
+        setCurrentUser(null);
+        setLoginOtpSent(false);
+        setLoginEmail('');
+        setLoginOtpVal('');
+        setLoginError('');
+        setView('login');
+      };
+
+      // REGISTRATION FORM SUBMISSION (MANDATORY EMAIL ID + BUTTON "Register" + DEFAULT ROLE = MEMBER)
+      const handleRegSubmitStep1 = (ev) => {
+        ev.preventDefault();
+        const errs = {};
+        if (!regForm.first_name.trim()) errs.first_name = 'पहला नाम आवश्यक है (First Name required)';
+        if (!regForm.surname.trim()) errs.surname = 'उपनाम आवश्यक है (Surname required)';
+        if (!regForm.dob.trim()) errs.dob = 'जन्म तिथि आवश्यक है (Date of Birth required)';
+        if (!regForm.mobile_number.trim() || regForm.mobile_number.trim().length !== 10) {
+          errs.mobile_number = '10 अंकों का वैध मोबाइल नंबर दर्ज करें (Valid 10-digit mobile required)';
+        }
+        if (!regForm.email.trim() || !regForm.email.trim().includes('@') || !regForm.email.trim().includes('.')) {
+          errs.email = 'वैध ईमेल आईडी दर्ज करें (Mandatory valid email address required)';
+        }
+
+        if (Object.keys(errs).length > 0) {
+          setRegErrors(errs);
+          return;
+        }
+
+        setRegErrors({});
+        setIsAuthLoading(true);
+
+        fetch(`${API_BASE_URL}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName: regForm.first_name.trim(),
+            surname: regForm.surname.trim(),
+            dob: regForm.dob.trim(),
+            mobileNumber: regForm.mobile_number.trim(),
+            email: regForm.email.trim().toLowerCase()
+          })
+        })
+          .then(res => res.json())
+          .then(resData => {
+            setIsAuthLoading(false);
+            if (resData.success) {
+              if (resData.user) {
+                setUsers(prev => [resData.user, ...prev]);
+              }
+              setRegStep(3); // Registration Success Screen
+            } else {
+              setRegErrors({ email: resData.message || 'Registration failed.' });
+            }
+          })
+          .catch(err => {
+            setIsAuthLoading(false);
+            setRegErrors({ email: 'Server error during registration.' });
+          });
+      };
+
+      // WORKFLOW HANDLER 1: SUBMIT NEW BIRTH REQUEST (Member & Admin)
+      const handleMemberBirthRequestSubmit = (ev) => {
+        ev.preventDefault();
+        if (isSubmitting) return;
+
+        if (!formChildName || formChildName.trim().length < 2) {
+          alert('बच्चे का नाम कम से कम 2 अक्षरों का होना चाहिए (Name minimum 2 characters)');
+          return;
+        }
+        if (!formDob) {
+          alert('जन्म तिथि दर्ज करें (DOB required)');
+          return;
+        }
+        if (!formSelectedFather) {
+          alert('पिता का चयन करें (Father selection required)');
+          return;
+        }
+
+        setIsSubmitting(true);
+        const finalFormattedName = appendTiwariSurname(formChildName);
+
+        fetch(`${API_BASE_URL}/pending-requests`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            childName: finalFormattedName,
+            dob: formDob,
+            fatherId: formSelectedFather.Person_ID,
+            fatherName: formSelectedFather.Full_Name,
+            photoData: formPhotoData,
+            requestedBy: currentUser ? `${currentUser.mobile_number} (${currentUser.full_name})` : 'Registered Member'
+          })
+        })
+          .then(res => {
+            if (!res.ok) {
+              return res.text().then(text => {
+                throw new Error(`Server error HTTP ${res.status}: ${text}`);
+              });
+            }
+            return res.json();
+          })
+          .then(resData => {
+            if (resData.success) {
+              showToast(`New Member Addition Request Submitted for ${finalFormattedName}. Pending Super Admin Approval.`);
+              setShowRequestModal(false);
+              setFormChildName('');
+              setFormDob('');
+              setFormSelectedFather(null);
+              setFormPhotoData('./default_avatar.png');
+              refreshDataFromDb();
+            } else {
+              alert('Failed to submit request: ' + (resData.message || 'Unknown server error'));
+            }
+          })
+          .catch(err => {
+            console.error('Submit Error:', err);
+            alert('Failed to submit request to database backend: ' + (err.message || err));
+          })
+          .finally(() => {
+            setIsSubmitting(false);
+          });
+      };
+
+      // WORKFLOW HANDLER 2: APPROVE REQUEST (Super Admin Only)
+      const handleApproveRequest = (reqItem) => {
+        fetch(`${API_BASE_URL}/pending-requests/${reqItem.id}/approve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ approvedBy: `${currentUser.mobile_number} (Rohit Tiwari)` })
+        })
+          .then(res => res.json())
+          .then(resData => {
+            if (resData.success) {
+              showToast(`Your member request for ${reqItem.child_name} has been approved.`);
+              refreshDataFromDb();
+            }
+          })
+          .catch(() => alert('Failed to approve request'));
+      };
+
+      // WORKFLOW HANDLER 3: REJECT REQUEST (Super Admin Only)
+      const handleConfirmRejectRequest = () => {
+        if (!selectedRequestForReject) return;
+
+        fetch(`${API_BASE_URL}/pending-requests/${selectedRequestForReject.id}/reject`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reason: rejectionReasonInput || 'Not meeting criteria',
+            rejectedBy: `${currentUser.mobile_number} (Rohit Tiwari)`
+          })
+        })
+          .then(res => res.json())
+          .then(resData => {
+            if (resData.success) {
+              showToast(`Your member request for ${selectedRequestForReject.child_name} has been rejected.`);
+              setShowRejectModal(false);
+              setSelectedRequestForReject(null);
+              setRejectionReasonInput('');
+              refreshDataFromDb();
+            }
+          })
+          .catch(() => alert('Failed to reject request'));
+      };
+
+      // WORKFLOW HANDLER 4: DIRECT ADD MEMBER BY SUPER ADMIN
+      const handleDirectAddSubmit = (ev) => {
+        ev.preventDefault();
+        if (!formChildName || !formDob || !formSelectedFather) {
+          alert('कृपया सभी आवश्यक विवरण भरें');
+          return;
+        }
+
+        const finalFormattedName = appendTiwariSurname(formChildName);
+
+        fetch(`${API_BASE_URL}/members/direct-add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            childName: finalFormattedName,
+            dob: formDob,
+            fatherId: formSelectedFather.Person_ID,
+            photoData: formPhotoData,
+            addedBy: `${currentUser.mobile_number} (Rohit Tiwari)`
+          })
+        })
+          .then(res => res.json())
+          .then(resData => {
+            if (resData.success) {
+              showToast(`Member ${finalFormattedName} Added Directly to Database!`);
+              setShowDirectAddModal(false);
+              setFormChildName('');
+              setFormDob('');
+              setFormSelectedFather(null);
+              setFormPhotoData('./default_avatar.png');
+              refreshDataFromDb();
+            }
+          })
+          .catch(err => {
+            console.error('Direct Add Error:', err);
+            alert('Failed to add member directly: ' + (err.message || err));
+          });
+      };
+
+      // WORKFLOW HANDLER 5: EDIT MEMBER BY SUPER ADMIN
+      const handleUpdateMemberSubmit = (ev) => {
+        ev.preventDefault();
+        if (!editingMember) return;
+
+        fetch(`${API_BASE_URL}/members/${editingMember.Person_ID}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            full_name: editingMember.Full_Name,
+            dob: editingMember.DOB,
+            father_id: editingMember.Father_ID,
+            profile_image: editingMember.Profile_Image,
+            updatedBy: `${currentUser.mobile_number} (Rohit Tiwari)`
+          })
+        })
+          .then(res => res.json())
+          .then(resData => {
+            if (resData.success) {
+              showToast(`Member ${editingMember.Full_Name} Updated Successfully!`);
+              setShowEditMemberModal(false);
+              setEditingMember(null);
+              refreshDataFromDb();
+            }
+          })
+          .catch(() => alert('Failed to update member'));
+      };
+
+      // LOGIN SCREEN (Email-Based OTP Login Portal)
+      if (view === 'login') {
+        return e('div', { className: 'min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-[#050B20]' },
+          e('div', { className: 'w-full max-w-md glass-card p-8 shadow-2xl relative z-10 animate-fadeIn text-center' },
+            e('div', { className: 'flex flex-col items-center mb-6' },
+              e('div', { className: 'w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary to-secondary p-0.5 shadow-xl shadow-primary/30 mb-3' },
+                e('div', { className: 'w-full h-full bg-[#0C1838] rounded-2xl flex items-center justify-center text-white font-black text-2xl' }, 'F')
+              ),
+              e('h1', { className: 'text-2xl font-black text-white tracking-tight' }, 'Family-GenApp'),
+              e('p', { className: 'text-xs text-primary/80 font-semibold mt-1' }, 'Email OTP Authentication Portal')
+            ),
+
+            !loginOtpSent ? e('div', { className: 'flex flex-col gap-4 text-left' },
+              e('div', null,
+                e('label', { className: 'block text-xs font-bold text-slate-300 uppercase mb-2' }, 'पंजीकृत ईमेल आईडी (Registered Email Address) *'),
+                e('div', { className: 'relative' },
+                  e('span', { className: 'absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm' }, '📧'),
+                  e('input', {
+                    type: 'email',
+                    value: loginEmail,
+                    onChange: ev => setLoginEmail(ev.target.value),
+                    placeholder: 'उदा. rohit.tiwari@familygen.com',
+                    className: 'w-full pl-12 pr-4 py-3.5 bg-navy-950 border border-slate-700 rounded-2xl text-white font-bold text-sm outline-none focus:border-primary'
+                  })
+                ),
+                loginError && e('div', { className: 'mt-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium' },
+                  loginError,
+                  (loginError.includes('not registered') || loginError.includes('पंजीकृत नहीं')) && e('button', {
+                    onClick: () => { setView('register'); setRegStep(1); setLoginError(''); },
+                    className: 'block mt-1 font-bold text-primary underline'
+                  }, 'यहाँ क्लिक करके नया रजिस्ट्रेशन करें ➔')
+                )
+              ),
+
+              e('button', {
+                onClick: handleSendLoginOtp,
+                disabled: isAuthLoading,
+                className: `w-full py-4 rounded-2xl btn-gradient text-white font-black text-sm uppercase tracking-wider ${isAuthLoading ? 'opacity-50 cursor-not-allowed' : ''}`
+              }, isAuthLoading ? 'Sending Email OTP...' : 'Send OTP (ओटीपी भेजें)'),
+
+              e('div', { className: 'mt-4 pt-3 border-t border-slate-800 text-center' },
+                e('span', { className: 'text-xs text-slate-400 font-medium' }, 'New User? '),
+                e('button', { onClick: () => { setView('register'); setRegStep(1); setLoginError(''); }, className: 'text-xs font-bold text-primary hover:underline' }, 'Register Now (नया पंजीकरण करें)')
+              )
+            ) : e('div', { className: 'flex flex-col gap-4 text-left animate-fadeIn' },
+              e('div', { className: 'text-center mb-1 bg-navy-950/80 p-3 rounded-2xl border border-indigo-500/30' },
+                e('span', { className: 'text-xs text-slate-400 font-medium' }, 'OTP Sent to Registered Email:'),
+                e('div', { className: 'text-sm font-black text-amber-400 mt-0.5 font-mono break-all' }, loginEmail),
+                e('div', { className: 'text-[11px] font-bold text-emerald-400 mt-1 flex items-center justify-center gap-2' },
+                  e('span', null, '⏱️ Valid for 5 Minutes'),
+                  attemptsLeft < 5 && e('span', { className: 'text-rose-400 font-mono' }, `(${attemptsLeft}/5 attempts left)`)
+                )
+              ),
+
+              authSuccessMsg && e('div', { className: 'p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold text-center' }, authSuccessMsg),
+
+              e('div', null,
+                e('label', { className: 'block text-xs font-bold text-slate-300 uppercase mb-2 text-center' }, 'Enter 6-Digit Email OTP'),
+                e('input', {
+                  type: 'text',
+                  maxLength: 6,
+                  value: loginOtpVal,
+                  onChange: ev => setLoginOtpVal(ev.target.value.replace(/\D/g, '')),
+                  placeholder: '• • • • • •',
+                  className: 'w-full text-center py-3.5 bg-navy-950 border-2 border-indigo-500/60 rounded-2xl text-white font-black text-2xl tracking-[0.4em] outline-none focus:border-amber-400 shadow-xl'
+                }),
+                loginError && e('p', { className: 'text-xs font-bold text-rose-400 text-center mt-2' }, loginError)
+              ),
+
+              e('button', {
+                onClick: handleVerifyLoginOtp,
+                disabled: isAuthLoading,
+                className: `w-full py-4 rounded-2xl btn-gradient text-white font-black text-sm uppercase tracking-wider ${isAuthLoading ? 'opacity-50 cursor-not-allowed' : ''}`
+              }, isAuthLoading ? 'Verifying OTP...' : 'Verify OTP & Login'),
+
+              e('div', { className: 'flex items-center justify-between text-xs pt-1' },
+                e('button', {
+                  onClick: handleResendLoginOtp,
+                  disabled: resendCooldown > 0 || isAuthLoading,
+                  className: `font-bold ${resendCooldown > 0 ? 'text-slate-500 cursor-not-allowed' : 'text-primary hover:underline'}`
+                }, resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : '🔄 Resend OTP'),
+                e('button', { onClick: () => { setLoginOtpSent(false); setLoginError(''); setAuthSuccessMsg(''); }, className: 'text-slate-400 hover:text-white font-bold' }, '← Change Email')
+              )
+            )
+          )
+        );
+      }
+
+      // REGISTRATION SCREEN (Mandatory Email ID, Field Order: First Name, Surname, DOB, Mobile, Email, Button: "Register")
+      if (view === 'register') {
+        return e('div', { className: 'min-h-screen flex flex-col items-center justify-center p-4 relative bg-[#050B20]' },
+          e('div', { className: 'w-full max-w-md glass-card p-7 shadow-2xl relative z-10 animate-fadeIn' },
+            e('div', { className: 'flex items-center justify-between mb-5 pb-3 border-b border-slate-800' },
+              e('div', null,
+                e('h2', { className: 'text-xl font-black text-white' }, 'Join Family-GenApp'),
+                e('p', { className: 'text-xs text-primary font-semibold mt-0.5' }, 'Community User Registration (Role: MEMBER)')
+              ),
+              e('button', { onClick: () => setView('login'), className: 'px-3 py-1.5 rounded-xl bg-navy-900 text-slate-300 hover:text-white text-xs font-bold border border-slate-700' }, 'लॉगइन पर जाएं')
+            ),
+
+            regStep === 1 ? e('form', { onSubmit: handleRegSubmitStep1, className: 'flex flex-col gap-3.5 text-xs' },
+              /* 1. First Name */
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'पहला नाम (First Name) *'),
+                e('input', { type: 'text', value: regForm.first_name, onChange: ev => setRegForm({ ...regForm, first_name: ev.target.value }), placeholder: 'उदा. रमेश', className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white' }),
+                regErrors.first_name && e('p', { className: 'text-[11px] text-rose-400 mt-1 font-semibold' }, regErrors.first_name)
+              ),
+              /* 2. Surname */
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'उपनाम (Surname) *'),
+                e('input', { type: 'text', value: regForm.surname, onChange: ev => setRegForm({ ...regForm, surname: ev.target.value }), placeholder: 'उदा. शर्मा / तिवारी', className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white' }),
+                regErrors.surname && e('p', { className: 'text-[11px] text-rose-400 mt-1 font-semibold' }, regErrors.surname)
+              ),
+              /* 3. Date of Birth */
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'जन्म तिथि (Date of Birth) *'),
+                e(ResponsiveDatePicker, {
+                  value: regForm.dob,
+                  onChange: val => setRegForm({ ...regForm, dob: val }),
+                  placeholder: 'जन्म तिथि चुनें (Select Date of Birth)'
+                }),
+                regErrors.dob && e('p', { className: 'text-[11px] text-rose-400 mt-1 font-semibold' }, regErrors.dob)
+              ),
+              /* 4. Mobile Number */
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'मोबाइल नंबर (Mobile Number) *'),
+                e('input', { type: 'tel', maxLength: 10, value: regForm.mobile_number, onChange: ev => setRegForm({ ...regForm, mobile_number: ev.target.value.replace(/\D/g, '') }), placeholder: '10 अंकों का मोबाइल नंबर', className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-bold' }),
+                regErrors.mobile_number && e('p', { className: 'text-[11px] text-rose-400 mt-1 font-semibold' }, regErrors.mobile_number)
+              ),
+              /* 5. Email ID (Mandatory) */
+              e('div', null,
+                e('label', { className: 'block font-bold text-amber-300 mb-1' }, 'ईमेल आईडी (Email ID) * Mandatory'),
+                e('input', { type: 'email', value: regForm.email, onChange: ev => setRegForm({ ...regForm, email: ev.target.value }), placeholder: 'उदा. name@example.com', className: 'w-full p-3 bg-navy-950 border border-amber-500/50 rounded-xl text-white font-bold focus:border-amber-400' }),
+                regErrors.email && e('p', { className: 'text-[11px] text-rose-400 mt-1 font-semibold' }, regErrors.email)
+              ),
+              /* BUTTON: "Register" */
+              e('button', {
+                type: 'submit',
+                disabled: isAuthLoading,
+                className: `w-full py-4 rounded-2xl btn-gradient text-white font-black text-sm uppercase tracking-wider mt-2 ${isAuthLoading ? 'opacity-50 cursor-not-allowed' : ''}`
+              }, isAuthLoading ? 'Creating User Account...' : 'Register')
+            ) : e('div', { className: 'flex flex-col items-center text-center p-4 animate-successBounce' },
+              e('div', { className: 'w-20 h-20 rounded-full bg-emerald-500/20 text-emerald-400 border-2 border-emerald-500 flex items-center justify-center text-3xl mb-4 shadow-xl' }, '✓'),
+              e('h3', { className: 'text-2xl font-black text-white' }, 'Registration Successful'),
+              e('p', { className: 'text-xs text-slate-300 mt-2 font-medium max-w-xs' }, 'Please use your registered email to receive OTP during login.'),
+              e('button', {
+                onClick: () => {
+                  setView('login');
+                  setLoginEmail(regForm.email);
+                  setLoginOtpSent(false);
+                  setLoginError('');
+                },
+                className: 'w-full mt-6 py-4 rounded-2xl btn-gradient text-white font-black text-sm uppercase tracking-wider'
+              }, 'Proceed to Email OTP Login ➔')
+            )
+          )
+        );
+      }
+
+      // DASHBOARD VIEW (Requires Active Logged-In User Session)
+      if (!currentUser) {
+        return e('div', { className: 'min-h-screen flex flex-col items-center justify-center p-4 bg-[#050B20] text-center' },
+          e('div', { className: 'w-full max-w-md glass-card p-8 shadow-2xl animate-fadeIn' },
+            e('div', { className: 'w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary to-secondary p-0.5 shadow-xl shadow-primary/30 mx-auto mb-4' },
+              e('div', { className: 'w-full h-full bg-[#0C1838] rounded-2xl flex items-center justify-center text-white font-black text-2xl' }, 'F')
+            ),
+            e('h2', { className: 'text-xl font-black text-white tracking-tight' }, 'Family-GenApp Portal'),
+            e('p', { className: 'text-xs text-slate-400 mt-1 mb-6' }, 'Please log in with your registered email address and OTP.'),
+            e('button', { onClick: () => setView('login'), className: 'w-full py-4 rounded-2xl btn-gradient text-white font-black text-xs uppercase tracking-wider' }, 'Proceed to Email OTP Login ➔')
+          )
+        );
+      }
+
+      const isSuperAdmin = currentUser && (currentUser.mobile_number === SUPER_ADMIN_MOBILE || currentUser.role === 'SUPER_ADMIN');
+      const isAdmin = currentUser && (isSuperAdmin || currentUser.role === 'ADMIN');
+      const pendingCount = pendingRequests.filter(r => r.status === 'PENDING').length;
+
+      return e('div', { className: 'min-h-screen bg-[#050B20] text-slate-100 flex flex-col' },
+        /* Toast Banner */
+        toastMsg && e('div', { className: 'fixed top-4 right-4 z-50 p-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-indigo-600 text-white font-extrabold text-xs shadow-2xl border border-emerald-400 animate-fadeIn' },
+          `🔔 ${toastMsg}`
+        ),
+
+        /* Header with Responsive Hamburger Menu */
+        e('header', { className: 'sticky top-0 z-40 bg-navy-950/90 backdrop-blur-xl border-b border-slate-800 px-4 py-3 max-w-6xl mx-auto w-full flex items-center justify-between' },
+          e('div', { className: 'flex items-center gap-3' },
+            /* Mobile Hamburger Toggle Button */
+            e('button', {
+              onClick: () => setIsMobileMenuOpen(true),
+              className: 'p-2 rounded-xl bg-navy-900 border border-slate-800 text-slate-300 hover:text-white md:hidden text-lg font-black min-h-[44px] min-w-[44px] flex items-center justify-center'
+            }, '☰'),
+
+            e('div', { className: 'w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white font-black text-lg shadow-md' }, 'F'),
+            e('div', null,
+              e('h1', { className: 'text-sm sm:text-base font-black text-white leading-tight' }, 'Family-GenApp'),
+              e('div', { className: 'flex items-center gap-1.5 mt-0.5' },
+                e('span', { className: `text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${isSuperAdmin ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : (isAdmin ? 'bg-indigo-500/20 text-indigo-300' : 'bg-slate-800 text-slate-400')}` },
+                  isSuperAdmin ? '👑 SUPER ADMIN' : (isAdmin ? '⚡ ADMIN' : '👤 MEMBER')
+                ),
+                (isAdmin && dbConnected) && e('span', { className: 'text-[9px] font-bold px-1.5 py-0.2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded flex items-center gap-1' },
+                  e('span', { className: 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse' }),
+                  'DB Live'
+                )
+              )
+            )
+          ),
+
+          e('div', { className: 'flex items-center gap-2 sm:gap-3' },
+            e('button', {
+              onClick: () => setShowRequestModal(true),
+              className: 'px-3 sm:px-3.5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold border border-indigo-400 shadow-md hover:bg-indigo-500 min-h-[40px] flex items-center gap-1'
+            },
+              e('span', { className: 'text-sm' }, '➕'),
+              e('span', { className: 'hidden sm:inline' }, 'Request New Member'),
+              e('span', { className: 'sm:hidden' }, 'Request')
+            ),
+
+            e('div', { className: 'text-right hidden sm:block' },
+              e('div', { className: 'text-xs font-bold text-white flex items-center justify-end gap-1.5' },
+                e('span', { className: 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse' }),
+                currentUser ? currentUser.full_name : ''
+              ),
+              e('div', { className: 'text-[10px] text-amber-300 font-mono' }, currentUser ? currentUser.email : '')
+            ),
+            e('button', { onClick: handleLogout, className: 'px-3 py-1.5 rounded-xl bg-navy-900 text-rose-400 border border-slate-800 text-xs font-bold min-h-[40px] hover:bg-rose-950/40' }, 'लॉगआउट')
+          )
+        ),
+
+        /* SLIDE-OUT MOBILE NAVIGATION DRAWER OVERLAY */
+        isMobileMenuOpen && e('div', { className: 'fixed inset-0 z-50 bg-navy-950/80 backdrop-blur-md flex animate-fadeIn md:hidden' },
+          e('div', { className: 'w-4/5 max-w-xs bg-navy-900 border-r border-slate-800 h-full p-5 flex flex-col justify-between overflow-y-auto animate-fadeIn' },
+            e('div', { className: 'flex flex-col gap-5' },
+              /* Drawer Header */
+              e('div', { className: 'flex items-center justify-between pb-3 border-b border-slate-800' },
+                e('div', { className: 'flex items-center gap-2.5' },
+                  e('div', { className: 'w-8 h-8 rounded-xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white font-black text-sm' }, 'F'),
+                  e('div', null,
+                    e('div', { className: 'text-sm font-black text-white' }, 'Family-GenApp'),
+                    e('div', { className: 'text-[10px] text-emerald-400 flex items-center gap-1 font-bold' },
+                      e('span', { className: 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse' }),
+                      '🟢 ONLINE'
+                    )
+                  )
+                ),
+                e('button', {
+                  onClick: () => setIsMobileMenuOpen(false),
+                  className: 'w-8 h-8 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-sm hover:text-white'
+                }, '✕')
+              ),
+
+              /* User Profile Badge */
+              currentUser && e('div', { className: 'p-3 rounded-2xl bg-navy-950 border border-slate-800' },
+                e('div', { className: 'text-xs font-bold text-white' }, currentUser.full_name),
+                e('div', { className: 'text-[11px] text-amber-300 font-mono mt-0.5 break-all' }, currentUser.email),
+                e('div', { className: 'text-[10px] text-slate-400 mt-1 font-mono' }, `Mobile: +91 ${currentUser.mobile_number}`)
+              ),
+
+              /* Navigation Links List */
+              e('nav', { className: 'flex flex-col gap-1.5' },
+                e('button', {
+                  onClick: () => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); },
+                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-between ${activeTab === 'dashboard' ? 'bg-primary text-white' : 'text-slate-300 hover:bg-slate-800/60'}`
+                }, '📊 डैशबोर्ड'),
+
+                isSuperAdmin && e('button', {
+                  onClick: () => { setActiveTab('registered_users'); setIsMobileMenuOpen(false); },
+                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-between ${activeTab === 'registered_users' ? 'bg-emerald-600 text-white' : 'text-emerald-300 bg-emerald-950/40 border border-emerald-500/30'}`
+                },
+                  `👥 पंजीकृत यूज़र्स`,
+                  e('span', { className: 'px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-black' }, `${users.filter(u=>u.is_online).length}/${users.length}`)
+                ),
+
+                e('button', {
+                  onClick: () => { setActiveTab('directory'); setIsMobileMenuOpen(false); },
+                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-between ${activeTab === 'directory' ? 'bg-primary text-white' : 'text-slate-300 hover:bg-slate-800/60'}`
+                }, `📂 निर्देशिका (${members.length})`),
+
+                e('button', {
+                  onClick: () => { setActiveTab('hierarchy_tree'); setIsMobileMenuOpen(false); },
+                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold ${activeTab === 'hierarchy_tree' ? 'bg-primary text-white' : 'text-slate-300 hover:bg-slate-800/60'}`
+                }, '🌲 संपूर्ण वंशावली वृक्ष'),
+
+                isSuperAdmin && e('button', {
+                  onClick: () => { setActiveTab('pending_requests'); setIsMobileMenuOpen(false); },
+                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-between ${activeTab === 'pending_requests' ? 'bg-amber-600 text-white' : 'text-amber-300 bg-amber-950/40 border border-amber-500/30'}`
+                },
+                  '⏳ लंबित अनुरोध',
+                  pendingCount > 0 && e('span', { className: 'px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black' }, pendingCount)
+                ),
+
+                isSuperAdmin && e('button', {
+                  onClick: () => { setActiveTab('roles'); setIsMobileMenuOpen(false); },
+                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold ${activeTab === 'roles' ? 'bg-amber-600 text-white' : 'text-amber-400 hover:bg-slate-800/60'}`
+                }, '👑 रोल मैनेजमेंट'),
+
+                isAdmin && e('button', {
+                  onClick: () => { setActiveTab('audit'); setIsMobileMenuOpen(false); },
+                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold ${activeTab === 'audit' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800/60'}`
+                }, '📜 ऑडिट लॉग्स'),
+
+                e('button', {
+                  onClick: () => { setActiveTab('tree'); setIsMobileMenuOpen(false); },
+                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold ${activeTab === 'tree' ? 'bg-primary text-white' : 'text-slate-300 hover:bg-slate-800/60'}`
+                }, '🌳 3-Gen Tree')
+              )
+            ),
+
+            e('button', {
+              onClick: () => { setIsMobileMenuOpen(false); handleLogout(); },
+              className: 'w-full py-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 font-bold text-xs hover:bg-rose-500/20'
+            }, 'लॉगआउट')
+          ),
+          e('div', { onClick: () => setIsMobileMenuOpen(false), className: 'flex-1 h-full' })
+        ),
+
+        /* Desktop Navigation Bar */
+        e('div', { className: 'bg-navy-900/60 border-b border-slate-800 px-4 py-2 hidden md:block' },
+          e('div', { className: 'max-w-6xl mx-auto flex items-center gap-2 overflow-x-auto' },
+            e('button', { onClick: () => setActiveTab('dashboard'), className: `px-4 py-2 rounded-xl text-xs font-bold ${activeTab === 'dashboard' ? 'bg-primary text-white' : 'text-slate-400 hover:text-white'}` }, '📊 डैशबोर्ड'),
+            
+            isSuperAdmin && e('button', {
+              onClick: () => setActiveTab('registered_users'),
+              className: `px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 ${activeTab === 'registered_users' ? 'bg-emerald-600 text-white' : 'text-emerald-300 bg-emerald-950/40 border border-emerald-500/30'}`
+            },
+              `👥 पंजीकृत यूज़र्स (${users.length})`,
+              users.filter(u => u.is_online).length > 0 && e('span', { className: 'px-1.5 py-0.2 rounded-full bg-emerald-500 text-white text-[10px] font-black' }, `🟢 ${users.filter(u => u.is_online).length}`)
+            ),
+
+            e('button', { onClick: () => setActiveTab('directory'), className: `px-4 py-2 rounded-xl text-xs font-bold ${activeTab === 'directory' ? 'bg-primary text-white' : 'text-slate-400 hover:text-white'}` }, `📂 निर्देशिका (${members.length})`),
+            e('button', { onClick: () => setActiveTab('hierarchy_tree'), className: `px-4 py-2 rounded-xl text-xs font-bold ${activeTab === 'hierarchy_tree' ? 'bg-primary text-white' : 'text-slate-400 hover:text-white'}` }, '🌲 संपूर्ण वंशावली वृक्ष'),
+            
+            isSuperAdmin && e('button', {
+              onClick: () => setActiveTab('pending_requests'),
+              className: `px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 ${activeTab === 'pending_requests' ? 'bg-amber-600 text-white' : 'text-amber-300 bg-amber-950/40 border border-amber-500/30'}`
+            },
+              '⏳ लंबित अनुरोध',
+              pendingCount > 0 && e('span', { className: 'px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-black' }, pendingCount)
+            ),
+
+            isSuperAdmin && e('button', { onClick: () => setActiveTab('roles'), className: `px-4 py-2 rounded-xl text-xs font-bold ${activeTab === 'roles' ? 'bg-amber-600 text-white' : 'text-amber-400'}` }, '👑 रोल मैनेजमेंट'),
+            isAdmin && e('button', { onClick: () => setActiveTab('audit'), className: `px-4 py-2 rounded-xl text-xs font-bold ${activeTab === 'audit' ? 'bg-indigo-600 text-white' : 'text-slate-400'}` }, '📜 ऑडिट लॉग्स'),
+            e('button', { onClick: () => setActiveTab('tree'), className: `px-4 py-2 rounded-xl text-xs font-bold ${activeTab === 'tree' ? 'bg-primary text-white' : 'text-slate-400'}` }, '🌳 3-Gen Tree')
+          )
+        ),
+
+        /* Main Workspace */
+        e('main', { className: 'flex-1 max-w-6xl mx-auto w-full p-4 sm:p-6' },
+          
+          /* TAB 1: DASHBOARD */
+          activeTab === 'dashboard' && e('div', { className: 'flex flex-col gap-6 animate-fadeIn' },
+            e('div', { className: 'grid grid-cols-2 md:grid-cols-4 gap-4' },
+              /* Stat Card 1: Registered Users Card */
+              e('div', {
+                onClick: () => isSuperAdmin && setActiveTab('registered_users'),
+                className: `glass-card p-5 transition-all ${isSuperAdmin ? 'cursor-pointer hover:border-emerald-400/60 hover:scale-[1.02] shadow-lg border-emerald-500/30' : ''}`
+              },
+                e('div', { className: 'flex items-center justify-between' },
+                  e('div', { className: 'text-xs font-bold text-emerald-300 uppercase' }, 'Registered Users'),
+                  e('span', { className: 'text-base font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' }, `🟢 ${users.filter(u => u.is_online).length} Online`)
+                ),
+                e('div', { className: 'text-4xl font-black text-white mt-1.5 font-mono' }, users.length),
+                e('div', { className: 'text-[10px] text-emerald-300/90 font-semibold mt-1' }, `Total User Accounts • ${isSuperAdmin ? 'Manage Users ➔' : 'System Accounts'}`)
+              ),
+
+              /* Stat Card 2: Birthdays This Month */
+              e('div', {
+                onClick: () => { setShowBirthdayModal(true); setBirthdaySearchQuery(''); },
+                className: 'glass-card p-5 cursor-pointer hover:border-amber-400/60 hover:scale-[1.02] transition-all relative overflow-hidden group shadow-lg'
+              },
+                e('div', { className: 'flex items-center justify-between' },
+                  e('div', { className: 'text-xs font-bold text-amber-300 uppercase' }, 'Birthdays This Month'),
+                  e('span', { className: 'text-lg' }, '🎂')
+                ),
+                e('div', { className: 'text-4xl font-black text-amber-400 mt-1.5 font-mono' }, birthdaysThisMonth.length),
+                e('div', { className: 'text-[10px] text-amber-200/90 font-semibold mt-1' }, `Month: ${currentMonthNameEng} • Details ➔`)
+              ),
+
+              /* Stat Card 3: Pending Requests */
+              isSuperAdmin ? e('div', {
+                onClick: () => setActiveTab('pending_requests'),
+                className: 'glass-card p-5 cursor-pointer hover:border-amber-400/60 transition-all border-amber-500/30'
+              },
+                e('div', { className: 'text-xs font-bold text-amber-300 uppercase' }, 'Pending Birth Requests'),
+                e('div', { className: 'text-3xl font-black text-amber-400 mt-1' }, pendingCount),
+                e('div', { className: 'text-[10px] text-slate-400 font-semibold mt-1' }, 'Review & Approve ➔')
+              ) : e('div', { className: 'glass-card p-5' },
+                e('div', { className: 'text-xs font-bold text-slate-400 uppercase' }, 'कुल गांव वंशावली सदस्य'),
+                e('div', { className: 'text-3xl font-black text-white mt-1' }, members.length),
+                e('div', { className: 'text-[10px] text-emerald-400 font-semibold mt-1' }, 'Village Member Lineage')
+              ),
+
+              /* Stat Card 4: Generations */
+              e('div', { className: 'glass-card p-5' },
+                e('div', { className: 'text-xs font-bold text-slate-400 uppercase' }, 'वंश पीढ़ियाँ (Generations)'),
+                e('div', { className: 'text-3xl font-black text-secondary mt-1' }, '8'),
+                e('div', { className: 'text-[10px] text-secondary/80 font-semibold mt-1' }, 'Lineage Generations')
+              )
+            ),
+
+            /* Super Admin Insights & Recent Registrations Widgets */
+            isSuperAdmin && e('div', { className: 'grid grid-cols-1 md:grid-cols-3 gap-6' },
+              /* User Insights Widget */
+              e('div', { className: 'glass-card p-5 md:col-span-1 border-l-4 border-l-emerald-500' },
+                e('h3', { className: 'text-sm font-black text-white uppercase tracking-wider mb-3 flex items-center justify-between' },
+                  e('span', null, '📊 Super Admin User Insights'),
+                  e('span', { className: 'text-xs font-bold text-emerald-400' }, `Online: ${users.filter(u=>u.is_online).length}`)
+                ),
+                e('div', { className: 'flex flex-col gap-2 text-xs font-semibold' },
+                  e('div', { className: 'flex justify-between items-center p-2 rounded-xl bg-navy-950/80 border border-slate-800' },
+                    e('span', { className: 'text-slate-300' }, 'Total Registered Users'),
+                    e('span', { className: 'font-mono font-bold text-white' }, users.length)
+                  ),
+                  e('div', { className: 'flex justify-between items-center p-2 rounded-xl bg-emerald-950/30 border border-emerald-500/30' },
+                    e('span', { className: 'text-emerald-300 flex items-center gap-1.5' },
+                      e('span', { className: 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse' }),
+                      'Online Users (🟢)'
+                    ),
+                    e('span', { className: 'font-mono font-bold text-emerald-400' }, users.filter(u=>u.is_online).length)
+                  ),
+                  e('div', { className: 'flex justify-between items-center p-2 rounded-xl bg-slate-950/40 border border-slate-800' },
+                    e('span', { className: 'text-slate-400 flex items-center gap-1.5' },
+                      e('span', { className: 'w-2 h-2 rounded-full bg-slate-500' }),
+                      'Offline Users (⚪)'
+                    ),
+                    e('span', { className: 'font-mono font-bold text-slate-400' }, users.filter(u=>!u.is_online).length)
+                  ),
+                  e('div', { className: 'flex justify-between items-center p-2 rounded-xl bg-indigo-950/30 border border-indigo-500/30' },
+                    e('span', { className: 'text-indigo-300' }, 'Admins & Super Admins'),
+                    e('span', { className: 'font-mono font-bold text-indigo-300' }, users.filter(u=>u.role==='ADMIN'||u.role==='SUPER_ADMIN').length)
+                  ),
+                  e('div', { className: 'flex justify-between items-center p-2 rounded-xl bg-amber-950/30 border border-amber-500/30' },
+                    e('span', { className: 'text-amber-300' }, 'Members'),
+                    e('span', { className: 'font-mono font-bold text-amber-300' }, users.filter(u=>u.role==='MEMBER').length)
+                  )
+                )
+              ),
+
+              /* Recent Registrations Widget */
+              e('div', { className: 'glass-card p-5 md:col-span-2 border-l-4 border-l-indigo-500' },
+                e('div', { className: 'flex items-center justify-between mb-3' },
+                  e('h3', { className: 'text-sm font-black text-white uppercase tracking-wider' }, '🆕 Recent Registrations'),
+                  e('button', { onClick: () => setActiveTab('registered_users'), className: 'text-xs text-primary font-bold hover:underline' }, 'View All Users ➔')
+                ),
+                e('div', { className: 'flex flex-col gap-2' },
+                  users.slice(0, 4).map(u => e('div', { key: u.id, className: 'p-3 rounded-xl bg-navy-950/80 border border-slate-800 flex items-center justify-between text-xs' },
+                    e('div', { className: 'flex items-center gap-3' },
+                      e('span', { className: 'text-lg' }, u.is_online ? '🟢' : '⚪'),
+                      e('div', null,
+                        e('div', { className: 'font-bold text-white flex items-center gap-2' },
+                          u.full_name,
+                          e('span', { className: `text-[9px] font-black px-1.5 py-0.2 rounded ${u.role === 'SUPER_ADMIN' ? 'bg-amber-500/20 text-amber-300' : 'bg-indigo-500/20 text-indigo-300'}` }, u.role)
+                        ),
+                        e('div', { className: 'text-[11px] text-slate-400 font-mono' }, u.email)
+                      )
+                    ),
+                    e('div', { className: 'text-right' },
+                      e('div', { className: 'text-slate-300 font-mono text-[11px]' }, `+91 ${u.mobile_number}`),
+                      e('div', { className: 'text-[10px] text-slate-500' }, u.registration_date ? u.registration_date.split('T')[0] : '2026-01-01')
+                    )
+                  ))
+                )
+              )
+            ),
+
+            /* Action Buttons Header */
+            e('div', { className: 'flex flex-wrap items-center justify-between gap-3 p-4 glass-card' },
+              e('div', null,
+                e('h3', { className: 'text-base font-bold text-white' }, 'New Birth & Member Addition Actions'),
+                e('p', { className: 'text-xs text-slate-400' }, 
+                  isSuperAdmin 
+                    ? 'Super Admin parameters: Direct Add bypasses approval, or review pending member submissions'
+                    : 'नये बच्चे/सदस्य के जन्म का अनुरोध दर्ज करें (Requires Super Admin Approval)'
+                )
+              ),
+              e('div', { className: 'flex items-center gap-3' },
+                e('button', {
+                  onClick: () => setShowRequestModal(true),
+                  className: 'px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg'
+                }, '➕ Submit Birth Request'),
+
+                isSuperAdmin && e('button', {
+                  onClick: () => setShowDirectAddModal(true),
+                  className: 'px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-lg'
+                }, '⚡ Add Member Directly')
+              )
+            )
+          ),
+
+          /* REGISTERED USERS MANAGEMENT TAB (SUPER ADMIN ONLY) */
+          activeTab === 'registered_users' && isSuperAdmin && e('div', { className: 'glass-card p-6 animate-fadeIn' },
+            e('div', { className: 'flex items-center justify-between mb-4 pb-3 border-b border-slate-800' },
+              e('div', null,
+                e('h2', { className: 'text-lg font-black text-white flex items-center gap-2' },
+                  e('span', { className: 'text-emerald-400' }, '👥'),
+                  'Registered Users Management'
+                ),
+                e('p', { className: 'text-xs text-slate-400 mt-0.5' }, `Total Registered Accounts: ${users.length} • Online: 🟢 ${users.filter(u=>u.is_online).length} • Offline: ⚪ ${users.filter(u=>!u.is_online).length}`)
+              ),
+              e('button', { onClick: () => { setView('register'); setRegStep(1); }, className: 'px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow' }, '➕ Register New User')
+            ),
+
+            /* Mobile Card View (< md) */
+            e('div', { className: 'grid grid-cols-1 gap-3 md:hidden' },
+              users.map(u => e('div', { key: u.id, className: 'p-4 rounded-2xl bg-navy-950/90 border border-slate-800 flex flex-col gap-2 shadow-md' },
+                e('div', { className: 'flex items-center justify-between' },
+                  e('div', { className: 'font-bold text-white text-sm flex items-center gap-2' },
+                    u.full_name,
+                    e('span', { className: `text-[9px] font-black px-1.5 py-0.2 rounded ${u.role === 'SUPER_ADMIN' ? 'bg-amber-500/20 text-amber-300' : 'bg-indigo-500/20 text-indigo-300'}` }, u.role)
+                  ),
+                  u.is_online ? (
+                    e('span', { className: 'px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold border border-emerald-500/30' }, '🟢 ONLINE')
+                  ) : (
+                    e('span', { className: 'px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 text-[10px] font-bold' }, '⚪ OFFLINE')
+                  )
+                ),
+                e('div', { className: 'text-xs text-amber-300 font-mono break-all' }, u.email),
+                e('div', { className: 'flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800/80 font-mono' },
+                  e('span', null, `📱 +91 ${u.mobile_number}`),
+                  e('span', null, `Reg: ${u.registration_date ? u.registration_date.split('T')[0] : '2026-01-01'}`)
+                )
+              ))
+            ),
+
+            /* Desktop Table View (md and up) */
+            e('div', { className: 'overflow-x-auto hidden md:block' },
+              e('table', { className: 'w-full text-left text-xs border-collapse' },
+                e('thead', null,
+                  e('tr', { className: 'border-b border-slate-800 text-slate-400 uppercase font-bold text-[10px]' },
+                    e('th', { className: 'py-2.5 px-3' }, 'Online Status'),
+                    e('th', { className: 'py-2.5 px-3' }, 'Full Name'),
+                    e('th', { className: 'py-2.5 px-3' }, 'Surname'),
+                    e('th', { className: 'py-2.5 px-3' }, 'Mobile Number'),
+                    e('th', { className: 'py-2.5 px-3' }, 'Email Address'),
+                    e('th', { className: 'py-2.5 px-3' }, 'Role'),
+                    e('th', { className: 'py-2.5 px-3' }, 'Registration Date'),
+                    e('th', { className: 'py-2.5 px-3 text-right' }, 'Account Status')
+                  )
+                ),
+                e('tbody', { className: 'divide-y divide-slate-800/60 font-medium' },
+                  users.map(u => e('tr', { key: u.id, className: 'hover:bg-navy-800/40 transition-colors' },
+                    e('td', { className: 'py-3 px-3 font-bold' },
+                      u.is_online ? (
+                        e('span', { className: 'px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[11px] font-bold flex items-center gap-1.5 w-max' },
+                          e('span', { className: 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse' }),
+                          'ONLINE 🟢'
+                        )
+                      ) : (
+                        e('span', { className: 'px-2 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[11px] font-bold flex items-center gap-1.5 w-max' },
+                          e('span', { className: 'w-2 h-2 rounded-full bg-slate-500' }),
+                          'OFFLINE ⚪'
+                        )
+                      )
+                    ),
+                    e('td', { className: 'py-3 px-3 font-bold text-white' }, u.full_name),
+                    e('td', { className: 'py-3 px-3 text-slate-300' }, u.surname),
+                    e('td', { className: 'py-3 px-3 text-indigo-300 font-mono' }, `+91 ${u.mobile_number}`),
+                    e('td', { className: 'py-3 px-3 text-amber-300 font-mono' }, u.email),
+                    e('td', { className: 'py-3 px-3' },
+                      e('span', { className: `px-2 py-0.5 rounded text-[10px] font-black ${u.role === 'SUPER_ADMIN' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : (u.role === 'ADMIN' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40' : 'bg-slate-800 text-slate-300')}` }, u.role)
+                    ),
+                    e('td', { className: 'py-3 px-3 text-slate-400 text-[11px] font-mono' }, u.registration_date ? u.registration_date.split('T')[0] : '2026-01-01'),
+                    e('td', { className: 'py-3 px-3 text-right' },
+                      e('span', { className: 'px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' }, u.status || 'Active')
+                    )
+                  ))
+                )
+              )
+            )
+          ),
+
+          /* TAB 2: DIRECTORY */
+          activeTab === 'directory' && e('div', { className: 'flex flex-col gap-3 animate-fadeIn' },
+            e('div', { className: 'sticky top-16 z-30 mb-2' },
+              e('input', {
+                type: 'text',
+                value: searchDirectoryQuery,
+                onChange: ev => setSearchDirectoryQuery(ev.target.value),
+                placeholder: 'गांव सदस्य नाम से खोजें (e.g. रामचन्द्र, मदन गोपाल, तीन शादी)...',
+                className: 'w-full px-4 py-3 bg-navy-950 border-2 border-indigo-500/40 rounded-2xl text-white placeholder-slate-400 text-sm font-medium outline-none focus:border-indigo-500 shadow-xl'
+              })
+            ),
+
+            e('div', { className: 'flex flex-col gap-2.5' },
+              filteredVillageMembers.map(m => e('div', {
+                key: m.Person_ID,
+                className: 'glass-card p-3.5 flex items-center justify-between transition-all'
+              },
+                e('div', {
+                  onClick: () => { setSelectedTreeFocusId(m.Person_ID); setActiveTab('tree'); },
+                  className: 'flex items-center gap-3.5 cursor-pointer flex-1'
+                },
+                  e('div', { className: 'relative' },
+                    e('img', { src: m.Profile_Image, className: 'w-12 h-12 rounded-full object-cover border-2 border-indigo-500/30' }),
+                    e('span', { className: 'absolute -bottom-1 -right-1 px-1.5 py-0.2 bg-navy-950 text-indigo-300 text-[9px] font-bold rounded border border-slate-800' }, `P${m.Generation_Level}`)
+                  ),
+                  e('div', null,
+                    e('div', { className: 'flex items-center gap-2' },
+                      e('h3', { className: 'text-base font-bold text-white' }, m.Full_Name),
+                      m.Marriage_Note && e('span', { className: 'text-[10px] font-black px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-md' }, `💍 ${m.Marriage_Note}`)
+                    ),
+                    m.DOB ? e('p', { className: 'text-xs text-indigo-300 font-semibold mt-0.5' }, `📅 ${m.DOB}`) : null
+                  )
+                ),
+
+                isSuperAdmin && e('button', {
+                  onClick: () => { setEditingMember(m); setShowEditMemberModal(true); },
+                  className: 'px-3 py-1.5 rounded-lg bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500 hover:text-white font-bold text-xs border border-indigo-500/30'
+                }, '✏️ Edit Member')
+              ))
+            )
+          ),
+
+          /* TAB 3: HIERARCHY TREE VIEW */
+          activeTab === 'hierarchy_tree' && e('div', { className: 'glass-card p-6 animate-fadeIn' },
+            e('div', { className: 'flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800' },
+              e('div', null,
+                e('h2', { className: 'text-lg font-black text-white flex items-center gap-2' },
+                  e('span', { className: 'text-primary' }, '🌲'),
+                  'संपूर्ण वंशावली वृक्ष (Full Hierarchy Tree)'
+                ),
+                e('p', { className: 'text-xs text-slate-400 mt-0.5' }, 'ग्रैंडफादर ➔ फादर ➔ सन ➔ पीढ़ी दर पीढ़ी ट्री')
+              ),
+              e('input', {
+                type: 'text',
+                value: treeSearchQuery,
+                onChange: ev => setTreeSearchQuery(ev.target.value),
+                placeholder: 'वृक्ष में नाम खोजें...',
+                className: 'w-full sm:w-72 px-3.5 py-2.5 bg-navy-950 border-2 border-indigo-500/50 rounded-xl text-white text-xs outline-none focus:border-amber-400 shadow-md font-bold'
+              })
+            ),
+
+            /* Interactive Zoom & Pan Controls Header for Mobile & Desktop */
+            e('div', { className: 'flex items-center justify-between gap-2 p-3 bg-navy-900/90 rounded-xl border border-slate-800 text-xs font-bold' },
+              e('div', { className: 'flex items-center gap-2 text-slate-300' },
+                e('span', { className: 'text-base' }, '🔍'),
+                e('span', { className: 'hidden sm:inline' }, `Zoom Level: ${Math.round(treeZoom * 100)}%`),
+                e('span', { className: 'sm:hidden font-mono' }, `${Math.round(treeZoom * 100)}%`)
+              ),
+              e('div', { className: 'flex items-center gap-1.5' },
+                e('button', {
+                  onClick: () => setTreeZoom(z => Math.min(2.5, z + 0.15)),
+                  className: 'px-2.5 py-1.5 rounded-lg bg-indigo-600/80 text-white font-extrabold hover:bg-indigo-500 shadow active:scale-95 min-h-[36px]'
+                }, '➕ Zoom In'),
+                e('button', {
+                  onClick: () => setTreeZoom(z => Math.max(0.5, z - 0.15)),
+                  className: 'px-2.5 py-1.5 rounded-lg bg-navy-950 text-slate-300 font-extrabold hover:text-white border border-slate-700 active:scale-95 min-h-[36px]'
+                }, '➖ Zoom Out'),
+                e('button', {
+                  onClick: () => { setTreeZoom(1); setTreePan({ x: 0, y: 0 }); },
+                  className: 'px-2.5 py-1.5 rounded-lg bg-amber-600/80 text-white font-extrabold hover:bg-amber-500 shadow active:scale-95 min-h-[36px]'
+                }, '↺ Reset')
+              )
+            ),
+
+            e('div', { className: 'p-4 bg-navy-950/90 rounded-2xl border border-slate-800/80 overflow-auto shadow-inner touch-pan-x touch-pan-y min-h-[350px] relative' },
+              e('div', {
+                style: {
+                  transform: `scale(${treeZoom}) translate(${treePan.x}px, ${treePan.y}px)`,
+                  transformOrigin: 'top center',
+                  transition: 'transform 0.15s cubic-bezier(0.2, 0, 0, 1)'
+                }
+              },
+                treeSourceData.length > 0 ? (
+                  treeSourceData.map((rootNode, idx) => e(TreeNodeItem, {
+                    key: idx,
+                    node: rootNode,
+                    highlightName: treeSearchQuery,
+                    onSelectMember: (name) => {
+                      const matched = members.find(m => m.Raw_Name.includes(name) || m.Full_Name.includes(name));
+                      if (matched) {
+                        setSelectedTreeFocusId(matched.Person_ID);
+                        setActiveTab('tree');
+                      }
+                    }
+                  }))
+                ) : (
+                  e('div', { className: 'text-center p-8 text-slate-400 text-xs font-bold' }, 'वंशावली डेटा लोड हो रहा है... (Loading Lineage Tree Data)')
+                )
+              )
+            )
+          ),
+
+          /* TAB 4: PENDING MEMBER REQUESTS (SUPER ADMIN ONLY) */
+          activeTab === 'pending_requests' && isSuperAdmin && e('div', { className: 'flex flex-col gap-6 animate-fadeIn' },
+            e('div', { className: 'glass-card p-6 border-l-4 border-l-amber-400' },
+              e('h2', { className: 'text-lg font-black text-white mb-1' }, '⏳ Pending Member Addition Requests'),
+              e('p', { className: 'text-xs text-slate-400 mb-4' }, 'समीक्षा करें और नये बच्चे/सदस्य को आधिकारिक वंशावली में शामिल करें'),
+
+              pendingRequests.length > 0 ? (
+                e('div', { className: 'overflow-x-auto' },
+                  e('table', { className: 'w-full text-left text-xs border-collapse' },
+                    e('thead', null,
+                      e('tr', { className: 'border-b border-slate-800 text-slate-400 uppercase font-bold text-[10px]' },
+                        e('th', { className: 'py-2 px-3' }, 'Photo'),
+                        e('th', { className: 'py-2 px-3' }, 'Child Name'),
+                        e('th', { className: 'py-2 px-3' }, 'DOB'),
+                        e('th', { className: 'py-2 px-3' }, 'Selected Father'),
+                        e('th', { className: 'py-2 px-3' }, 'Requested By'),
+                        e('th', { className: 'py-2 px-3' }, 'Status'),
+                        e('th', { className: 'py-2 px-3 text-right' }, 'Action')
+                      )
+                    ),
+                    e('tbody', { className: 'divide-y divide-slate-800/60 font-medium' },
+                      pendingRequests.map(r => e('tr', { key: r.id, className: 'hover:bg-navy-800/40' },
+                        e('td', { className: 'py-3 px-3' },
+                          e('img', { src: r.photo_data || DEFAULT_AVATAR, className: 'w-10 h-10 rounded-full object-cover border border-amber-400/50' })
+                        ),
+                        e('td', { className: 'py-3 px-3 font-bold text-white' }, r.child_name),
+                        e('td', { className: 'py-3 px-3 text-indigo-300 font-mono' }, r.dob),
+                        e('td', { className: 'py-3 px-3 text-slate-300 font-bold' }, r.father_name),
+                        e('td', { className: 'py-3 px-3 text-slate-400 text-[11px]' }, r.requested_by),
+                        e('td', { className: 'py-3 px-3' },
+                          e('span', { className: `px-2 py-0.5 rounded text-[10px] font-black ${r.status === 'PENDING' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : (r.status === 'APPROVED' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40')}` }, r.status)
+                        ),
+                        e('td', { className: 'py-3 px-3 text-right' },
+                          r.status === 'PENDING' ? e('div', { className: 'flex justify-end gap-2' },
+                            e('button', {
+                              onClick: () => handleApproveRequest(r),
+                              className: 'px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow'
+                            }, '✓ Approve'),
+                            e('button', {
+                              onClick: () => { setSelectedRequestForReject(r); setShowRejectModal(true); },
+                              className: 'px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow'
+                            }, '✕ Reject')
+                          ) : e('span', { className: 'text-[11px] text-slate-500 font-mono' }, r.approval_date || r.request_date)
+                        )
+                      ))
+                    )
+                  )
+                )
+              ) : (
+                e('div', { className: 'text-center p-8 text-slate-400 text-xs' }, 'कोई लंबित अनुरोध नहीं है (No pending requests available)')
+              )
+            )
+          ),
+
+          /* TAB 5: ROLE MANAGEMENT */
+          activeTab === 'roles' && isSuperAdmin && e('div', { className: 'glass-card p-6' },
+            e('h2', { className: 'text-lg font-black text-white mb-2' }, 'Super Admin Role Management'),
+            e('div', { className: 'overflow-x-auto mt-4' },
+              e('table', { className: 'w-full text-left text-xs border-collapse' },
+                e('thead', null,
+                  e('tr', { className: 'border-b border-slate-800 text-slate-400 font-bold text-[10px]' },
+                    e('th', { className: 'py-2 px-3' }, 'Name'),
+                    e('th', { className: 'py-2 px-3' }, 'Mobile'),
+                    e('th', { className: 'py-2 px-3' }, 'Role'),
+                    e('th', { className: 'py-2 px-3 text-right' }, 'Action')
+                  )
+                ),
+                e('tbody', { className: 'divide-y divide-slate-800/60 font-medium' },
+                  users.map(u => e('tr', { key: u.id },
+                    e('td', { className: 'py-3 px-3 font-bold text-white' }, u.full_name),
+                    e('td', { className: 'py-3 px-3 text-primary font-mono' }, u.mobile_number),
+                    e('td', { className: 'py-3 px-3' },
+                      e('span', { className: `px-2 py-0.5 rounded text-[10px] font-extrabold ${u.role === 'SUPER_ADMIN' ? 'bg-amber-500/20 text-amber-300' : (u.role === 'ADMIN' ? 'bg-indigo-500/20 text-indigo-300' : 'bg-slate-800 text-slate-400')}` }, u.role)
+                    ),
+                    e('td', { className: 'py-3 px-3 text-right' },
+                      u.role === 'MEMBER' ? e('button', {
+                        onClick: () => { setSelectedUserForRole(u); setShowPromoteModal(true); },
+                        className: 'px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 font-bold text-[11px]'
+                      }, 'Make Admin') : (
+                        u.mobile_number === SUPER_ADMIN_MOBILE ? e('span', { className: 'text-[11px] text-amber-400 font-bold' }, 'Super Admin (Fixed)') : (
+                          e('button', {
+                            onClick: () => { setSelectedUserForRole(u); setShowDemoteModal(true); },
+                            className: 'px-2.5 py-1 rounded bg-rose-500/20 text-rose-300 font-bold text-[11px]'
+                          }, 'Demote')
+                        )
+                      )
+                    )
+                  ))
+                )
+              )
+            )
+          ),
+
+          /* TAB 6: AUDIT LOGS */
+          activeTab === 'audit' && isAdmin && e('div', { className: 'glass-card p-6' },
+            e('h2', { className: 'text-lg font-black text-white mb-3' }, 'System Security Audit Logs'),
+            e('div', { className: 'flex flex-col gap-2.5' },
+              auditLogs.map(log => e('div', { key: log.id, className: 'p-3.5 rounded-2xl bg-navy-950 border border-slate-800 text-xs flex justify-between items-center' },
+                e('div', null,
+                  e('div', { className: 'font-bold text-white' }, log.action_type),
+                  e('div', { className: 'text-[11px] text-slate-300 mt-0.5' }, `User: ${log.user_modified}`),
+                  e('div', { className: 'text-[10px] text-slate-500 mt-0.5' }, `By: ${log.changed_by}`)
+                ),
+                e('span', { className: 'text-[10px] text-slate-400 font-mono' }, log.date_time)
+              ))
+            )
+          ),
+
+          /* TAB 7: 3-GENERATION TREE */
+          activeTab === 'tree' && (()=>{
+            const focusMember = memberMap.get(selectedTreeFocusId) || (members.length > 0 ? members[0] : null);
+            if (!focusMember) {
+              return e('div', { className: 'glass-card p-6 text-center text-slate-400 text-xs font-bold' }, 'वंशावली डेटा लोड हो रहा है... (Lineage tree data loading...)');
+            }
+            const fatherMember = focusMember.Father_ID ? memberMap.get(focusMember.Father_ID) : null;
+            const grandFatherMember = fatherMember?.Father_ID ? memberMap.get(fatherMember.Father_ID) : null;
+            const childrenMembers = (focusMember.Children_IDs || []).map(cid => memberMap.get(cid)).filter(Boolean);
+
+            return e('div', { className: 'glass-card p-6 text-center animate-fadeIn' },
+              e('h3', { className: 'text-xs font-extrabold text-indigo-400 uppercase tracking-wider mb-4' }, '3-Generation Lineage Tree'),
+              
+              grandFatherMember ? e('div', { className: 'mb-3' },
+                e('span', { className: 'text-[10px] text-slate-400 block' }, 'पूर्वज (Grandparent)'),
+                e('button', {
+                  onClick: () => setSelectedTreeFocusId(grandFatherMember.Person_ID),
+                  className: 'mt-1 px-4 py-2 bg-navy-950 border border-indigo-500/40 rounded-xl text-xs font-bold text-white mx-auto flex items-center gap-2'
+                }, grandFatherMember.Full_Name)
+              ) : null,
+
+              fatherMember ? e('div', { className: 'mb-3' },
+                e('span', { className: 'text-[10px] text-slate-400 block' }, 'पिता (Father)'),
+                e('button', {
+                  onClick: () => setSelectedTreeFocusId(fatherMember.Person_ID),
+                  className: 'mt-1 px-4 py-2 bg-indigo-950 border border-indigo-500 rounded-xl text-xs font-bold text-indigo-200 mx-auto flex items-center gap-2'
+                }, fatherMember.Full_Name)
+              ) : null,
+
+              e('div', { className: 'p-4 bg-gradient-to-r from-indigo-950 to-purple-950 border-2 border-amber-400 rounded-2xl max-w-sm mx-auto my-3' },
+                e('img', { src: focusMember.Profile_Image, className: 'w-14 h-14 rounded-full border border-amber-300 mx-auto mb-2 object-cover' }),
+                e('h2', { className: 'text-lg font-black text-white' }, focusMember.Full_Name),
+                focusMember.DOB && e('p', { className: 'text-xs text-indigo-200 font-semibold' }, focusMember.DOB)
+              ),
+
+              childrenMembers.length > 0 && e('div', { className: 'mt-4' },
+                e('span', { className: 'text-xs font-bold text-emerald-400 block mb-2' }, `संतान (Children - ${childrenMembers.length})`),
+                e('div', { className: 'flex flex-wrap justify-center gap-2' },
+                  childrenMembers.map(c => e('button', {
+                    key: c.Person_ID,
+                    onClick: () => setSelectedTreeFocusId(c.Person_ID),
+                    className: 'px-3 py-1.5 bg-navy-950 border border-emerald-500/40 rounded-xl text-xs font-bold text-white'
+                  }, c.Full_Name))
+                )
+              )
+            );
+          })()
+        ),
+
+        /* MODAL 1: REQUEST NEW FAMILY MEMBER (Member & Admin) */
+        showRequestModal && e('div', { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn' },
+          e('div', { className: 'glass-card w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto' },
+            e('div', { className: 'flex items-center justify-between mb-4 pb-3 border-b border-slate-800' },
+              e('h2', { className: 'text-lg font-black text-white flex items-center gap-2' },
+                e('span', null, '👶'),
+                'Request New Family Member'
+              ),
+              e('button', { onClick: () => setShowRequestModal(false), className: 'text-slate-400 hover:text-white font-bold' }, '✕')
+            ),
+
+            e('form', { onSubmit: handleMemberBirthRequestSubmit, className: 'flex flex-col gap-4 text-xs' },
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'बच्चे का नाम (Child Name) *'),
+                e('input', {
+                  type: 'text',
+                  required: true,
+                  value: formChildName,
+                  onChange: ev => setFormChildName(ev.target.value),
+                  onBlur: () => {
+                    if (formChildName) {
+                      setFormChildName(appendTiwariSurname(formChildName));
+                    }
+                  },
+                  placeholder: 'e.g. Ram / मोहन',
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white outline-none font-bold'
+                })
+              ),
+
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'जन्म तिथि (DOB) *'),
+                e(ResponsiveDatePicker, {
+                  value: formDob,
+                  onChange: val => setFormDob(val),
+                  placeholder: 'जन्म तिथि चुनें (Select DOB)'
+                })
+              ),
+
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'पिता का नाम खोजें एवं चुनें (Father Selection) *'),
+                e('input', {
+                  type: 'text',
+                  value: formFatherSearch,
+                  onChange: ev => setFormFatherSearch(ev.target.value),
+                  placeholder: 'पिता का नाम खोजें (e.g. रामचन्द्र, मदन गोपाल)...',
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white outline-none font-bold mb-2'
+                }),
+                e('div', { className: 'max-h-36 overflow-y-auto flex flex-col gap-1 bg-navy-950 p-2 rounded-xl border border-slate-800' },
+                  filteredFathers.map(f => e('div', {
+                    key: f.Person_ID,
+                    onClick: () => { setFormSelectedFather(f); setFormFatherSearch(f.Full_Name); },
+                    className: `p-2 rounded-lg cursor-pointer flex justify-between items-center ${formSelectedFather?.Person_ID === f.Person_ID ? 'bg-indigo-600 text-white font-bold' : 'hover:bg-navy-800 text-slate-300'}`
+                  },
+                    e('span', null, f.Full_Name),
+                    e('span', { className: 'text-[10px] opacity-80' }, `Generation P${f.Generation_Level}`)
+                  ))
+                ),
+                formSelectedFather && e('p', { className: 'text-[11px] text-emerald-400 font-bold mt-1' },
+                  `✓ चयनित पिता: ${formSelectedFather.Full_Name} (Generation P${formSelectedFather.Generation_Level})`
+                )
+              ),
+
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, '📷 फ़ोटो अपलोड / कैमरा से कैप्चर करें (Photo Upload / Camera)'),
+                e('input', {
+                  type: 'file',
+                  accept: 'image/*',
+                  onChange: ev => {
+                    const file = ev.target.files[0];
+                    if (file) {
+                      compressImageFile(file, res => setFormPhotoData(res));
+                    }
+                  },
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-slate-300 text-xs min-h-[44px]'
+                }),
+                formPhotoData && e('div', { className: 'mt-2 flex items-center gap-3' },
+                  e('img', { src: formPhotoData, className: 'w-14 h-14 rounded-full object-cover border-2 border-indigo-500' }),
+                  e('span', { className: 'text-xs text-slate-400' }, 'Live Preview')
+                )
+              ),
+
+              e('div', { className: 'flex gap-3 mt-2' },
+                e('button', { type: 'button', onClick: () => setShowRequestModal(false), className: 'w-1/2 py-3 rounded-xl bg-navy-900 text-slate-300 font-bold' }, 'Cancel'),
+                e('button', {
+                  type: 'submit',
+                  disabled: isSubmitting,
+                  className: `w-1/2 py-3 rounded-xl btn-gradient text-white font-black uppercase ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`
+                }, isSubmitting ? '⏳ Submitting...' : 'Submit Request')
+              )
+            )
+          )
+        ),
+
+        /* MODAL 2: DIRECT ADD MEMBER (Super Admin Only) */
+        showDirectAddModal && isSuperAdmin && e('div', { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn' },
+          e('div', { className: 'glass-card w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto border-amber-500/40' },
+            e('div', { className: 'flex items-center justify-between mb-4 pb-3 border-b border-slate-800' },
+              e('h2', { className: 'text-lg font-black text-white flex items-center gap-2' },
+                e('span', null, '⚡'),
+                'Direct Add Member (Super Admin Override)'
+              ),
+              e('button', { onClick: () => setShowDirectAddModal(false), className: 'text-slate-400 hover:text-white font-bold' }, '✕')
+            ),
+
+            e('form', { onSubmit: handleDirectAddSubmit, className: 'flex flex-col gap-4 text-xs' },
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'सदस्य का नाम (Member Name) *'),
+                e('input', {
+                  type: 'text',
+                  required: true,
+                  value: formChildName,
+                  onChange: ev => setFormChildName(ev.target.value),
+                  onBlur: () => {
+                    if (formChildName) {
+                      setFormChildName(appendTiwariSurname(formChildName));
+                    }
+                  },
+                  placeholder: 'e.g. Ram / मोहन',
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white outline-none font-bold'
+                })
+              ),
+
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'जन्म तिथि (DOB) *'),
+                e(ResponsiveDatePicker, {
+                  value: formDob,
+                  onChange: val => setFormDob(val),
+                  placeholder: 'जन्म तिथि चुनें (Select DOB)'
+                })
+              ),
+
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'पिता का नाम खोजें एवं चुनें (Father Selection) *'),
+                e('input', {
+                  type: 'text',
+                  value: formFatherSearch,
+                  onChange: ev => setFormFatherSearch(ev.target.value),
+                  placeholder: 'पिता का नाम खोजें...',
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white outline-none font-bold mb-2'
+                }),
+                e('div', { className: 'max-h-36 overflow-y-auto flex flex-col gap-1 bg-navy-950 p-2 rounded-xl border border-slate-800' },
+                  filteredFathers.map(f => e('div', {
+                    key: f.Person_ID,
+                    onClick: () => { setFormSelectedFather(f); setFormFatherSearch(f.Full_Name); },
+                    className: `p-2 rounded-lg cursor-pointer flex justify-between items-center ${formSelectedFather?.Person_ID === f.Person_ID ? 'bg-amber-600 text-white font-bold' : 'hover:bg-navy-800 text-slate-300'}`
+                  },
+                    e('span', null, f.Full_Name),
+                    e('span', { className: 'text-[10px] opacity-80' }, `Generation P${f.Generation_Level}`)
+                  ))
+                )
+              ),
+
+              e('div', { className: 'flex gap-3 mt-2' },
+                e('button', { type: 'button', onClick: () => setShowDirectAddModal(false), className: 'w-1/2 py-3 rounded-xl bg-navy-900 text-slate-300 font-bold' }, 'Cancel'),
+                e('button', { type: 'submit', className: 'w-1/2 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-black uppercase' }, 'Add Member Directly')
+              )
+            )
+          )
+        ),
+
+        /* MODAL 3: REJECTION REASON PROMPT (Super Admin Only) */
+        showRejectModal && e('div', { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn' },
+          e('div', { className: 'glass-card w-full max-w-md p-6 text-center border-rose-500/40' },
+            e('div', { className: 'w-14 h-14 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-2xl mx-auto mb-3' }, '✕'),
+            e('h3', { className: 'text-lg font-black text-white' }, 'Reject Member Request'),
+            e('p', { className: 'text-xs text-slate-300 mt-1 mb-4' },
+              `Reason for rejecting ${selectedRequestForReject ? selectedRequestForReject.child_name : ''}:`
+            ),
+
+            e('textarea', {
+              rows: 3,
+              value: rejectionReasonInput,
+              onChange: ev => setRejectionReasonInput(ev.target.value),
+              placeholder: 'अस्वीकृति का कारण लिखें (e.g. Incorrect father assignment)...',
+              className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white text-xs outline-none mb-4 font-medium'
+            }),
+
+            e('div', { className: 'flex gap-3' },
+              e('button', { onClick: () => setShowRejectModal(false), className: 'w-1/2 py-3 rounded-xl bg-navy-900 text-slate-300 font-bold text-xs' }, 'Cancel'),
+              e('button', { onClick: handleConfirmRejectRequest, className: 'w-1/2 py-3 rounded-xl bg-rose-600 text-white font-black text-xs' }, 'Confirm Reject')
+            )
+          )
+        ),
+
+        /* MODAL 4: EDIT MEMBER (Super Admin Only) */
+        showEditMemberModal && isSuperAdmin && editingMember && e('div', { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md' },
+          e('div', { className: 'glass-card w-full max-w-md p-6' },
+            e('h3', { className: 'text-lg font-black text-white mb-4' }, '✏️ Edit Member Details'),
+            e('form', { onSubmit: handleUpdateMemberSubmit, className: 'flex flex-col gap-3 text-xs' },
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'Full Name *'),
+                e('input', {
+                  type: 'text',
+                  value: editingMember.Full_Name,
+                  onChange: ev => setEditingMember({ ...editingMember, Full_Name: ev.target.value }),
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-bold'
+                })
+              ),
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'DOB *'),
+                e(ResponsiveDatePicker, {
+                  value: editingMember.DOB || '',
+                  onChange: val => setEditingMember({ ...editingMember, DOB: val }),
+                  placeholder: 'जन्म तिथि चुनें (Select DOB)'
+                })
+              ),
+              e('div', { className: 'flex gap-2 mt-2' },
+                e('button', { type: 'button', onClick: () => setShowEditMemberModal(false), className: 'w-1/2 py-2.5 rounded-xl bg-navy-900 text-slate-300 font-bold' }, 'Cancel'),
+                e('button', { type: 'submit', className: 'w-1/2 py-2.5 rounded-xl btn-gradient text-white font-bold' }, 'Update Member')
+              )
+            )
+          )
+        ),
+
+        /* MODAL 5: BIRTHDAYS THIS MONTH DETAILS SCREEN */
+        showBirthdayModal && e('div', { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn' },
+          e('div', { className: 'glass-card w-full max-w-lg p-6 relative max-h-[85vh] flex flex-col shadow-2xl border-amber-500/40' },
+            e('div', { className: 'flex items-center justify-between mb-4 pb-3 border-b border-slate-800' },
+              e('h2', { className: 'text-xl font-black text-white flex items-center gap-2' },
+                e('span', null, '🎂'),
+                `Birthdays This Month (${currentMonthNameEng} / ${currentMonthNameHin})`
+              ),
+              e('button', { onClick: () => setShowBirthdayModal(false), className: 'w-8 h-8 rounded-full bg-navy-900 border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white font-bold' }, '✕')
+            ),
+
+            e('input', {
+              type: 'text',
+              value: birthdaySearchQuery,
+              onChange: ev => setBirthdaySearchQuery(ev.target.value),
+              placeholder: 'नाम या उपनाम से खोजें (Search by Name)...',
+              className: 'w-full px-4 py-2.5 bg-navy-950 border border-slate-700 rounded-xl text-white text-xs outline-none focus:border-amber-400 font-medium mb-4'
+            }),
+
+            e('div', { className: 'flex-1 overflow-y-auto flex flex-col gap-3 pr-1' },
+              filteredBirthdays.length > 0 ? (
+                filteredBirthdays.map(p => {
+                  const isUpcoming = nextUpcomingPerson && nextUpcomingPerson.id === p.id;
+                  return e('div', {
+                    key: p.id,
+                    className: `p-4 rounded-2xl border flex items-center justify-between ${isUpcoming ? 'bg-gradient-to-r from-amber-950/80 via-navy-900 to-amber-950/80 border-amber-400/80' : 'bg-navy-950/90 border-slate-800'}`
+                  },
+                    e('div', { className: 'flex items-center gap-3.5' },
+                      e('img', { src: p.image, className: `w-12 h-12 rounded-full object-cover border-2 ${isUpcoming ? 'border-amber-400' : 'border-indigo-500/30'}` }),
+                      e('div', null,
+                        e('h3', { className: 'text-base font-bold text-white' }, p.name),
+                        e('p', { className: `text-xs font-semibold mt-0.5 ${isUpcoming ? 'text-amber-300' : 'text-indigo-300'}` }, `Birthday: ${String(p.day).padStart(2, '0')}-${currentMonthNameEng}`)
+                      )
+                    ),
+                    e('div', { className: 'text-right font-mono font-black text-sm text-slate-300' }, `${String(p.day).padStart(2, '0')} ${currentMonthNameEng.substring(0, 3)}`)
+                  );
+                })
+              ) : (
+                e('div', { className: 'text-center p-8 text-slate-400 text-xs' }, 'No birthdays available in the current month.')
+              )
+            ),
+
+            e('div', { className: 'mt-4 pt-3 border-t border-slate-800 text-right' },
+              e('button', { onClick: () => setShowBirthdayModal(false), className: 'px-5 py-2.5 rounded-xl bg-navy-900 text-white font-bold text-xs border border-slate-700' }, 'Close')
+            )
+          )
+        )
+      );
+    }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(e(App));
+      } catch(err) {
+        console.error('FATAL_BOOT_ERROR:', err);
+        document.getElementById('root').innerHTML = `
+          <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; background-color: #050B20; color: white;">
+            <div style="background: rgba(12, 24, 56, 0.95); padding: 32px; border-radius: 24px; border: 1px solid rgba(92, 108, 255, 0.3); max-width: 450px;">
+              <h2 style="font-size: 20px; font-weight: 900; color: #F8FAFC; margin-bottom: 10px;">Family-GenApp Application</h2>
+              <p style="font-size: 13px; color: #94A3B8; margin-bottom: 20px;">Click below to launch the Real-Time OTP Mobile Portal.</p>
+              <button onclick="window.location.reload()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #5C6CFF 0%, #8B5CF6 100%); color: white; border: none; border-radius: 16px; font-weight: 900; cursor: pointer; text-transform: uppercase;">
+                Launch OTP Login Screen ➔
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    })();
+  </script>
+</body>
+</html>

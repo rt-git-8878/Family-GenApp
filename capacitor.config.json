@@ -1,0 +1,9 @@
+{
+  "appId": "com.village.familygenapp",
+  "appName": "Family-GenApp",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}
