@@ -1131,14 +1131,14 @@
 
             !loginOtpSent ? e('div', { className: 'flex flex-col gap-4 text-left' },
               e('div', null,
-                e('label', { className: 'block text-xs font-bold text-slate-300 uppercase mb-2' }, 'पंजीकृत ईमेल आईडी (Registered Email Address) *'),
+                e('label', { className: 'block text-xs font-bold text-slate-300 mb-2' }, 'Registered Email Address'),
                 e('div', { className: 'relative' },
                   e('span', { className: 'absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm' }, '📧'),
                   e('input', {
                     type: 'email',
                     value: loginEmail,
                     onChange: ev => setLoginEmail(ev.target.value),
-                    placeholder: 'उदा. rohit.tiwari@familygen.com',
+                    placeholder: 'Enter Registered Email ID',
                     className: 'w-full pl-12 pr-4 py-3.5 bg-navy-950 border border-slate-700 rounded-2xl text-white font-bold text-sm outline-none focus:border-primary'
                   })
                 ),
