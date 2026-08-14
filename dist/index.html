@@ -1121,8 +1121,8 @@
         return e('div', { className: 'min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-[#050B20]' },
           e('div', { className: 'w-full max-w-md glass-card p-8 shadow-2xl relative z-10 animate-fadeIn text-center' },
             e('div', { className: 'flex flex-col items-center mb-6' },
-              e('div', { className: 'w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary to-secondary p-0.5 shadow-xl shadow-primary/30 mb-3' },
-                e('div', { className: 'w-full h-full bg-[#0C1838] rounded-2xl flex items-center justify-center text-white font-black text-2xl' }, 'F')
+              e('div', { className: 'w-20 h-20 rounded-2xl bg-navy-900 border-2 border-primary/50 p-1 shadow-2xl shadow-primary/40 mb-3 flex items-center justify-center' },
+                e('img', { src: './FamilyFavicon.png', alt: 'Family-GenApp Logo', className: 'w-full h-full object-contain rounded-xl' })
               ),
               e('h1', { className: 'text-2xl font-black text-white tracking-tight' }, 'Family-GenApp'),
               e('p', { className: 'text-xs text-primary/80 font-semibold mt-1' }, 'Email OTP Authentication Portal')
@@ -1279,8 +1279,8 @@
       if (!currentUser) {
         return e('div', { className: 'min-h-screen flex flex-col items-center justify-center p-4 bg-[#050B20] text-center' },
           e('div', { className: 'w-full max-w-md glass-card p-8 shadow-2xl animate-fadeIn' },
-            e('div', { className: 'w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary to-secondary p-0.5 shadow-xl shadow-primary/30 mx-auto mb-4' },
-              e('div', { className: 'w-full h-full bg-[#0C1838] rounded-2xl flex items-center justify-center text-white font-black text-2xl' }, 'F')
+            e('div', { className: 'w-20 h-20 rounded-2xl bg-navy-900 border-2 border-primary/50 p-1 shadow-2xl shadow-primary/40 mx-auto mb-4 flex items-center justify-center' },
+              e('img', { src: './FamilyFavicon.png', alt: 'Family-GenApp Logo', className: 'w-full h-full object-contain rounded-xl' })
             ),
             e('h2', { className: 'text-xl font-black text-white tracking-tight' }, 'Family-GenApp Portal'),
             e('p', { className: 'text-xs text-slate-400 mt-1 mb-6' }, 'Please log in with your registered email address and OTP.'),
@@ -1308,7 +1308,7 @@
               className: 'p-2 rounded-xl bg-navy-900 border border-slate-800 text-slate-300 hover:text-white md:hidden text-lg font-black min-h-[44px] min-w-[44px] flex items-center justify-center'
             }, '☰'),
 
-            e('div', { className: 'w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white font-black text-lg shadow-md' }, 'F'),
+            e('img', { src: './FamilyFavicon.png', alt: 'Logo', className: 'w-9 h-9 object-contain rounded-xl border border-primary/40 shadow-md bg-navy-900 p-0.5' }),
             e('div', null,
               e('h1', { className: 'text-sm sm:text-base font-black text-white leading-tight' }, 'Family-GenApp'),
               e('div', { className: 'flex items-center gap-1.5 mt-0.5' },
@@ -1351,7 +1351,7 @@
               /* Drawer Header */
               e('div', { className: 'flex items-center justify-between pb-3 border-b border-slate-800' },
                 e('div', { className: 'flex items-center gap-2.5' },
-                  e('div', { className: 'w-8 h-8 rounded-xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white font-black text-sm' }, 'F'),
+                  e('img', { src: './FamilyFavicon.png', alt: 'Logo', className: 'w-8 h-8 object-contain rounded-xl border border-primary/40 bg-navy-900 p-0.5' }),
                   e('div', null,
                     e('div', { className: 'text-sm font-black text-white' }, 'Family-GenApp'),
                     e('div', { className: 'text-[10px] text-emerald-400 flex items-center gap-1 font-bold' },
