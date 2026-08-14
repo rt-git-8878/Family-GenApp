@@ -91,6 +91,19 @@
       border-left: 1.5px dashed rgba(92, 108, 255, 0.4);
     }
 
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background-color: rgba(5, 11, 32, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
   </style>
 </head>
 </head>
@@ -2011,7 +2024,7 @@
         ),
 
         /* MODAL 1: REQUEST NEW FAMILY MEMBER (Member & Admin) */
-        showRequestModal && e('div', { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn' },
+        showRequestModal && e('div', { className: 'modal-backdrop animate-fadeIn' },
           e('div', { className: 'glass-card w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto' },
             e('div', { className: 'flex items-center justify-between mb-4 pb-3 border-b border-slate-800' },
               e('h2', { className: 'text-lg font-black text-white flex items-center gap-2' },
@@ -2104,7 +2117,7 @@
         ),
 
         /* MODAL 2: DIRECT ADD MEMBER (Super Admin Only) */
-        showDirectAddModal && isSuperAdmin && e('div', { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn' },
+        showDirectAddModal && isSuperAdmin && e('div', { className: 'modal-backdrop animate-fadeIn' },
           e('div', { className: 'glass-card w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto border-amber-500/40' },
             e('div', { className: 'flex items-center justify-between mb-4 pb-3 border-b border-slate-800' },
               e('h2', { className: 'text-lg font-black text-white flex items-center gap-2' },
@@ -2171,7 +2184,7 @@
         ),
 
         /* MODAL 3: REJECTION REASON PROMPT (Super Admin Only) */
-        showRejectModal && e('div', { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn' },
+        showRejectModal && e('div', { className: 'modal-backdrop animate-fadeIn' },
           e('div', { className: 'glass-card w-full max-w-md p-6 text-center border-rose-500/40' },
             e('div', { className: 'w-14 h-14 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-2xl mx-auto mb-3' }, '✕'),
             e('h3', { className: 'text-lg font-black text-white' }, 'Reject Member Request'),
@@ -2195,7 +2208,7 @@
         ),
 
         /* MODAL 4: EDIT MEMBER (Super Admin Only) */
-        showEditMemberModal && isSuperAdmin && editingMember && e('div', { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn' },
+        showEditMemberModal && isSuperAdmin && editingMember && e('div', { className: 'modal-backdrop animate-fadeIn' },
           e('div', { className: 'glass-card w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto border border-indigo-500/40 shadow-2xl' },
             e('div', { className: 'flex items-center justify-between mb-4 pb-3 border-b border-slate-800' },
               e('h3', { className: 'text-lg font-black text-white flex items-center gap-2' },
@@ -2287,7 +2300,7 @@
         ),
 
         /* MODAL 5: BIRTHDAYS THIS MONTH DETAILS SCREEN */
-        showBirthdayModal && e('div', { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn' },
+        showBirthdayModal && e('div', { className: 'modal-backdrop animate-fadeIn' },
           e('div', { className: 'glass-card w-full max-w-lg p-6 relative max-h-[85vh] flex flex-col shadow-2xl border-amber-500/40' },
             e('div', { className: 'flex items-center justify-between mb-4 pb-3 border-b border-slate-800' },
               e('h2', { className: 'text-xl font-black text-white flex items-center gap-2' },
