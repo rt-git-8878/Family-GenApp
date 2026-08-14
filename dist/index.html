@@ -1517,11 +1517,10 @@
             ),
 
             e('div', { className: 'text-right hidden sm:block' },
-              e('div', { className: 'text-xs font-bold text-white flex items-center justify-end gap-1.5' },
+              e('div', { className: `text-xs font-black flex items-center justify-end gap-1.5 ${themeMode === 'light' ? 'text-slate-900' : 'text-white'}` },
                 e('span', { className: 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse' }),
                 currentUser ? currentUser.full_name : ''
-              ),
-              e('div', { className: 'text-[10px] text-amber-300 font-mono' }, currentUser ? currentUser.email : '')
+              )
             ),
             e('button', {
               onClick: handleLogout,
