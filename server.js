@@ -407,15 +407,15 @@ app.post('/api/auth/send-otp', async (req, res) => {
   // Check if email is registered in application database
   let user = db.users.find(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
   
-  // Hardcoded Super Admin fallback check for rohit.tiwari@familygen.com
-  if (!user && cleanEmail === 'rohit.tiwari@familygen.com') {
+  // Hardcoded Super Admin fallback check for rohitkumartiwari1993@gmail.com
+  if (!user && cleanEmail === 'rohitkumartiwari1993@gmail.com') {
     user = {
       id: 'U_SUPER_ADMIN',
       first_name: 'Rohit',
       surname: 'Tiwari',
-      full_name: 'Rohit Tiwari (Super Admin)',
+      full_name: 'Rohit Tiwari',
       mobile_number: '8871174576',
-      email: 'rohit.tiwari@familygen.com',
+      email: 'rohitkumartiwari1993@gmail.com',
       role: 'SUPER_ADMIN',
       status: 'Active',
       registration_date: '2026-01-01T00:00:00.000Z',
@@ -713,7 +713,7 @@ app.post('/api/auth/register', (req, res) => {
   }
 
   // Default Role = MEMBER for all new registrations
-  const role = (cleanMobile === '8871174576' || cleanEmail === 'rohit.tiwari@familygen.com') ? 'SUPER_ADMIN' : 'MEMBER';
+  const role = (cleanMobile === '8871174576' || cleanEmail === 'rohitkumartiwari1993@gmail.com') ? 'SUPER_ADMIN' : 'MEMBER';
   const fullName = `${firstName.trim()} ${surname.trim()}`;
   const nowIso = new Date().toISOString();
 
@@ -741,7 +741,7 @@ app.post('/api/auth/register', (req, res) => {
   db.notifications.unshift({
     id: `NOTIF_${Date.now()}`,
     recipient_mobile: '8871174576',
-    recipient_email: 'rohit.tiwari@familygen.com',
+    recipient_email: 'rohitkumartiwari1993@gmail.com',
     message: `New user registered: ${fullName} (${cleanEmail})`,
     created_at: nowIso,
     is_read: false
