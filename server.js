@@ -133,6 +133,39 @@ import nodemailer from 'nodemailer';
 // FREE SMTP EMAIL OTP AUTHENTICATION & SECURITY ENGINE
 // =========================================================================
 
+const OTP_SECRET = process.env.OTP_SECRET || 'familygen_secure_otp_secret_key_2026';
+
+function generateStatelessOtpToken(email, otpCode, ttlMinutes = 5) {
+  const expiresAt = Date.now() + ttlMinutes * 60 * 1000;
+  const data = `${email}:${otpCode}:${expiresAt}`;
+  const signature = crypto.createHmac('sha256', OTP_SECRET).update(data).digest('hex');
+  return `${email}:${expiresAt}:${signature}`;
+}
+
+function verifyStatelessOtpToken(email, otpCode, token) {
+  if (!token || typeof token !== 'string') return { valid: false, reason: 'INVALID_TOKEN' };
+  const parts = token.split(':');
+  if (parts.length !== 3) return { valid: false, reason: 'MALFORMED_TOKEN' };
+
+  const [tokenEmail, tokenExpiresAt, tokenSignature] = parts;
+  if (tokenEmail.toLowerCase() !== email.toLowerCase()) return { valid: false, reason: 'EMAIL_MISMATCH' };
+
+  const expiresAtNum = Number(tokenExpiresAt);
+  if (isNaN(expiresAtNum) || Date.now() > expiresAtNum) {
+    return { valid: false, reason: 'EXPIRED' };
+  }
+
+  const expectedData = `${email}:${otpCode}:${tokenExpiresAt}`;
+  const expectedSignature = crypto.createHmac('sha256', OTP_SECRET).update(expectedData).digest('hex');
+
+  const bufA = Buffer.from(tokenSignature);
+  const bufB = Buffer.from(expectedSignature);
+  if (bufA.length === bufB.length && crypto.timingSafeEqual(bufA, bufB)) {
+    return { valid: true };
+  }
+  return { valid: false, reason: 'INVALID_OTP' };
+}
+
 function generateRandomOtp() {
   const num = crypto.randomInt(100000, 1000000);
   return String(num);
@@ -417,11 +450,13 @@ app.post('/api/auth/send-otp', async (req, res) => {
   // Generate cryptographically random 6-digit OTP
   const otpCode = generateRandomOtp();
   const otpHash = hashOtp(otpCode);
+  const otpToken = generateStatelessOtpToken(cleanEmail, otpCode, 5);
 
   const otpRecord = {
     id: `OTP_${Date.now()}`,
     email: cleanEmail,
     otp_hash: otpHash,
+    otp_token: otpToken,
     generated_at: new Date().toISOString(),
     expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(), // 5 Minutes Expiry
     attempt_count: 0,
@@ -452,6 +487,7 @@ app.post('/api/auth/send-otp', async (req, res) => {
     message: `OTP has been sent to ${cleanEmail}. Please check your email inbox.`,
     resendCooldownSeconds: 30,
     expiresInMinutes: 5,
+    otpToken: otpToken,
     emailProvider: emailResult.provider,
     previewUrl: emailResult.previewUrl,
     demoOtpCode: otpCode
@@ -460,7 +496,7 @@ app.post('/api/auth/send-otp', async (req, res) => {
 
 // AUTH ROUTE 2: POST /api/auth/verify-otp (EMAIL-BASED OTP VERIFICATION)
 app.post('/api/auth/verify-otp', (req, res) => {
-  const { email, otp } = req.body;
+  const { email, otp, otpToken } = req.body;
   if (!email || !otp) {
     return res.status(400).json({ success: false, message: 'Email address and OTP are required' });
   }
@@ -474,12 +510,29 @@ app.post('/api/auth/verify-otp', (req, res) => {
     return res.status(404).json({ success: false, message: 'Email address is not registered.' });
   }
 
-  if (!db.email_otp_verification) db.email_otp_verification = [];
+  // A. Check Stateless HMAC Token First (100% Reliable for Vercel Serverless Functions)
+  if (otpToken) {
+    const tokenVerification = verifyStatelessOtpToken(cleanEmail, cleanOtp, otpToken);
+    if (tokenVerification.valid) {
+      user.is_online = true;
+      user.last_login = new Date().toISOString();
+      saveDbStore(db);
 
-  // Find active PENDING verification record
+      return res.json({
+        success: true,
+        message: 'Authentication successful! Welcome to Family-GenApp.',
+        user: user
+      });
+    } else if (tokenVerification.reason === 'EXPIRED') {
+      return res.status(400).json({ success: false, message: 'OTP expired. Please request a new OTP.' });
+    }
+  }
+
+  // B. Stateful Database Fallback Check
+  if (!db.email_otp_verification) db.email_otp_verification = [];
   const otpRecord = db.email_otp_verification.find(v => v.email.toLowerCase() === cleanEmail && v.status === 'PENDING');
   if (!otpRecord) {
-    return res.status(400).json({ success: false, message: 'No active OTP request found. Please request a new OTP.' });
+    return res.status(400).json({ success: false, message: 'गलत या अमान्य ओटीपी! (Invalid or Expired OTP code entered)' });
   }
 
   // 1. Check Expiration (5 Minutes Expiry Rule)

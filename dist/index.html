@@ -619,6 +619,7 @@
       const [loginEmail, setLoginEmail] = useState('');
       const [loginOtpSent, setLoginOtpSent] = useState(false);
       const [loginOtpVal, setLoginOtpVal] = useState('');
+      const [loginOtpToken, setLoginOtpToken] = useState('');
       const [loginError, setLoginError] = useState('');
       const [authSuccessMsg, setAuthSuccessMsg] = useState('');
       const [isAuthLoading, setIsAuthLoading] = useState(false);
@@ -801,6 +802,7 @@
             if (resData.success) {
               setLoginOtpSent(true);
               setLoginOtpVal(''); // OTP input left blank for user email entry
+              setLoginOtpToken(resData.otpToken || '');
               setResendCooldown(resData.resendCooldownSeconds || 30);
               setAttemptsLeft(5);
               setAuthSuccessMsg(resData.message || 'OTP has been sent to your registered email. Please check your email inbox.');
@@ -827,7 +829,7 @@
         fetch(`${API_BASE_URL}/auth/verify-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: cleanEmail, otp: loginOtpVal.trim() })
+          body: JSON.stringify({ email: cleanEmail, otp: loginOtpVal.trim(), otpToken: loginOtpToken })
         })
           .then(res => res.json())
           .then(resData => {
