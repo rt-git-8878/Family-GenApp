@@ -91,140 +91,8 @@
       border-left: 1.5px dashed rgba(92, 108, 255, 0.4);
     }
 
-    /* =========================================================
-       UNIVERSAL HIGH-CONTRAST LIGHT MODE ENGINE
-       ========================================================= */
-    .light-mode {
-      background-color: #F8FAFC !important;
-      color: #0F172A !important;
-    }
-
-    /* All Card Containers, Panels, and Glass Cards in Light Mode */
-    .light-mode .glass-card,
-    .light-mode .bg-navy-950,
-    .light-mode .bg-navy-900,
-    .light-mode .bg-navy-800,
-    .light-mode .bg-\[\#0C1838\],
-    .light-mode .bg-\[\#050B20\],
-    .light-mode .bg-navy-950\/80,
-    .light-mode .bg-navy-950\/90,
-    .light-mode .bg-navy-900\/90,
-    .light-mode .bg-navy-900\/60,
-    .light-mode .bg-slate-950,
-    .light-mode .bg-slate-900 {
-      background-color: #FFFFFF !important;
-      border-color: #CBD5E1 !important;
-      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03) !important;
-      color: #0F172A !important;
-    }
-
-    /* Modal Backdrop Overlays in Light Mode */
-    .light-mode .bg-slate-950\/85,
-    .light-mode .bg-slate-950\/80,
-    .light-mode .bg-slate-950\/90 {
-      background-color: rgba(15, 23, 42, 0.45) !important;
-      backdrop-filter: blur(8px) !important;
-    }
-
-    /* Inner Sub-cards, Directory Member Items, and Row Backgrounds in Light Mode */
-    .light-mode .bg-navy-950\/40,
-    .light-mode .bg-navy-900\/40,
-    .light-mode .bg-navy-800\/40,
-    .light-mode .hover\:bg-navy-800\/40:hover {
-      background-color: #F1F5F9 !important;
-      border-color: #CBD5E1 !important;
-    }
-
-    /* Text Colors in Light Mode */
-    .light-mode h1,
-    .light-mode h2,
-    .light-mode h3,
-    .light-mode h4,
-    .light-mode h5,
-    .light-mode h6,
-    .light-mode label {
-      color: #0F172A !important; /* Pure Slate 900 for headings */
-    }
-
-    .light-mode .text-white:not(button):not(button *):not(.btn-gradient):not(.bg-indigo-600 *):not(.bg-emerald-600 *):not(.bg-amber-600 *):not(.bg-rose-600 *) {
-      color: #0F172A !important; /* High-contrast dark headings */
-    }
-
-    .light-mode .text-slate-400,
-    .light-mode .text-slate-300,
-    .light-mode .text-slate-200,
-    .light-mode .text-slate-100 {
-      color: #334155 !important; /* Slate 700 for subtitles/body text */
-    }
-
-    .light-mode .text-amber-300,
-    .light-mode .text-amber-400 {
-      color: #B45309 !important; /* High-visibility Amber 700 */
-    }
-
-    .light-mode .text-emerald-400,
-    .light-mode .text-emerald-300 {
-      color: #047857 !important; /* High-visibility Emerald 700 */
-    }
-
-    .light-mode .text-indigo-400,
-    .light-mode .text-indigo-300 {
-      color: #4338CA !important; /* High-visibility Indigo 700 */
-    }
-
-    .light-mode .text-rose-400,
-    .light-mode .text-rose-300 {
-      color: #BE123C !important; /* High-visibility Rose 700 */
-    }
-
-    /* Inputs, Select Dropdowns, and Search Boxes in Light Mode */
-    .light-mode input,
-    .light-mode select,
-    .light-mode textarea {
-      background-color: #F8FAFC !important;
-      color: #0F172A !important;
-      border-color: #CBD5E1 !important;
-    }
-
-    .light-mode input::placeholder,
-    .light-mode textarea::placeholder {
-      color: #64748B !important;
-    }
-
-    /* Navigation Bar & Header in Light Mode */
-    .light-mode header,
-    .light-mode nav,
-    .light-mode .sticky {
-      background-color: #FFFFFF !important;
-      border-color: #CBD5E1 !important;
-    }
-
-    /* Tables in Light Mode */
-    .light-mode table thead tr {
-      background-color: #F1F5F9 !important;
-      border-bottom-color: #CBD5E1 !important;
-      color: #1E293B !important;
-    }
-
-    .light-mode table tbody tr {
-      border-bottom-color: #E2E8F0 !important;
-    }
-
-    .light-mode table tbody tr:hover {
-      background-color: #F8FAFC !important;
-    }
-
-    /* Tree Connector Lines in Light Mode */
-    .light-mode .tree-connector-line {
-      border-left-color: #94A3B8 !important;
-    }
-
-    /* Hierarchy Tree Node Hover/Focus in Light Mode */
-    .light-mode .hover\:bg-slate-900\/60:hover {
-      background-color: #E2E8F0 !important;
-      color: #4F46E5 !important;
-    }
   </style>
+</head>
 </head>
 <body class="bg-[#050B20] text-slate-100 antialiased selection:bg-indigo-500 selection:text-white overflow-x-hidden min-h-screen">
 
@@ -735,31 +603,6 @@
           return null;
         } catch(err) { return null; }
       });
-
-      // Universal Light & Dark Mode Theme Engine
-      const [themeMode, setThemeMode] = useState(() => {
-        try { return localStorage.getItem('familygen_theme_mode') || 'dark'; } catch(e) { return 'dark'; }
-      });
-
-      const toggleThemeMode = () => {
-        const nextMode = themeMode === 'dark' ? 'light' : 'dark';
-        setThemeMode(nextMode);
-        try { localStorage.setItem('familygen_theme_mode', nextMode); } catch(e){}
-      };
-
-      const renderThemeToggleBtn = (extraClasses = '') => e('button', {
-        onClick: toggleThemeMode,
-        type: 'button',
-        title: themeMode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode',
-        className: `px-3 py-1.5 rounded-full font-bold text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95 border ${
-          themeMode === 'dark'
-            ? 'bg-navy-900 text-amber-300 border-amber-500/40 hover:bg-amber-500/10'
-            : 'bg-amber-100 text-amber-900 border-amber-400 hover:bg-amber-200'
-        } ${extraClasses}`
-      },
-        e('span', { className: 'text-sm' }, themeMode === 'dark' ? '☀️' : '🌙'),
-        e('span', { className: 'font-extrabold' }, themeMode === 'dark' ? 'Light Mode' : 'Dark Mode')
-      );
 
       const [view, setView] = useState(() => (currentUser && currentUser.mobile_number) ? 'dashboard' : 'login');
       
@@ -1295,8 +1138,7 @@
 
       // LOGIN SCREEN (Email-Based OTP Login Portal)
       if (view === 'login') {
-        return e('div', { className: `min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden ${themeMode === 'light' ? 'light-mode bg-slate-100 text-slate-900' : 'bg-[#050B20] text-slate-100'}` },
-          e('div', { className: 'fixed top-4 right-4 z-50' }, renderThemeToggleBtn()),
+        return e('div', { className: 'min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-[#050B20] text-slate-100' },
           e('div', { className: 'w-full max-w-md glass-card p-8 shadow-2xl relative z-10 animate-fadeIn text-center' },
             e('div', { className: 'flex flex-col items-center mb-6' },
               e('div', { className: 'w-20 h-20 rounded-2xl bg-navy-900 border-2 border-primary/50 p-1 shadow-2xl shadow-primary/40 mb-3 flex items-center justify-center' },
@@ -1386,8 +1228,7 @@
 
       // REGISTRATION SCREEN (Mandatory Email ID, Field Order: First Name, Surname, DOB, Mobile, Email, Button: "Register")
       if (view === 'register') {
-        return e('div', { className: `min-h-screen flex flex-col items-center justify-center p-4 relative ${themeMode === 'light' ? 'light-mode bg-slate-100 text-slate-900' : 'bg-[#050B20] text-slate-100'}` },
-          e('div', { className: 'fixed top-4 right-4 z-50' }, renderThemeToggleBtn()),
+        return e('div', { className: 'min-h-screen flex flex-col items-center justify-center p-4 relative bg-[#050B20] text-slate-100' },
           e('div', { className: 'w-full max-w-md glass-card p-7 shadow-2xl relative z-10 animate-fadeIn' },
             e('div', { className: 'flex items-center justify-between mb-5 pb-3 border-b border-slate-800' },
               e('div', null,
@@ -1461,8 +1302,7 @@
 
       // DASHBOARD VIEW (Requires Active Logged-In User Session)
       if (!currentUser) {
-        return e('div', { className: `min-h-screen flex flex-col items-center justify-center p-4 text-center ${themeMode === 'light' ? 'light-mode bg-slate-100 text-slate-900' : 'bg-[#050B20] text-slate-100'}` },
-          e('div', { className: 'fixed top-4 right-4 z-50' }, renderThemeToggleBtn()),
+        return e('div', { className: 'min-h-screen flex flex-col items-center justify-center p-4 text-center bg-[#050B20] text-slate-100' },
           e('div', { className: 'w-full max-w-md glass-card p-8 shadow-2xl animate-fadeIn' },
             e('div', { className: 'w-20 h-20 rounded-2xl bg-navy-900 border-2 border-primary/50 p-1 shadow-2xl shadow-primary/40 mx-auto mb-4 flex items-center justify-center' },
               e('img', { src: './FamilyFavicon.gif', alt: 'Family-GenApp Logo', className: 'w-full h-full object-contain rounded-xl' })
@@ -1478,7 +1318,7 @@
       const isAdmin = currentUser && (isSuperAdmin || currentUser.role === 'ADMIN');
       const pendingCount = pendingRequests.filter(r => r.status === 'PENDING').length;
 
-      return e('div', { className: `min-h-screen flex flex-col ${themeMode === 'light' ? 'light-mode bg-slate-100 text-slate-900' : 'bg-[#050B20] text-slate-100'}` },
+      return e('div', { className: 'min-h-screen flex flex-col bg-[#050B20] text-slate-100' },
         /* Toast Banner */
         toastMsg && e('div', { className: 'fixed top-4 right-4 z-50 p-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-indigo-600 text-white font-extrabold text-xs shadow-2xl border border-emerald-400 animate-fadeIn' },
           `🔔 ${toastMsg}`
@@ -1509,7 +1349,6 @@
           ),
 
           e('div', { className: 'flex items-center gap-2 sm:gap-3' },
-            renderThemeToggleBtn('hidden sm:flex'),
             e('button', {
               onClick: () => setShowRequestModal(true),
               className: 'px-3 sm:px-3.5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold border border-indigo-400 shadow-md hover:bg-indigo-500 min-h-[40px] flex items-center gap-1'
@@ -1520,7 +1359,7 @@
             ),
 
             e('div', { className: 'text-right hidden sm:block' },
-              e('div', { className: `text-xs font-black flex items-center justify-end gap-1.5 ${themeMode === 'light' ? 'text-slate-900' : 'text-white'}` },
+              e('div', { className: 'text-xs font-bold text-white flex items-center justify-end gap-1.5' },
                 e('span', { className: 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse' }),
                 currentUser ? currentUser.full_name : ''
               )
@@ -1533,7 +1372,7 @@
         ),
 
         /* SLIDE-OUT MOBILE NAVIGATION DRAWER OVERLAY */
-        isMobileMenuOpen && e('div', { className: 'fixed inset-0 z-50 bg-navy-950/80 backdrop-blur-md flex animate-fadeIn md:hidden' },
+        isMobileMenuOpen && e('div', { className: 'fixed inset-0 z-50 bg-navy-950/90 backdrop-blur-md flex animate-fadeIn md:hidden' },
           e('div', { className: 'w-4/5 max-w-xs bg-navy-900 border-r border-slate-800 h-full p-5 flex flex-col justify-between overflow-y-auto animate-fadeIn' },
             e('div', { className: 'flex flex-col gap-5' },
               /* Drawer Header */
@@ -1548,13 +1387,10 @@
                     )
                   )
                 ),
-                e('div', { className: 'flex items-center gap-2' },
-                  renderThemeToggleBtn('sm:hidden'),
-                  e('button', {
-                    onClick: () => setIsMobileMenuOpen(false),
-                    className: 'w-8 h-8 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-sm hover:text-white'
-                  }, '✕')
-                )
+                e('button', {
+                  onClick: () => setIsMobileMenuOpen(false),
+                  className: 'w-8 h-8 rounded-xl bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-sm hover:text-white'
+                }, '✕')
               ),
 
               /* User Profile Badge */
@@ -2111,53 +1947,37 @@
             const grandChildrenMembers = childrenMembers.flatMap(child => (child.Children_IDs || []).map(gcid => memberMap.get(gcid))).filter(Boolean);
 
             return e('div', { className: 'glass-card p-6 text-center animate-fadeIn' },
-              e('h3', { className: `text-xs font-extrabold uppercase tracking-wider mb-4 ${themeMode === 'light' ? 'text-indigo-800' : 'text-indigo-400'}` }, '5-Generation Lineage Tree (5-पीढ़ी वंशावली वृक्ष)'),
+              e('h3', { className: 'text-xs font-extrabold text-indigo-400 uppercase tracking-wider mb-4' }, '5-Generation Lineage Tree (5-पीढ़ी वंशावली वृक्ष)'),
               
               /* Gen 1: Great-Grandfather */
               greatGrandFatherMember ? e('div', { className: 'mb-2.5' },
-                e('span', { className: `text-[10px] block font-bold uppercase tracking-wider ${themeMode === 'light' ? 'text-purple-800' : 'text-purple-300'}` }, '👑 पर-दादा (Great-Grandparent)'),
+                e('span', { className: 'text-[10px] block font-bold uppercase tracking-wider text-purple-300' }, '👑 पर-दादा (Great-Grandparent)'),
                 e('button', {
                   onClick: () => setSelectedTreeFocusId(greatGrandFatherMember.Person_ID),
-                  className: `mt-1 px-4 py-2 rounded-xl text-xs font-bold mx-auto flex items-center gap-2 border shadow-sm transition-all ${
-                    themeMode === 'light'
-                      ? 'bg-purple-50 border-purple-300 text-purple-900 hover:bg-purple-100'
-                      : 'bg-navy-950 border-purple-500/40 text-purple-300 hover:bg-navy-900'
-                  }`
+                  className: 'mt-1 px-4 py-2 rounded-xl text-xs font-bold mx-auto flex items-center gap-2 border border-purple-500/40 bg-navy-950 text-purple-300 hover:bg-navy-900 shadow-sm transition-all'
                 }, greatGrandFatherMember.Full_Name)
               ) : null,
 
               /* Gen 2: Grandfather */
               grandFatherMember ? e('div', { className: 'mb-2.5' },
-                e('span', { className: `text-[10px] block font-bold uppercase tracking-wider ${themeMode === 'light' ? 'text-slate-600' : 'text-slate-400'}` }, '👴 दादा (Grandparent)'),
+                e('span', { className: 'text-[10px] block font-bold uppercase tracking-wider text-slate-400' }, '👴 दादा (Grandparent)'),
                 e('button', {
                   onClick: () => setSelectedTreeFocusId(grandFatherMember.Person_ID),
-                  className: `mt-1 px-4 py-2 rounded-xl text-xs font-bold mx-auto flex items-center gap-2 border shadow-sm transition-all ${
-                    themeMode === 'light'
-                      ? 'bg-slate-100 border-slate-300 text-slate-900 hover:bg-indigo-50 hover:border-indigo-400'
-                      : 'bg-navy-950 border-indigo-500/40 text-white hover:bg-navy-900'
-                  }`
+                  className: 'mt-1 px-4 py-2 rounded-xl text-xs font-bold mx-auto flex items-center gap-2 border border-indigo-500/40 bg-navy-950 text-white hover:bg-navy-900 shadow-sm transition-all'
                 }, grandFatherMember.Full_Name)
               ) : null,
 
               /* Gen 3: Father */
               fatherMember ? e('div', { className: 'mb-2.5' },
-                e('span', { className: `text-[10px] block font-bold uppercase tracking-wider ${themeMode === 'light' ? 'text-indigo-800' : 'text-indigo-300'}` }, '👨 पिता (Father)'),
+                e('span', { className: 'text-[10px] block font-bold uppercase tracking-wider text-indigo-300' }, '👨 पिता (Father)'),
                 e('button', {
                   onClick: () => setSelectedTreeFocusId(fatherMember.Person_ID),
-                  className: `mt-1 px-4 py-2 rounded-xl text-xs font-bold mx-auto flex items-center gap-2 border shadow-sm transition-all ${
-                    themeMode === 'light'
-                      ? 'bg-indigo-50 border-indigo-300 text-indigo-900 hover:bg-indigo-100'
-                      : 'bg-indigo-950 border-indigo-500 text-indigo-200 hover:bg-indigo-900'
-                  }`
+                  className: 'mt-1 px-4 py-2 rounded-xl text-xs font-bold mx-auto flex items-center gap-2 border border-indigo-500 bg-indigo-950 text-indigo-200 hover:bg-indigo-900 shadow-sm transition-all'
                 }, fatherMember.Full_Name)
               ) : null,
 
               /* Gen 4: Focus Member Card */
-              e('div', { className: `p-5 rounded-2xl max-w-sm mx-auto my-3 text-center shadow-xl border-2 border-amber-400 ${
-                themeMode === 'light'
-                  ? 'bg-gradient-to-tr from-indigo-600 to-indigo-700 text-white'
-                  : 'bg-gradient-to-r from-indigo-950 to-purple-950 text-white'
-              }` },
+              e('div', { className: 'p-5 rounded-2xl max-w-sm mx-auto my-3 text-center shadow-xl border-2 border-amber-400 bg-gradient-to-r from-indigo-950 to-purple-950 text-white' },
                 e('img', { src: focusMember.Profile_Image, className: 'w-16 h-16 rounded-full border-2 border-amber-300 mx-auto mb-2 object-cover shadow-md' }),
                 e('h2', { className: 'text-xl font-black text-white' }, focusMember.Full_Name),
                 focusMember.DOB && e('p', { className: 'text-xs text-indigo-100 font-bold mt-0.5' }, focusMember.DOB)
@@ -2165,32 +1985,24 @@
 
               /* Gen 5 Level A: Children */
               childrenMembers.length > 0 && e('div', { className: 'mt-3' },
-                e('span', { className: `text-xs font-bold block mb-2 ${themeMode === 'light' ? 'text-emerald-700' : 'text-emerald-400'}` }, `👦👧 संतान (Children - ${childrenMembers.length})`),
+                e('span', { className: 'text-xs font-bold block mb-2 text-emerald-400' }, `👦👧 संतान (Children - ${childrenMembers.length})`),
                 e('div', { className: 'flex flex-wrap justify-center gap-2' },
                   childrenMembers.map(c => e('button', {
                     key: c.Person_ID,
                     onClick: () => setSelectedTreeFocusId(c.Person_ID),
-                    className: `px-3.5 py-2 rounded-xl text-xs font-bold border shadow-sm transition-all ${
-                      themeMode === 'light'
-                        ? 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100'
-                        : 'bg-navy-950 border-emerald-500/40 text-white hover:bg-navy-900'
-                    }`
+                    className: 'px-3.5 py-2 rounded-xl text-xs font-bold border border-emerald-500/40 bg-navy-950 text-white hover:bg-navy-900 shadow-sm transition-all'
                   }, c.Full_Name))
                 )
               ),
 
               /* Gen 5 Level B: Grandchildren */
               grandChildrenMembers.length > 0 && e('div', { className: 'mt-3 pt-2 border-t border-slate-800/40' },
-                e('span', { className: `text-[11px] font-bold block mb-2 ${themeMode === 'light' ? 'text-teal-800' : 'text-teal-400'}` }, `👶 पोता / पोती (Grandchildren - ${grandChildrenMembers.length})`),
+                e('span', { className: 'text-[11px] font-bold block mb-2 text-teal-400' }, `👶 पोता / पोती (Grandchildren - ${grandChildrenMembers.length})`),
                 e('div', { className: 'flex flex-wrap justify-center gap-2' },
                   grandChildrenMembers.map(gc => e('button', {
                     key: gc.Person_ID,
                     onClick: () => setSelectedTreeFocusId(gc.Person_ID),
-                    className: `px-3 py-1.5 rounded-xl text-[11px] font-bold border shadow-sm transition-all ${
-                      themeMode === 'light'
-                        ? 'bg-teal-50 border-teal-300 text-teal-900 hover:bg-teal-100'
-                        : 'bg-navy-900 border-teal-500/40 text-teal-300 hover:bg-navy-800'
-                    }`
+                    className: 'px-3 py-1.5 rounded-xl text-[11px] font-bold border border-teal-500/40 bg-navy-900 text-teal-300 hover:bg-navy-800 shadow-sm transition-all'
                   }, gc.Full_Name))
                 )
               )
@@ -2383,33 +2195,33 @@
         ),
 
         /* MODAL 4: EDIT MEMBER (Super Admin Only) */
-        showEditMemberModal && isSuperAdmin && editingMember && e('div', { className: `fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-fadeIn ${themeMode === 'light' ? 'bg-slate-900/40' : 'bg-slate-950/85'}` },
-          e('div', { className: `glass-card w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto border shadow-2xl ${themeMode === 'light' ? 'bg-white text-slate-900 border-slate-300' : 'bg-navy-950 text-white border-slate-800'}` },
-            e('div', { className: 'flex items-center justify-between mb-4 pb-3 border-b border-slate-800/40' },
-              e('h3', { className: `text-lg font-black flex items-center gap-2 ${themeMode === 'light' ? 'text-slate-900' : 'text-white'}` },
+        showEditMemberModal && isSuperAdmin && editingMember && e('div', { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn' },
+          e('div', { className: 'glass-card w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto border border-indigo-500/40 shadow-2xl' },
+            e('div', { className: 'flex items-center justify-between mb-4 pb-3 border-b border-slate-800' },
+              e('h3', { className: 'text-lg font-black text-white flex items-center gap-2' },
                 e('span', null, '✏️'),
                 'Edit Member Details'
               ),
-              e('button', { onClick: () => setShowEditMemberModal(false), className: `font-bold ${themeMode === 'light' ? 'text-slate-500 hover:text-slate-900' : 'text-slate-400 hover:text-white'}` }, '✕')
+              e('button', { onClick: () => setShowEditMemberModal(false), className: 'text-slate-400 hover:text-white font-bold' }, '✕')
             ),
 
             e('form', { onSubmit: handleUpdateMemberSubmit, className: 'flex flex-col gap-4 text-xs' },
               /* 1. Full Name */
               e('div', null,
-                e('label', { className: `block font-bold mb-1 ${themeMode === 'light' ? 'text-slate-800' : 'text-slate-300'}` }, 'Full Name *'),
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'Full Name *'),
                 e('input', {
                   type: 'text',
                   required: true,
                   value: editingMember.Full_Name || '',
                   onChange: ev => setEditingMember({ ...editingMember, Full_Name: ev.target.value }),
                   placeholder: 'e.g. रामचन्द्र तिवारी',
-                  className: `w-full p-3 rounded-xl font-bold outline-none border ${themeMode === 'light' ? 'bg-slate-50 border-slate-300 text-slate-900 focus:border-indigo-600' : 'bg-navy-950 border-slate-700 text-white'}`
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-bold outline-none'
                 })
               ),
 
               /* 2. DOB */
               e('div', null,
-                e('label', { className: `block font-bold mb-1 ${themeMode === 'light' ? 'text-slate-800' : 'text-slate-300'}` }, 'DOB *'),
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'DOB *'),
                 e(ResponsiveDatePicker, {
                   value: editingMember.DOB || '',
                   onChange: val => setEditingMember({ ...editingMember, DOB: val }),
@@ -2419,31 +2231,31 @@
 
               /* 3. Current City (Optional) */
               e('div', null,
-                e('label', { className: `block font-bold mb-1 ${themeMode === 'light' ? 'text-slate-800' : 'text-slate-300'}` }, 'Current City / वर्तमान शहर (Optional)'),
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'Current City / वर्तमान शहर (Optional)'),
                 e('input', {
                   type: 'text',
                   value: editingMember.Current_City || '',
                   onChange: ev => setEditingMember({ ...editingMember, Current_City: ev.target.value }),
                   placeholder: 'e.g. रीवा / भोपाल / Indore / Delhi',
-                  className: `w-full p-3 rounded-xl font-medium outline-none border ${themeMode === 'light' ? 'bg-slate-50 border-slate-300 text-slate-900 focus:border-indigo-600' : 'bg-navy-950 border-slate-700 text-white'}`
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-medium outline-none'
                 })
               ),
 
               /* 4. Education / Occupation (Optional) */
               e('div', null,
-                e('label', { className: `block font-bold mb-1 ${themeMode === 'light' ? 'text-slate-800' : 'text-slate-300'}` }, 'Education / Occupation (शिक्षा एवं व्यवसाय) (Optional)'),
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'Education / Occupation (शिक्षा एवं व्यवसाय) (Optional)'),
                 e('input', {
                   type: 'text',
                   value: editingMember.Occupation || '',
                   onChange: ev => setEditingMember({ ...editingMember, Occupation: ev.target.value }),
                   placeholder: 'e.g. ज्योतिषाचार्य / B.Tech / Senior Software Engineer',
-                  className: `w-full p-3 rounded-xl font-medium outline-none border ${themeMode === 'light' ? 'bg-slate-50 border-slate-300 text-slate-900 focus:border-indigo-600' : 'bg-navy-950 border-slate-700 text-white'}`
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-medium outline-none'
                 })
               ),
 
               /* 5. Upload Image (Mandatory) */
               e('div', null,
-                e('label', { className: `block font-bold mb-1 ${themeMode === 'light' ? 'text-slate-800' : 'text-slate-300'}` }, '📷 Upload Photo / फ़ोटो (Mandatory) *'),
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, '📷 Upload Photo / फ़ोटो (Mandatory) *'),
                 e('input', {
                   type: 'file',
                   accept: 'image/*',
@@ -2454,21 +2266,21 @@
                       compressImageFile(file, res => setEditingMember({ ...editingMember, Profile_Image: res }));
                     }
                   },
-                  className: `w-full p-3 rounded-xl text-xs min-h-[44px] border ${themeMode === 'light' ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-navy-950 border-slate-700 text-slate-300'}`
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-slate-300 text-xs min-h-[44px]'
                 }),
-                editingMember.Profile_Image && e('div', { className: `mt-2 flex items-center gap-3 p-2.5 rounded-xl border ${themeMode === 'light' ? 'bg-slate-100 border-slate-300' : 'bg-navy-950 border-slate-800'}` },
+                editingMember.Profile_Image && e('div', { className: 'mt-2 flex items-center gap-3 bg-navy-950 p-2.5 rounded-xl border border-slate-800' },
                   e('img', { src: editingMember.Profile_Image, className: 'w-14 h-14 rounded-full object-cover border-2 border-indigo-500 shadow-md' }),
                   e('div', null,
-                    e('span', { className: 'text-xs font-bold text-emerald-600 dark:text-emerald-400 block' }, '✓ Live Photo Preview'),
-                    e('span', { className: `text-[10px] ${themeMode === 'light' ? 'text-slate-600' : 'text-slate-400'}` }, 'Photo ready to save in database')
+                    e('span', { className: 'text-xs font-bold text-emerald-400 block' }, '✓ Live Photo Preview'),
+                    e('span', { className: 'text-[10px] text-slate-400' }, 'Photo ready to save in database')
                   )
                 )
               ),
 
               /* Action Buttons */
               e('div', { className: 'flex gap-3 mt-2' },
-                e('button', { type: 'button', onClick: () => setShowEditMemberModal(false), className: `w-1/2 py-3 rounded-xl font-bold transition-all ${themeMode === 'light' ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-navy-900 text-slate-300'}` }, 'Cancel'),
-                e('button', { type: 'submit', className: 'w-1/2 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase shadow-md transition-all' }, 'Update Member')
+                e('button', { type: 'button', onClick: () => setShowEditMemberModal(false), className: 'w-1/2 py-3 rounded-xl bg-navy-900 text-slate-300 font-bold hover:bg-slate-800' }, 'Cancel'),
+                e('button', { type: 'submit', className: 'w-1/2 py-3 rounded-xl btn-gradient text-white font-black uppercase shadow-md' }, 'Update Member')
               )
             )
           )
