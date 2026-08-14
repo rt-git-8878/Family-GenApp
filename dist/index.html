@@ -118,6 +118,14 @@
       color: #0F172A !important;
     }
 
+    /* Modal Backdrop Overlays in Light Mode */
+    .light-mode .bg-slate-950\/85,
+    .light-mode .bg-slate-950\/80,
+    .light-mode .bg-slate-950\/90 {
+      background-color: rgba(15, 23, 42, 0.45) !important;
+      backdrop-filter: blur(8px) !important;
+    }
+
     /* Inner Sub-cards, Directory Member Items, and Row Backgrounds in Light Mode */
     .light-mode .bg-navy-950\/40,
     .light-mode .bg-navy-900\/40,
@@ -2375,33 +2383,33 @@
         ),
 
         /* MODAL 4: EDIT MEMBER (Super Admin Only) */
-        showEditMemberModal && isSuperAdmin && editingMember && e('div', { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn' },
-          e('div', { className: 'glass-card w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto' },
-            e('div', { className: 'flex items-center justify-between mb-4 pb-3 border-b border-slate-800' },
-              e('h3', { className: 'text-lg font-black text-white flex items-center gap-2' },
+        showEditMemberModal && isSuperAdmin && editingMember && e('div', { className: `fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-fadeIn ${themeMode === 'light' ? 'bg-slate-900/40' : 'bg-slate-950/85'}` },
+          e('div', { className: `glass-card w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto border shadow-2xl ${themeMode === 'light' ? 'bg-white text-slate-900 border-slate-300' : 'bg-navy-950 text-white border-slate-800'}` },
+            e('div', { className: 'flex items-center justify-between mb-4 pb-3 border-b border-slate-800/40' },
+              e('h3', { className: `text-lg font-black flex items-center gap-2 ${themeMode === 'light' ? 'text-slate-900' : 'text-white'}` },
                 e('span', null, '✏️'),
                 'Edit Member Details'
               ),
-              e('button', { onClick: () => setShowEditMemberModal(false), className: 'text-slate-400 hover:text-white font-bold' }, '✕')
+              e('button', { onClick: () => setShowEditMemberModal(false), className: `font-bold ${themeMode === 'light' ? 'text-slate-500 hover:text-slate-900' : 'text-slate-400 hover:text-white'}` }, '✕')
             ),
 
             e('form', { onSubmit: handleUpdateMemberSubmit, className: 'flex flex-col gap-4 text-xs' },
               /* 1. Full Name */
               e('div', null,
-                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'Full Name *'),
+                e('label', { className: `block font-bold mb-1 ${themeMode === 'light' ? 'text-slate-800' : 'text-slate-300'}` }, 'Full Name *'),
                 e('input', {
                   type: 'text',
                   required: true,
                   value: editingMember.Full_Name || '',
                   onChange: ev => setEditingMember({ ...editingMember, Full_Name: ev.target.value }),
                   placeholder: 'e.g. रामचन्द्र तिवारी',
-                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-bold outline-none'
+                  className: `w-full p-3 rounded-xl font-bold outline-none border ${themeMode === 'light' ? 'bg-slate-50 border-slate-300 text-slate-900 focus:border-indigo-600' : 'bg-navy-950 border-slate-700 text-white'}`
                 })
               ),
 
               /* 2. DOB */
               e('div', null,
-                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'DOB *'),
+                e('label', { className: `block font-bold mb-1 ${themeMode === 'light' ? 'text-slate-800' : 'text-slate-300'}` }, 'DOB *'),
                 e(ResponsiveDatePicker, {
                   value: editingMember.DOB || '',
                   onChange: val => setEditingMember({ ...editingMember, DOB: val }),
@@ -2411,31 +2419,31 @@
 
               /* 3. Current City (Optional) */
               e('div', null,
-                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'Current City / वर्तमान शहर (Optional)'),
+                e('label', { className: `block font-bold mb-1 ${themeMode === 'light' ? 'text-slate-800' : 'text-slate-300'}` }, 'Current City / वर्तमान शहर (Optional)'),
                 e('input', {
                   type: 'text',
                   value: editingMember.Current_City || '',
                   onChange: ev => setEditingMember({ ...editingMember, Current_City: ev.target.value }),
                   placeholder: 'e.g. रीवा / भोपाल / Indore / Delhi',
-                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-medium outline-none'
+                  className: `w-full p-3 rounded-xl font-medium outline-none border ${themeMode === 'light' ? 'bg-slate-50 border-slate-300 text-slate-900 focus:border-indigo-600' : 'bg-navy-950 border-slate-700 text-white'}`
                 })
               ),
 
               /* 4. Education / Occupation (Optional) */
               e('div', null,
-                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'Education / Occupation (शिक्षा एवं व्यवसाय) (Optional)'),
+                e('label', { className: `block font-bold mb-1 ${themeMode === 'light' ? 'text-slate-800' : 'text-slate-300'}` }, 'Education / Occupation (शिक्षा एवं व्यवसाय) (Optional)'),
                 e('input', {
                   type: 'text',
                   value: editingMember.Occupation || '',
                   onChange: ev => setEditingMember({ ...editingMember, Occupation: ev.target.value }),
                   placeholder: 'e.g. ज्योतिषाचार्य / B.Tech / Senior Software Engineer',
-                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-medium outline-none'
+                  className: `w-full p-3 rounded-xl font-medium outline-none border ${themeMode === 'light' ? 'bg-slate-50 border-slate-300 text-slate-900 focus:border-indigo-600' : 'bg-navy-950 border-slate-700 text-white'}`
                 })
               ),
 
               /* 5. Upload Image (Mandatory) */
               e('div', null,
-                e('label', { className: 'block font-bold text-slate-300 mb-1' }, '📷 Upload Photo / फ़ोटो (Mandatory) *'),
+                e('label', { className: `block font-bold mb-1 ${themeMode === 'light' ? 'text-slate-800' : 'text-slate-300'}` }, '📷 Upload Photo / फ़ोटो (Mandatory) *'),
                 e('input', {
                   type: 'file',
                   accept: 'image/*',
@@ -2446,21 +2454,21 @@
                       compressImageFile(file, res => setEditingMember({ ...editingMember, Profile_Image: res }));
                     }
                   },
-                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-slate-300 text-xs min-h-[44px]'
+                  className: `w-full p-3 rounded-xl text-xs min-h-[44px] border ${themeMode === 'light' ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-navy-950 border-slate-700 text-slate-300'}`
                 }),
-                editingMember.Profile_Image && e('div', { className: 'mt-2 flex items-center gap-3 bg-navy-950 p-2.5 rounded-xl border border-slate-800' },
+                editingMember.Profile_Image && e('div', { className: `mt-2 flex items-center gap-3 p-2.5 rounded-xl border ${themeMode === 'light' ? 'bg-slate-100 border-slate-300' : 'bg-navy-950 border-slate-800'}` },
                   e('img', { src: editingMember.Profile_Image, className: 'w-14 h-14 rounded-full object-cover border-2 border-indigo-500 shadow-md' }),
                   e('div', null,
-                    e('span', { className: 'text-xs font-bold text-emerald-400 block' }, '✓ Live Photo Preview'),
-                    e('span', { className: 'text-[10px] text-slate-400' }, 'Photo ready to save in database')
+                    e('span', { className: 'text-xs font-bold text-emerald-600 dark:text-emerald-400 block' }, '✓ Live Photo Preview'),
+                    e('span', { className: `text-[10px] ${themeMode === 'light' ? 'text-slate-600' : 'text-slate-400'}` }, 'Photo ready to save in database')
                   )
                 )
               ),
 
               /* Action Buttons */
               e('div', { className: 'flex gap-3 mt-2' },
-                e('button', { type: 'button', onClick: () => setShowEditMemberModal(false), className: 'w-1/2 py-3 rounded-xl bg-navy-900 text-slate-300 font-bold' }, 'Cancel'),
-                e('button', { type: 'submit', className: 'w-1/2 py-3 rounded-xl btn-gradient text-white font-black uppercase' }, 'Update Member')
+                e('button', { type: 'button', onClick: () => setShowEditMemberModal(false), className: `w-1/2 py-3 rounded-xl font-bold transition-all ${themeMode === 'light' ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-navy-900 text-slate-300'}` }, 'Cancel'),
+                e('button', { type: 'submit', className: 'w-1/2 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase shadow-md transition-all' }, 'Update Member')
               )
             )
           )
