@@ -427,8 +427,9 @@
           Father_ID: fatherId,
           DOB: dob,
           Gender: 'Male',
-          Occupation: title || (notes.includes('शास्त्री') ? 'ज्योतिषाचार्य / शास्त्री' : 'कृषि एवं समाज सेवा'),
-          Profile_Image: DEFAULT_AVATAR,
+          Occupation: node.occupation || title || (notes.includes('शास्त्री') ? 'ज्योतिषाचार्य / शास्त्री' : 'कृषि एवं समाज सेवा'),
+          Current_City: node.current_city || 'रीवा (MP)',
+          Profile_Image: node.profile_image || DEFAULT_AVATAR,
           Notes: notes,
           Marriages_Count: marriagesCount,
           Marriage_Note: marriageNote,
@@ -1254,6 +1255,11 @@
         ev.preventDefault();
         if (!editingMember) return;
 
+        if (!editingMember.Profile_Image) {
+          alert('फ़ोटो अपलोड करना अनिवार्य है (Photo upload is mandatory)');
+          return;
+        }
+
         fetch(`${API_BASE_URL}/members/${editingMember.Person_ID}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -1261,8 +1267,10 @@
             full_name: editingMember.Full_Name,
             dob: editingMember.DOB,
             father_id: editingMember.Father_ID,
+            current_city: editingMember.Current_City || '',
+            occupation: editingMember.Occupation || '',
             profile_image: editingMember.Profile_Image,
-            updatedBy: `${currentUser.mobile_number} (Rohit Tiwari)`
+            updatedBy: `${currentUser.mobile_number} (${currentUser.full_name})`
           })
         })
           .then(res => res.json())
@@ -2367,19 +2375,31 @@
         ),
 
         /* MODAL 4: EDIT MEMBER (Super Admin Only) */
-        showEditMemberModal && isSuperAdmin && editingMember && e('div', { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md' },
-          e('div', { className: 'glass-card w-full max-w-md p-6' },
-            e('h3', { className: 'text-lg font-black text-white mb-4' }, '✏️ Edit Member Details'),
-            e('form', { onSubmit: handleUpdateMemberSubmit, className: 'flex flex-col gap-3 text-xs' },
+        showEditMemberModal && isSuperAdmin && editingMember && e('div', { className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn' },
+          e('div', { className: 'glass-card w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto' },
+            e('div', { className: 'flex items-center justify-between mb-4 pb-3 border-b border-slate-800' },
+              e('h3', { className: 'text-lg font-black text-white flex items-center gap-2' },
+                e('span', null, '✏️'),
+                'Edit Member Details'
+              ),
+              e('button', { onClick: () => setShowEditMemberModal(false), className: 'text-slate-400 hover:text-white font-bold' }, '✕')
+            ),
+
+            e('form', { onSubmit: handleUpdateMemberSubmit, className: 'flex flex-col gap-4 text-xs' },
+              /* 1. Full Name */
               e('div', null,
                 e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'Full Name *'),
                 e('input', {
                   type: 'text',
-                  value: editingMember.Full_Name,
+                  required: true,
+                  value: editingMember.Full_Name || '',
                   onChange: ev => setEditingMember({ ...editingMember, Full_Name: ev.target.value }),
-                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-bold'
+                  placeholder: 'e.g. रामचन्द्र तिवारी',
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-bold outline-none'
                 })
               ),
+
+              /* 2. DOB */
               e('div', null,
                 e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'DOB *'),
                 e(ResponsiveDatePicker, {
@@ -2388,9 +2408,59 @@
                   placeholder: 'जन्म तिथि चुनें (Select DOB)'
                 })
               ),
-              e('div', { className: 'flex gap-2 mt-2' },
-                e('button', { type: 'button', onClick: () => setShowEditMemberModal(false), className: 'w-1/2 py-2.5 rounded-xl bg-navy-900 text-slate-300 font-bold' }, 'Cancel'),
-                e('button', { type: 'submit', className: 'w-1/2 py-2.5 rounded-xl btn-gradient text-white font-bold' }, 'Update Member')
+
+              /* 3. Current City (Optional) */
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'Current City / वर्तमान शहर (Optional)'),
+                e('input', {
+                  type: 'text',
+                  value: editingMember.Current_City || '',
+                  onChange: ev => setEditingMember({ ...editingMember, Current_City: ev.target.value }),
+                  placeholder: 'e.g. रीवा / भोपाल / Indore / Delhi',
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-medium outline-none'
+                })
+              ),
+
+              /* 4. Education / Occupation (Optional) */
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'Education / Occupation (शिक्षा एवं व्यवसाय) (Optional)'),
+                e('input', {
+                  type: 'text',
+                  value: editingMember.Occupation || '',
+                  onChange: ev => setEditingMember({ ...editingMember, Occupation: ev.target.value }),
+                  placeholder: 'e.g. ज्योतिषाचार्य / B.Tech / Senior Software Engineer',
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-medium outline-none'
+                })
+              ),
+
+              /* 5. Upload Image (Mandatory) */
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, '📷 Upload Photo / फ़ोटो (Mandatory) *'),
+                e('input', {
+                  type: 'file',
+                  accept: 'image/*',
+                  required: !editingMember.Profile_Image,
+                  onChange: ev => {
+                    const file = ev.target.files[0];
+                    if (file) {
+                      compressImageFile(file, res => setEditingMember({ ...editingMember, Profile_Image: res }));
+                    }
+                  },
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-slate-300 text-xs min-h-[44px]'
+                }),
+                editingMember.Profile_Image && e('div', { className: 'mt-2 flex items-center gap-3 bg-navy-950 p-2.5 rounded-xl border border-slate-800' },
+                  e('img', { src: editingMember.Profile_Image, className: 'w-14 h-14 rounded-full object-cover border-2 border-indigo-500 shadow-md' }),
+                  e('div', null,
+                    e('span', { className: 'text-xs font-bold text-emerald-400 block' }, '✓ Live Photo Preview'),
+                    e('span', { className: 'text-[10px] text-slate-400' }, 'Photo ready to save in database')
+                  )
+                )
+              ),
+
+              /* Action Buttons */
+              e('div', { className: 'flex gap-3 mt-2' },
+                e('button', { type: 'button', onClick: () => setShowEditMemberModal(false), className: 'w-1/2 py-3 rounded-xl bg-navy-900 text-slate-300 font-bold' }, 'Cancel'),
+                e('button', { type: 'submit', className: 'w-1/2 py-3 rounded-xl btn-gradient text-white font-black uppercase' }, 'Update Member')
               )
             )
           )

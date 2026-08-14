@@ -861,11 +861,14 @@ app.get('/api/tree', (req, res) => {
     memberMap.set(m.id, {
       text: {
         name: m.raw_name || m.full_name,
-        title: m.title || '',
+        title: m.occupation || m.title || '',
         DOB: m.dob || undefined
       },
       id: m.id,
       father_id: m.father_id,
+      current_city: m.current_city || 'रीवा (MP)',
+      occupation: m.occupation || m.title || '',
+      profile_image: m.profile_image || './default_avatar.png',
       children: []
     });
   });
@@ -1138,7 +1141,7 @@ app.post('/api/members/direct-add', (req, res) => {
 // 8. PUT /api/members/:id (Super Admin Edit Member)
 app.put('/api/members/:id', (req, res) => {
   const memberId = req.params.id;
-  const { full_name, dob, father_id, profile_image, updatedBy } = req.body;
+  const { full_name, dob, father_id, current_city, occupation, profile_image, updatedBy } = req.body;
   const db = loadDbStore();
 
   const idx = db.members.findIndex(m => m.id === memberId);
@@ -1162,7 +1165,11 @@ app.put('/api/members/:id', (req, res) => {
   db.members[idx].raw_name = finalName;
   if (dob !== undefined) db.members[idx].dob = dob;
   if (father_id !== undefined) db.members[idx].father_id = father_id;
+  if (current_city !== undefined) db.members[idx].current_city = current_city;
+  if (occupation !== undefined) db.members[idx].occupation = occupation;
   if (profile_image !== undefined) db.members[idx].profile_image = profile_image;
+
+  saveDbStore(db);
 
   // Audit Log
   db.audit_logs.unshift({
