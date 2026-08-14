@@ -353,6 +353,46 @@
       return false;
     }
 
+    // COMPONENT: PROFILE AVATAR WITH ENLARGED PHOTO PREVIEW ON HOVER (Only for Custom Uploaded Photos)
+    function AvatarWithPreview({ src, name = 'Member Photo', className = 'w-12 h-12 rounded-full object-cover border-2 border-indigo-500/30' }) {
+      const [isHovered, setIsHovered] = useState(false);
+      const isDefault = !src || src.includes('default_avatar');
+
+      if (isDefault) {
+        return e('img', { src: src || DEFAULT_AVATAR, alt: name, className });
+      }
+
+      return e('div', {
+        className: 'relative inline-block',
+        onMouseEnter: () => setIsHovered(true),
+        onMouseLeave: () => setIsHovered(false)
+      },
+        e('img', {
+          src,
+          alt: name,
+          className: `${className} cursor-pointer hover:scale-105 transition-transform duration-200 ring-2 ring-indigo-500/60`
+        }),
+
+        isHovered && e('div', {
+          className: 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 pointer-events-none animate-fadeIn'
+        },
+          e('div', {
+            className: 'glass-card p-3 max-w-sm sm:max-w-md border-2 border-amber-400 shadow-2xl rounded-3xl flex flex-col items-center bg-navy-950/95 animate-fadeIn pointer-events-auto'
+          },
+            e('img', {
+              src,
+              alt: name,
+              className: 'w-64 h-64 sm:w-80 sm:h-80 object-cover rounded-2xl border-2 border-indigo-400 shadow-2xl mb-2.5'
+            }),
+            e('div', { className: 'text-center' },
+              e('h4', { className: 'text-base font-black text-white' }, name),
+              e('span', { className: 'text-[11px] font-bold text-emerald-400 block mt-0.5' }, '🔍 High-Resolution Photo Preview')
+            )
+          )
+        )
+      );
+    }
+
     // COMPONENT: HIERARCHY TREE NODE
     function TreeNodeItem({ node, highlightName, onSelectMember }) {
       const hasChildren = node.children && node.children.length > 0;
@@ -1745,8 +1785,8 @@
                   className: 'flex items-center gap-3.5 cursor-pointer flex-1'
                 },
                   e('div', { className: 'relative' },
-                    e('img', { src: m.Profile_Image, className: 'w-12 h-12 rounded-full object-cover border-2 border-indigo-500/30' }),
-                    e('span', { className: 'absolute -bottom-1 -right-1 px-1.5 py-0.2 bg-navy-950 text-indigo-300 text-[9px] font-bold rounded border border-slate-800' }, `P${m.Generation_Level}`)
+                    e(AvatarWithPreview, { src: m.Profile_Image, name: m.Full_Name, className: 'w-12 h-12 rounded-full object-cover border-2 border-indigo-500/30' }),
+                    e('span', { className: 'absolute -bottom-1 -right-1 px-1.5 py-0.2 bg-navy-950 text-indigo-300 text-[9px] font-bold rounded border border-slate-800 pointer-events-none' }, `P${m.Generation_Level}`)
                   ),
                   e('div', null,
                     e('div', { className: 'flex items-center gap-2' },
@@ -1858,7 +1898,7 @@
                     e('tbody', { className: 'divide-y divide-slate-800/60 font-medium' },
                       pendingRequests.map(r => e('tr', { key: r.id, className: 'hover:bg-navy-800/40' },
                         e('td', { className: 'py-3 px-3' },
-                          e('img', { src: r.photo_data || DEFAULT_AVATAR, className: 'w-10 h-10 rounded-full object-cover border border-amber-400/50' })
+                          e(AvatarWithPreview, { src: r.photo_data || DEFAULT_AVATAR, name: r.child_name, className: 'w-10 h-10 rounded-full object-cover border border-amber-400/50' })
                         ),
                         e('td', { className: 'py-3 px-3 font-bold text-white' }, r.child_name),
                         e('td', { className: 'py-3 px-3 text-indigo-300 font-mono' }, r.dob),
@@ -1989,7 +2029,7 @@
 
               /* Gen 4: Focus Member Card */
               e('div', { className: 'p-5 rounded-2xl max-w-sm mx-auto my-3 text-center shadow-xl border-2 border-amber-400 bg-gradient-to-r from-indigo-950 to-purple-950 text-white' },
-                e('img', { src: focusMember.Profile_Image, className: 'w-16 h-16 rounded-full border-2 border-amber-300 mx-auto mb-2 object-cover shadow-md' }),
+                e(AvatarWithPreview, { src: focusMember.Profile_Image, name: focusMember.Full_Name, className: 'w-16 h-16 rounded-full border-2 border-amber-300 mx-auto mb-2 object-cover shadow-md' }),
                 e('h2', { className: 'text-xl font-black text-white' }, focusMember.Full_Name),
                 focusMember.DOB && e('p', { className: 'text-xs text-indigo-100 font-bold mt-0.5' }, focusMember.DOB)
               ),
