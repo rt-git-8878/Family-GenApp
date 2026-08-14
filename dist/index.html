@@ -1221,13 +1221,13 @@
               /* 1. First Name */
               e('div', null,
                 e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'पहला नाम (First Name) *'),
-                e('input', { type: 'text', value: regForm.first_name, onChange: ev => setRegForm({ ...regForm, first_name: ev.target.value }), placeholder: 'उदा. रमेश', className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white' }),
+                e('input', { type: 'text', value: regForm.first_name, onChange: ev => setRegForm({ ...regForm, first_name: ev.target.value }), placeholder: 'Enter First Name', className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white' }),
                 regErrors.first_name && e('p', { className: 'text-[11px] text-rose-400 mt-1 font-semibold' }, regErrors.first_name)
               ),
               /* 2. Surname */
               e('div', null,
                 e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'उपनाम (Surname) *'),
-                e('input', { type: 'text', value: regForm.surname, onChange: ev => setRegForm({ ...regForm, surname: ev.target.value }), placeholder: 'उदा. शर्मा / तिवारी', className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white' }),
+                e('input', { type: 'text', value: regForm.surname, onChange: ev => setRegForm({ ...regForm, surname: ev.target.value }), placeholder: 'Enter Surname', className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white' }),
                 regErrors.surname && e('p', { className: 'text-[11px] text-rose-400 mt-1 font-semibold' }, regErrors.surname)
               ),
               /* 3. Date of Birth */
@@ -1248,8 +1248,8 @@
               ),
               /* 5. Email ID (Mandatory) */
               e('div', null,
-                e('label', { className: 'block font-bold text-amber-300 mb-1' }, 'ईमेल आईडी (Email ID) * Mandatory'),
-                e('input', { type: 'email', value: regForm.email, onChange: ev => setRegForm({ ...regForm, email: ev.target.value }), placeholder: 'उदा. name@example.com', className: 'w-full p-3 bg-navy-950 border border-amber-500/50 rounded-xl text-white font-bold focus:border-amber-400' }),
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'ईमेल आईडी (Email ID) *'),
+                e('input', { type: 'email', value: regForm.email, onChange: ev => setRegForm({ ...regForm, email: ev.target.value }), placeholder: 'Enter Email ID', className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-bold focus:border-primary' }),
                 regErrors.email && e('p', { className: 'text-[11px] text-rose-400 mt-1 font-semibold' }, regErrors.email)
               ),
               /* BUTTON: "Register" */
