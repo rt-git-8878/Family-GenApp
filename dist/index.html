@@ -687,6 +687,27 @@
       const [resendCooldown, setResendCooldown] = useState(0);
       const [attemptsLeft, setAttemptsLeft] = useState(5);
 
+      // Real-Time Running OTP Countdown Timer (300 Seconds = 5 Minutes)
+      const [otpCountdown, setOtpCountdown] = useState(300);
+
+      useEffect(() => {
+        let interval = null;
+        if (loginOtpSent && otpCountdown > 0) {
+          interval = setInterval(() => {
+            setOtpCountdown(prev => (prev > 0 ? prev - 1 : 0));
+          }, 1000);
+        }
+        return () => {
+          if (interval) clearInterval(interval);
+        };
+      }, [loginOtpSent, otpCountdown]);
+
+      const formatOtpTimer = (totalSeconds) => {
+        const m = Math.floor(totalSeconds / 60);
+        const s = totalSeconds % 60;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      };
+
       // Multi-step Registration Form State
       const [regStep, setRegStep] = useState(1);
       const [regForm, setRegForm] = useState({ first_name: '', surname: '', dob: '', mobile_number: '', email: '' });
@@ -866,6 +887,7 @@
               setLoginOtpToken(resData.otpToken || '');
               setResendCooldown(resData.resendCooldownSeconds || 30);
               setAttemptsLeft(5);
+              setOtpCountdown(300);
               setAuthSuccessMsg(resData.message || 'OTP has been sent to your registered email. Please check your email inbox.');
             } else {
               setLoginError(resData.message || 'Verification email failed to send.');
@@ -1206,7 +1228,7 @@
                 loginError && e('div', { className: 'mt-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium' },
                   loginError,
                   (loginError.includes('not registered') || loginError.includes('पंजीकृत नहीं')) && e('button', {
-                    onClick: () => { setView('register'); setRegStep(1); setLoginError(''); },
+                    onClick: () => { setView('register'); setRegStep(1); setLoginEmail(''); setLoginError(''); setAuthSuccessMsg(''); },
                     className: 'block mt-1 font-bold text-primary underline'
                   }, 'यहाँ क्लिक करके नया रजिस्ट्रेशन करें ➔')
                 )
@@ -1220,14 +1242,16 @@
 
               e('div', { className: 'mt-4 pt-3 border-t border-slate-800 text-center' },
                 e('span', { className: 'text-xs text-slate-400 font-medium' }, 'New User? '),
-                e('button', { onClick: () => { setView('register'); setRegStep(1); setLoginError(''); }, className: 'text-xs font-bold text-primary hover:underline' }, 'Register Now (नया पंजीकरण करें)')
+                e('button', { onClick: () => { setView('register'); setRegStep(1); setLoginEmail(''); setLoginOtpSent(false); setLoginError(''); setAuthSuccessMsg(''); }, className: 'text-xs font-bold text-primary hover:underline' }, 'Register Now (नया पंजीकरण करें)')
               )
             ) : e('div', { className: 'flex flex-col gap-4 text-left animate-fadeIn' },
               e('div', { className: 'text-center mb-1 bg-navy-950/80 p-3 rounded-2xl border border-indigo-500/30' },
                 e('span', { className: 'text-xs text-slate-400 font-medium' }, 'OTP Sent to Registered Email:'),
                 e('div', { className: 'text-sm font-black text-amber-400 mt-0.5 font-mono break-all' }, loginEmail),
                 e('div', { className: 'text-[11px] font-bold text-emerald-400 mt-1 flex items-center justify-center gap-2' },
-                  e('span', null, '⏱️ Valid for 5 Minutes'),
+                  e('span', { className: `font-mono ${otpCountdown === 0 ? 'text-rose-400 font-black animate-pulse' : 'text-emerald-400 font-bold'}` },
+                    otpCountdown > 0 ? `⏱️ Valid for ${formatOtpTimer(otpCountdown)}` : '⚠️ OTP Expired'
+                  ),
                   attemptsLeft < 5 && e('span', { className: 'text-rose-400 font-mono' }, `(${attemptsLeft}/5 attempts left)`)
                 )
               ),
@@ -1273,10 +1297,12 @@
           e('div', { className: 'w-full max-w-md glass-card p-7 shadow-2xl relative z-10 animate-fadeIn' },
             e('div', { className: 'flex items-center justify-between mb-5 pb-3 border-b border-slate-800' },
               e('div', null,
-                e('h2', { className: 'text-xl font-black text-white' }, 'Join Family-GenApp'),
-                e('p', { className: 'text-xs text-primary font-semibold mt-0.5' }, 'Community User Registration (Role: MEMBER)')
+                e('h2', { className: 'text-xl font-black text-white' }, 'Join Family-GenApp')
               ),
-              e('button', { onClick: () => setView('login'), className: 'px-3 py-1.5 rounded-xl bg-navy-900 text-slate-300 hover:text-white text-xs font-bold border border-slate-700' }, 'लॉगइन पर जाएं')
+              e('button', {
+                onClick: () => { setView('login'); setLoginEmail(''); setLoginOtpSent(false); setLoginError(''); setAuthSuccessMsg(''); },
+                className: 'px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md border border-emerald-400 transition-all'
+              }, 'Sign In')
             ),
 
             regStep === 1 ? e('form', { onSubmit: handleRegSubmitStep1, className: 'flex flex-col gap-3.5 text-xs' },
@@ -1327,9 +1353,10 @@
               e('button', {
                 onClick: () => {
                   setView('login');
-                  setLoginEmail(regForm.email);
+                  setLoginEmail('');
                   setLoginOtpSent(false);
                   setLoginError('');
+                  setAuthSuccessMsg('');
                 },
                 className: 'w-full mt-6 py-4 rounded-2xl btn-gradient text-white font-black text-sm uppercase tracking-wider'
               }, 'Proceed to Email OTP Login ➔')
@@ -1405,7 +1432,10 @@
               ),
               e('div', { className: 'text-[10px] text-amber-300 font-mono' }, currentUser ? currentUser.email : '')
             ),
-            e('button', { onClick: handleLogout, className: 'px-3 py-1.5 rounded-xl bg-navy-900 text-rose-400 border border-slate-800 text-xs font-bold min-h-[40px] hover:bg-rose-950/40' }, 'लॉगआउट')
+            e('button', {
+              onClick: handleLogout,
+              className: 'px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black shadow-md border border-rose-400 min-h-[40px] transition-all'
+            }, 'Sign Out')
           )
         ),
 
@@ -1493,8 +1523,8 @@
 
             e('button', {
               onClick: () => { setIsMobileMenuOpen(false); handleLogout(); },
-              className: 'w-full py-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 font-bold text-xs hover:bg-rose-500/20'
-            }, 'लॉगआउट')
+              className: 'w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs shadow-md border border-rose-400 transition-all'
+            }, 'Sign Out')
           ),
           e('div', { onClick: () => setIsMobileMenuOpen(false), className: 'flex-1 h-full' })
         ),
