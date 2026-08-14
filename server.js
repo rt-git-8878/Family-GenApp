@@ -861,13 +861,13 @@ app.get('/api/tree', (req, res) => {
     memberMap.set(m.id, {
       text: {
         name: m.raw_name || m.full_name,
-        title: m.occupation || m.title || '',
+        title: m.occupation || '',
         DOB: m.dob || undefined
       },
       id: m.id,
       father_id: m.father_id,
-      current_city: m.current_city || 'रीवा (MP)',
-      occupation: m.occupation || m.title || '',
+      current_city: m.current_city || '',
+      occupation: m.occupation || '',
       profile_image: m.profile_image || './default_avatar.png',
       children: []
     });
@@ -1012,7 +1012,8 @@ app.post('/api/pending-requests/:id/approve', (req, res) => {
     dob: reqItem.dob,
     title: '',
     gender: 'Male',
-    occupation: 'बालक / सदस्य',
+    current_city: '',
+    occupation: '',
     profile_image: reqItem.photo_data || './default_avatar.png',
     marriage_note: null,
     marriages_count: 1,
@@ -1113,7 +1114,8 @@ app.post('/api/members/direct-add', (req, res) => {
     dob: dob,
     title: '',
     gender: 'Male',
-    occupation: 'बालक / सदस्य',
+    current_city: '',
+    occupation: '',
     profile_image: photoData || './default_avatar.png',
     marriage_note: null,
     marriages_count: 1,
