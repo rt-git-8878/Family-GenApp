@@ -748,6 +748,8 @@
       // Form Inputs State for Request & Direct Add
       const [formChildName, setFormChildName] = useState('');
       const [formDob, setFormDob] = useState('');
+      const [formCurrentCity, setFormCurrentCity] = useState('');
+      const [formOccupation, setFormOccupation] = useState('');
       const [formFatherSearch, setFormFatherSearch] = useState('');
       const [formSelectedFather, setFormSelectedFather] = useState(null);
       const [formPhotoData, setFormPhotoData] = useState('./default_avatar.png');
@@ -1106,6 +1108,8 @@
           body: JSON.stringify({
             childName: finalFormattedName,
             dob: formDob,
+            currentCity: formCurrentCity.trim(),
+            occupation: formOccupation.trim(),
             fatherId: formSelectedFather.Person_ID,
             fatherName: formSelectedFather.Full_Name,
             photoData: formPhotoData,
@@ -1126,7 +1130,10 @@
               setShowRequestModal(false);
               setFormChildName('');
               setFormDob('');
+              setFormCurrentCity('');
+              setFormOccupation('');
               setFormSelectedFather(null);
+              setFormFatherSearch('');
               setFormPhotoData('./default_avatar.png');
               refreshDataFromDb();
             } else {
@@ -1200,6 +1207,8 @@
           body: JSON.stringify({
             childName: finalFormattedName,
             dob: formDob,
+            currentCity: formCurrentCity.trim(),
+            occupation: formOccupation.trim(),
             fatherId: formSelectedFather.Person_ID,
             photoData: formPhotoData,
             addedBy: `${currentUser.mobile_number} (Rohit Tiwari)`
@@ -1212,7 +1221,10 @@
               setShowDirectAddModal(false);
               setFormChildName('');
               setFormDob('');
+              setFormCurrentCity('');
+              setFormOccupation('');
               setFormSelectedFather(null);
+              setFormFatherSearch('');
               setFormPhotoData('./default_avatar.png');
               refreshDataFromDb();
             }
@@ -2171,6 +2183,30 @@
                 })
               ),
 
+              /* Current City */
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'Current City / वर्तमान शहर'),
+                e('input', {
+                  type: 'text',
+                  value: formCurrentCity,
+                  onChange: ev => setFormCurrentCity(ev.target.value),
+                  placeholder: 'e.g. रीवा / भोपाल / Indore / Delhi',
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-medium outline-none'
+                })
+              ),
+
+              /* Education / Occupation */
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'Education / Occupation (शिक्षा एवं व्यवसाय)'),
+                e('input', {
+                  type: 'text',
+                  value: formOccupation,
+                  onChange: ev => setFormOccupation(ev.target.value),
+                  placeholder: 'e.g. ज्योतिषाचार्य / B.Tech / Senior Software Engineer',
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-medium outline-none'
+                })
+              ),
+
               e('div', null,
                 e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'पिता का नाम खोजें एवं चुनें (Father Selection) *'),
                 e('input', {
@@ -2261,6 +2297,30 @@
                   value: formDob,
                   onChange: val => setFormDob(val),
                   placeholder: 'जन्म तिथि चुनें (Select DOB)'
+                })
+              ),
+
+              /* Current City */
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'Current City / वर्तमान शहर'),
+                e('input', {
+                  type: 'text',
+                  value: formCurrentCity,
+                  onChange: ev => setFormCurrentCity(ev.target.value),
+                  placeholder: 'e.g. रीवा / भोपाल / Indore / Delhi',
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-medium outline-none'
+                })
+              ),
+
+              /* Education / Occupation */
+              e('div', null,
+                e('label', { className: 'block font-bold text-slate-300 mb-1' }, 'Education / Occupation (शिक्षा एवं व्यवसाय)'),
+                e('input', {
+                  type: 'text',
+                  value: formOccupation,
+                  onChange: ev => setFormOccupation(ev.target.value),
+                  placeholder: 'e.g. ज्योतिषाचार्य / B.Tech / Senior Software Engineer',
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-white font-medium outline-none'
                 })
               ),
 

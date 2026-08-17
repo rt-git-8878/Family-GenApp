@@ -973,15 +973,20 @@ app.get('/api/pending-requests', (req, res) => {
 });
 
 app.post('/api/pending-requests', (req, res) => {
-  const { childName, dob, fatherId, fatherName, photoData, requestedBy } = req.body;
-  const db = loadDbStore();
+  const { childName, dob, fatherId, fatherName, photoData, requestedBy, currentCity, occupation } = req.body;
+  if (!childName || !dob || !fatherId) {
+    return res.status(400).json({ success: false, message: 'कृपया सभी आवश्यक विवरण भरें (Child Name, DOB, and Father Selection are required)' });
+  }
 
+  const db = loadDbStore();
   let formattedName = appendTiwariSurname(childName);
 
   const newReq = {
     id: `REQ_${String(db.pending_requests.length + 1).padStart(3, '0')}`,
     child_name: formattedName,
     dob: dob,
+    current_city: currentCity || '',
+    occupation: occupation || '',
     father_id: fatherId,
     father_name: fatherName,
     photo_data: photoData || './default_avatar.png',
@@ -1052,8 +1057,8 @@ app.post('/api/pending-requests/:id/approve', (req, res) => {
     dob: reqItem.dob,
     title: '',
     gender: 'Male',
-    current_city: '',
-    occupation: '',
+    current_city: reqItem.current_city || '',
+    occupation: reqItem.occupation || '',
     profile_image: reqItem.photo_data || './default_avatar.png',
     marriage_note: null,
     marriages_count: 1,
@@ -1135,7 +1140,7 @@ app.post('/api/pending-requests/:id/reject', (req, res) => {
 
 // 7. POST /api/members/direct-add (Super Admin Direct Addition)
 app.post('/api/members/direct-add', (req, res) => {
-  const { childName, dob, fatherId, photoData, addedBy } = req.body;
+  const { childName, dob, fatherId, photoData, addedBy, currentCity, occupation } = req.body;
   const db = loadDbStore();
 
   let finalName = appendTiwariSurname(childName);
@@ -1154,8 +1159,8 @@ app.post('/api/members/direct-add', (req, res) => {
     dob: dob,
     title: '',
     gender: 'Male',
-    current_city: '',
-    occupation: '',
+    current_city: currentCity || '',
+    occupation: occupation || '',
     profile_image: photoData || './default_avatar.png',
     marriage_note: null,
     marriages_count: 1,
