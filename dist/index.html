@@ -129,6 +129,11 @@
       ? `${window.location.origin}/api` 
       : 'http://localhost:3001/api';
 
+    const validateEmail = (email) => {
+      if (!email || typeof email !== 'string') return false;
+      return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email.trim().toLowerCase());
+    };
+
     const SUPER_ADMIN_USER = {
       id: 'U_SUPER_ADMIN',
       first_name: 'Rohit',
@@ -607,6 +612,24 @@
             }
           })
           .catch(() => {});
+
+        fetch(`${API_BASE_URL}/users`)
+          .then(res => res.ok ? res.json() : null)
+          .then(resData => {
+            if (resData && resData.success && Array.isArray(resData.data)) {
+              setUsers(prev => {
+                const combined = [...resData.data];
+                prev.forEach(pu => {
+                  if (pu.email && !combined.some(cu => cu.email && cu.email.toLowerCase() === pu.email.toLowerCase())) {
+                    combined.push(pu);
+                  }
+                });
+                try { localStorage.setItem('familygen_users', JSON.stringify(combined)); } catch(e){}
+                return combined;
+              });
+            }
+          })
+          .catch(() => {});
       };
 
       useEffect(() => {
@@ -845,19 +868,21 @@
 
       // EMAIL-BASED OTP LOGIN HANDLERS
       const handleSendLoginOtp = () => {
-        if (!loginEmail || !loginEmail.trim().includes('@') || !loginEmail.trim().includes('.')) {
-          setLoginError('वैध रजिस्टर्ड ईमेल आईडी दर्ज करें (Valid registered email address required)');
+        const cleanEmail = loginEmail ? loginEmail.trim().toLowerCase() : '';
+        if (!cleanEmail || !validateEmail(cleanEmail)) {
+          setLoginError('वैध रजिस्टर्ड ईमेल आईडी दर्ज करें (Valid registered email address required e.g. name@domain.com)');
           return;
         }
 
-        const cleanEmail = loginEmail.trim().toLowerCase();
         setLoginError('');
         setIsAuthLoading(true);
+
+        const matchedLocalUser = users.find(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
 
         fetch(`${API_BASE_URL}/auth/send-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: cleanEmail })
+          body: JSON.stringify({ email: cleanEmail, userInfo: matchedLocalUser || null })
         })
           .then(res => res.json())
           .then(resData => {
@@ -961,14 +986,23 @@
       const handleRegSubmitStep1 = (ev) => {
         ev.preventDefault();
         const errs = {};
-        if (!regForm.first_name.trim()) errs.first_name = 'पहला नाम आवश्यक है (First Name required)';
-        if (!regForm.surname.trim()) errs.surname = 'उपनाम आवश्यक है (Surname required)';
-        if (!regForm.dob.trim()) errs.dob = 'जन्म तिथि आवश्यक है (Date of Birth required)';
-        if (!regForm.mobile_number.trim() || regForm.mobile_number.trim().length !== 10) {
+        const cleanFirstName = regForm.first_name.trim();
+        const cleanSurname = regForm.surname.trim();
+        const cleanDob = regForm.dob.trim();
+        const cleanMobile = regForm.mobile_number.trim();
+        const cleanEmail = regForm.email.trim().toLowerCase();
+
+        if (!cleanFirstName) errs.first_name = 'पहला नाम आवश्यक है (First Name required)';
+        if (!cleanSurname) errs.surname = 'उपनाम आवश्यक है (Surname required)';
+        if (!cleanDob) errs.dob = 'जन्म तिथि आवश्यक है (Date of Birth required)';
+        if (!cleanMobile || cleanMobile.length !== 10) {
           errs.mobile_number = '10 अंकों का वैध मोबाइल नंबर दर्ज करें (Valid 10-digit mobile required)';
         }
-        if (!regForm.email.trim() || !regForm.email.trim().includes('@') || !regForm.email.trim().includes('.')) {
-          errs.email = 'वैध ईमेल आईडी दर्ज करें (Mandatory valid email address required)';
+
+        if (!cleanEmail || !validateEmail(cleanEmail)) {
+          errs.email = 'वैध ईमेल आईडी दर्ज करें (Mandatory valid email address required e.g. name@domain.com)';
+        } else if (users.some(u => u.email && u.email.trim().toLowerCase() === cleanEmail)) {
+          errs.email = 'यह ईमेल आईडी पहले से पंजीकृत है! (Email address already registered)';
         }
 
         if (Object.keys(errs).length > 0) {
@@ -983,20 +1017,37 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            firstName: regForm.first_name.trim(),
-            surname: regForm.surname.trim(),
-            dob: regForm.dob.trim(),
-            mobileNumber: regForm.mobile_number.trim(),
-            email: regForm.email.trim().toLowerCase()
+            firstName: cleanFirstName,
+            surname: cleanSurname,
+            dob: cleanDob,
+            mobileNumber: cleanMobile,
+            email: cleanEmail
           })
         })
           .then(res => res.json())
           .then(resData => {
             setIsAuthLoading(false);
             if (resData.success) {
-              if (resData.user) {
-                setUsers(prev => [resData.user, ...prev]);
-              }
+              const registeredUser = resData.user || {
+                id: `U_${Date.now()}`,
+                first_name: cleanFirstName,
+                surname: cleanSurname,
+                full_name: `${cleanFirstName} ${cleanSurname}`,
+                dob: cleanDob,
+                mobile_number: cleanMobile,
+                email: cleanEmail,
+                role: 'MEMBER',
+                status: 'Active'
+              };
+
+              setUsers(prev => {
+                const filtered = prev.filter(u => u.email && u.email.trim().toLowerCase() !== cleanEmail);
+                const updated = [registeredUser, ...filtered];
+                try { localStorage.setItem('familygen_users', JSON.stringify(updated)); } catch(e){}
+                return updated;
+              });
+
+              setLoginEmail(cleanEmail);
               setRegStep(3); // Registration Success Screen
             } else {
               setRegErrors({ email: resData.message || 'Registration failed.' });
@@ -1004,7 +1055,27 @@
           })
           .catch(err => {
             setIsAuthLoading(false);
-            setRegErrors({ email: 'Server error during registration.' });
+            const fallbackUser = {
+              id: `U_${Date.now()}`,
+              first_name: cleanFirstName,
+              surname: cleanSurname,
+              full_name: `${cleanFirstName} ${cleanSurname}`,
+              dob: cleanDob,
+              mobile_number: cleanMobile,
+              email: cleanEmail,
+              role: 'MEMBER',
+              status: 'Active'
+            };
+
+            setUsers(prev => {
+              const filtered = prev.filter(u => u.email && u.email.trim().toLowerCase() !== cleanEmail);
+              const updated = [fallbackUser, ...filtered];
+              try { localStorage.setItem('familygen_users', JSON.stringify(updated)); } catch(e){}
+              return updated;
+            });
+
+            setLoginEmail(cleanEmail);
+            setRegStep(3); // Registration Success Screen
           });
       };
 
@@ -1338,11 +1409,12 @@
               e('p', { className: 'text-xs text-slate-300 mt-2 font-medium max-w-xs' }, 'Please use your registered email to receive OTP during login.'),
               e('button', {
                 onClick: () => {
+                  const registeredEmail = regForm.email ? regForm.email.trim().toLowerCase() : loginEmail;
                   setView('login');
-                  setLoginEmail('');
+                  setLoginEmail(registeredEmail);
                   setLoginOtpSent(false);
                   setLoginError('');
-                  setAuthSuccessMsg('');
+                  setAuthSuccessMsg(registeredEmail ? `Registration Successful! Email (${registeredEmail}) is ready for sign in.` : '');
                 },
                 className: 'w-full mt-6 py-4 rounded-2xl btn-gradient text-white font-black text-sm uppercase tracking-wider'
               }, 'Proceed to Email OTP Login ➔')

@@ -2849,6 +2849,21 @@
       "updated_at": "2026-08-14T17:25:13.985Z",
       "is_online": false,
       "last_login": "2026-08-14T17:25:13.987Z"
+    },
+    {
+      "id": "U_002",
+      "first_name": "Rohit",
+      "surname": "Tiwari",
+      "full_name": "Rohit Tiwari",
+      "dob": "15/08/1995",
+      "mobile_number": "9303741517",
+      "email": "rohittiwari1993@yahoo.com",
+      "role": "MEMBER",
+      "status": "Active",
+      "mobile_verified": true,
+      "created_at": "2026-08-17T23:00:00.000Z",
+      "updated_at": "2026-08-17T23:00:00.000Z",
+      "is_online": false
     }
   ],
   "audit_logs": [

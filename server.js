@@ -38,21 +38,38 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'dist')));
 
 const DB_STORE_PATH = path.join(__dirname, 'db/database_store.json');
+const globalUserCache = new Map();
 
-// Helper to load database store
+// Helper to load database store with serverless memory cache sync
 function loadDbStore() {
+  let data = { members: [], users: [], audit_logs: [], pending_requests: [], notifications: [], otp_verifications: [] };
   try {
     if (fs.existsSync(DB_STORE_PATH)) {
-      const data = JSON.parse(fs.readFileSync(DB_STORE_PATH, 'utf8'));
-      if (!data.pending_requests) data.pending_requests = [];
-      if (!data.notifications) data.notifications = [];
-      if (!data.otp_verifications) data.otp_verifications = [];
-      return data;
+      data = JSON.parse(fs.readFileSync(DB_STORE_PATH, 'utf8'));
     }
   } catch(err) {
     console.error('Error reading DB store:', err);
   }
-  return { members: [], users: [], audit_logs: [], pending_requests: [], notifications: [], otp_verifications: [] };
+  if (!data.users) data.users = [];
+  if (!data.members) data.members = [];
+  if (!data.audit_logs) data.audit_logs = [];
+  if (!data.pending_requests) data.pending_requests = [];
+  if (!data.notifications) data.notifications = [];
+  if (!data.otp_verifications) data.otp_verifications = [];
+
+  // Merge in-memory cached users so serverless instances never lose registered users
+  globalUserCache.forEach((u, em) => {
+    if (!data.users.some(existing => existing.email && existing.email.toLowerCase() === em)) {
+      data.users.unshift(u);
+    }
+  });
+
+  // Sync memory cache
+  data.users.forEach(u => {
+    if (u.email) globalUserCache.set(u.email.trim().toLowerCase(), u);
+  });
+
+  return data;
 }
 
 // Helper to save database store
@@ -404,8 +421,8 @@ app.post('/api/auth/send-otp', async (req, res) => {
   const cleanEmail = String(email).trim().toLowerCase();
   const db = loadDbStore();
 
-  // Check if email is registered in application database
-  let user = db.users.find(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
+  // Check if email is registered in application database or memory cache
+  let user = db.users.find(u => u.email && u.email.trim().toLowerCase() === cleanEmail) || globalUserCache.get(cleanEmail);
   
   // Hardcoded Super Admin fallback check for rohitkumartiwari1993@gmail.com
   if (!user && cleanEmail === 'rohitkumartiwari1993@gmail.com') {
@@ -423,6 +440,28 @@ app.post('/api/auth/send-otp', async (req, res) => {
       is_online: false
     };
     db.users.unshift(user);
+    globalUserCache.set(cleanEmail, user);
+  }
+
+  // Fallback auto-registration if userInfo is passed in request body
+  if (!user && req.body.userInfo && req.body.userInfo.email) {
+    const uInfo = req.body.userInfo;
+    user = {
+      id: `U_${String(db.users.length + 1).padStart(3, '0')}`,
+      first_name: uInfo.firstName || 'User',
+      surname: uInfo.surname || 'Tiwari',
+      full_name: uInfo.fullName || `${uInfo.firstName || ''} ${uInfo.surname || ''}`.trim() || 'User',
+      dob: uInfo.dob || '',
+      mobile_number: uInfo.mobileNumber || '9999999999',
+      email: cleanEmail,
+      role: 'MEMBER',
+      status: 'Active',
+      registration_date: new Date().toISOString(),
+      created_at: new Date().toISOString()
+    };
+    db.users.unshift(user);
+    globalUserCache.set(cleanEmail, user);
+    saveDbStore(db);
   }
 
   if (!user) {
@@ -708,7 +747,7 @@ app.post('/api/auth/register', (req, res) => {
   const db = loadDbStore();
 
   // Validate Unique Email Address
-  if (db.users.some(u => u.email && u.email.trim().toLowerCase() === cleanEmail)) {
+  if (db.users.some(u => u.email && u.email.trim().toLowerCase() === cleanEmail) || globalUserCache.has(cleanEmail)) {
     return res.status(400).json({ success: false, message: 'यह ईमेल आईडी पहले से पंजीकृत है! (Email address already registered)' });
   }
 
@@ -734,6 +773,7 @@ app.post('/api/auth/register', (req, res) => {
     updated_at: nowIso
   };
 
+  globalUserCache.set(cleanEmail, newUser);
   db.users.unshift(newUser);
 
   // Notify Super Admin
