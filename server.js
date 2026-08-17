@@ -72,6 +72,31 @@ function loadDbStore() {
   return data;
 }
 
+// Helper to expire stale online sessions (> 35 seconds of inactivity)
+function cleanStaleSessions(db) {
+  const STALE_TIMEOUT_MS = 35 * 1000; // 35 seconds
+  const now = Date.now();
+  let changed = false;
+
+  if (db && Array.isArray(db.users)) {
+    db.users.forEach(u => {
+      if (u.is_online) {
+        const lastActivity = u.last_login ? new Date(u.last_login).getTime() : 0;
+        if (now - lastActivity > STALE_TIMEOUT_MS) {
+          u.is_online = false;
+          if (u.email) globalUserCache.set(u.email.trim().toLowerCase(), u);
+          changed = true;
+        }
+      }
+    });
+  }
+
+  if (changed) {
+    saveDbStore(db);
+  }
+  return changed;
+}
+
 // Helper to save database store
 function saveDbStore(data) {
   try {
@@ -807,21 +832,34 @@ app.post('/api/auth/register', (req, res) => {
   });
 });
 
-// AUTH ROUTE 5: POST /api/auth/logout (MARKS USER OFFLINE)
+// AUTH ROUTE 5: POST /api/auth/logout (MARKS USER OFFLINE INSTANTLY)
 app.post('/api/auth/logout', (req, res) => {
-  const { email, userId } = req.body;
+  let email = req.body ? req.body.email : null;
+  let userId = req.body ? req.body.userId : null;
+
+  // Support text payload from sendBeacon
+  if (!email && typeof req.body === 'string') {
+    try {
+      const parsed = JSON.parse(req.body);
+      email = parsed.email;
+      userId = parsed.userId;
+    } catch(e){}
+  }
+
   const db = loadDbStore();
 
   let user = null;
-  if (email) user = db.users.find(u => u.email && u.email.trim().toLowerCase() === String(email).trim().toLowerCase());
+  if (email) user = db.users.find(u => u.email && u.email.trim().toLowerCase() === String(email).trim().toLowerCase()) || globalUserCache.get(String(email).trim().toLowerCase());
   else if (userId) user = db.users.find(u => u.id === userId);
 
   if (user) {
     user.is_online = false;
     user.updated_at = new Date().toISOString();
+    if (user.email) globalUserCache.set(user.email.trim().toLowerCase(), user);
     saveDbStore(db);
   }
 
+  cleanStaleSessions(db);
   res.json({ success: true, message: 'User logged out and marked OFFLINE.' });
 });
 
@@ -831,24 +869,16 @@ app.post('/api/auth/heartbeat', (req, res) => {
   const db = loadDbStore();
 
   let activeUser = null;
-  if (email) activeUser = db.users.find(u => u.email && u.email.trim().toLowerCase() === String(email).trim().toLowerCase());
+  if (email) activeUser = db.users.find(u => u.email && u.email.trim().toLowerCase() === String(email).trim().toLowerCase()) || globalUserCache.get(String(email).trim().toLowerCase());
   else if (userId) activeUser = db.users.find(u => u.id === userId);
 
   if (activeUser) {
     activeUser.is_online = true;
     activeUser.last_login = new Date().toISOString();
+    if (activeUser.email) globalUserCache.set(activeUser.email.trim().toLowerCase(), activeUser);
   }
 
-  // Clear stale sessions (> 15 minutes of inactivity)
-  const fifteenMinsAgo = Date.now() - (15 * 60 * 1000);
-  db.users.forEach(u => {
-    if (u.is_online && u.last_login && new Date(u.last_login).getTime() < fifteenMinsAgo) {
-      if (!activeUser || activeUser.id !== u.id) {
-        u.is_online = false;
-      }
-    }
-  });
-
+  cleanStaleSessions(db);
   saveDbStore(db);
 
   res.json({
@@ -1236,6 +1266,7 @@ app.put('/api/members/:id', (req, res) => {
 // 9. GET /api/users & POST /api/users/promote
 app.get('/api/users', (req, res) => {
   const db = loadDbStore();
+  cleanStaleSessions(db);
   res.json({
     success: true,
     count: db.users.length,

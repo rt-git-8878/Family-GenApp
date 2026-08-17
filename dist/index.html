@@ -771,7 +771,7 @@
         }
       }, [resendCooldown]);
 
-      // Real-Time Heartbeat & Online Status Sync Effect (Every 20 Seconds)
+      // Real-Time Heartbeat & Online Status Sync Effect (Every 12 Seconds)
       useEffect(() => {
         if (!currentUser || !currentUser.email) return;
 
@@ -791,8 +791,34 @@
         };
 
         pingHeartbeat();
-        const intervalId = setInterval(pingHeartbeat, 20000);
-        return () => clearInterval(intervalId);
+        const intervalId = setInterval(pingHeartbeat, 12000);
+
+        // Instant Tab Closing & Unload Handler (Sends instant logout beacon when tab/browser is closed)
+        const sendLogoutBeacon = () => {
+          try {
+            const payload = JSON.stringify({ email: currentUser.email, userId: currentUser.id });
+            if (navigator.sendBeacon) {
+              const blob = new Blob([payload], { type: 'application/json' });
+              navigator.sendBeacon(`${API_BASE_URL}/auth/logout`, blob);
+            } else {
+              fetch(`${API_BASE_URL}/auth/logout`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: payload,
+                keepalive: true
+              }).catch(() => {});
+            }
+          } catch(e){}
+        };
+
+        window.addEventListener('beforeunload', sendLogoutBeacon);
+        window.addEventListener('pagehide', sendLogoutBeacon);
+
+        return () => {
+          clearInterval(intervalId);
+          window.removeEventListener('beforeunload', sendLogoutBeacon);
+          window.removeEventListener('pagehide', sendLogoutBeacon);
+        };
       }, [currentUser]);
 
       const showToast = (msg) => {
