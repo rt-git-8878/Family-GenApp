@@ -40,7 +40,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <!-- Standalone React 18 & ReactDOM 18 Local Bundle with CDN Fallback -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="./vendor/react.bundle.js"></script>
   <script>
     if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
@@ -108,10 +107,7 @@
 </head>
 <body class="bg-[#050B20] text-slate-100 antialiased selection:bg-indigo-500 selection:text-white overflow-x-hidden min-h-screen">
 
-  <!-- 3D Interactive Constellation/Particle Background Canvas -->
-  <div id="canvas-3d-bg" class="fixed inset-0 pointer-events-none z-0 opacity-70"></div>
-
-  <div id="root" class="relative z-10">
+  <div id="root">
     <div class="min-h-screen flex flex-col items-center justify-center p-4 text-center">
       <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-indigo-500/30 mb-3 animate-bounce">
         F
@@ -725,93 +721,7 @@
         return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
       };
 
-      // Relation Calculator State
-      const [relPerson1Id, setRelPerson1Id] = useState('');
-      const [relPerson2Id, setRelPerson2Id] = useState('');
-      const [relResult, setRelResult] = useState(null);
 
-      // Relationship Calculation Helper (BFS Traversal over Lineage Network)
-      const calculateRelationship = (p1Id, p2Id) => {
-        if (!p1Id || !p2Id) return null;
-        if (p1Id === p2Id) return { hindiTitle: 'स्वयं (Self)', path: [memberMap.get(p1Id)] };
-
-        const p1 = memberMap.get(p1Id);
-        const p2 = memberMap.get(p2Id);
-        if (!p1 || !p2) return null;
-
-        const adj = new Map();
-        members.forEach(m => {
-          if (!adj.has(m.Person_ID)) adj.set(m.Person_ID, []);
-        });
-
-        members.forEach(m => {
-          if (m.Father_ID && adj.has(m.Father_ID)) {
-            adj.get(m.Person_ID).push(m.Father_ID);
-            adj.get(m.Father_ID).push(m.Person_ID);
-          }
-          if (m.Spouse_ID && adj.has(m.Spouse_ID)) {
-            adj.get(m.Person_ID).push(m.Spouse_ID);
-          }
-        });
-
-        const queue = [[p1Id]];
-        const visited = new Set([p1Id]);
-        let foundPath = null;
-
-        while (queue.length > 0) {
-          const path = queue.shift();
-          const curr = path[path.length - 1];
-
-          if (curr === p2Id) {
-            foundPath = path;
-            break;
-          }
-
-          const neighbors = adj.get(curr) || [];
-          for (const nextId of neighbors) {
-            if (!visited.has(nextId)) {
-              visited.add(nextId);
-              queue.push([...path, nextId]);
-            }
-          }
-        }
-
-        if (!foundPath) return { hindiTitle: 'कोई प्रत्यक्ष वंश संबंध नहीं मिला (No direct lineage path)', path: [] };
-
-        const pathNodes = foundPath.map(id => memberMap.get(id));
-        const len = foundPath.length;
-        const p1Name = p1.Full_Name;
-        const p2Name = p2.Full_Name;
-
-        let relationStr = '';
-
-        if (len === 2) {
-          if (p2.Father_ID === p1.Person_ID) relationStr = p2.Gender === 'F' ? 'पिता - पुत्री (Father - Daughter)' : 'पिता - पुत्र (Father - Son)';
-          else if (p1.Father_ID === p2.Person_ID) relationStr = p1.Gender === 'F' ? 'पुत्री - पिता (Daughter - Father)' : 'पुत्र - पिता (Son - Father)';
-          else if (p1.Spouse_ID === p2.Person_ID || p2.Spouse_ID === p1.Person_ID) relationStr = 'पति - पत्नी (Husband - Wife)';
-          else relationStr = 'प्रत्यक्ष सम्बन्धी (Direct Lineage Relative)';
-        } else if (len === 3) {
-          if (p1.Father_ID && p2.Father_ID && p1.Father_ID === p2.Father_ID) {
-            relationStr = (p1.Gender === 'F' || p2.Gender === 'F') ? 'भाई - बहन (Brother - Sister)' : 'सहोदर भाई (Brothers)';
-          } else if (p2.Father_ID && memberMap.get(p2.Father_ID) && memberMap.get(p2.Father_ID).Father_ID === p1.Person_ID) {
-            relationStr = p2.Gender === 'F' ? 'दादा - पोती (Grandfather - Granddaughter)' : 'दादा - पोता (Grandfather - Grandson)';
-          } else if (p1.Father_ID && memberMap.get(p1.Father_ID) && memberMap.get(p1.Father_ID).Father_ID === p2.Person_ID) {
-            relationStr = p1.Gender === 'F' ? 'पोती - दादा (Granddaughter - Grandfather)' : 'पोता - दादा (Grandson - Grandfather)';
-          } else {
-            relationStr = `पारिवारिक सम्बन्धी (${len - 1} पीढ़ी की दूरी)`;
-          }
-        } else if (len === 4) {
-          if (p2.Father_ID && memberMap.get(p2.Father_ID) && memberMap.get(p2.Father_ID).Father_ID === p1.Father_ID) {
-            relationStr = p2.Gender === 'F' ? 'चाचा - भतीजी (Uncle - Niece)' : 'चाचा - भतीजा (Uncle - Nephew)';
-          } else {
-            relationStr = `पारिवारिक वंशज (Lineage Distance: ${len - 1} Steps)`;
-          }
-        } else {
-          relationStr = `वंशज सम्बन्धी (${len - 1} पीढ़ियों का नाता)`;
-        }
-
-        return { hindiTitle: `${p1Name} ➔ ${p2Name}: ${relationStr}`, path: pathNodes };
-      };
 
       // Multi-step Registration Form State
       const [regStep, setRegStep] = useState(1);
@@ -1733,7 +1643,6 @@
 
             e('button', { onClick: () => setActiveTab('directory'), className: `px-4 py-2 rounded-xl text-xs font-bold ${activeTab === 'directory' ? 'bg-primary text-white' : 'text-slate-400 hover:text-white'}` }, `📂 निर्देशिका (${members.length})`),
             e('button', { onClick: () => setActiveTab('hierarchy_tree'), className: `px-4 py-2 rounded-xl text-xs font-bold ${activeTab === 'hierarchy_tree' ? 'bg-primary text-white' : 'text-slate-400 hover:text-white'}` }, '🌲 संपूर्ण वंशावली वृक्ष'),
-            e('button', { onClick: () => setActiveTab('relation'), className: `px-4 py-2 rounded-xl text-xs font-bold ${activeTab === 'relation' ? 'bg-purple-600 text-white' : 'text-purple-300 hover:text-white bg-purple-950/40 border border-purple-500/30'}` }, '🤝 हमारा नाता'),
             
             isSuperAdmin && e('button', {
               onClick: () => setActiveTab('pending_requests'),
@@ -2161,93 +2070,7 @@
             )
           ),
 
-          /* TAB 8: RELATION CALCULATOR ("हमारा नाता") */
-          activeTab === 'relation' && e('div', { className: 'glass-card p-6 animate-fadeIn flex flex-col gap-6 border-l-4 border-l-purple-500' },
-            e('div', { className: 'pb-3 border-b border-slate-800' },
-              e('h2', { className: 'text-xl font-black text-white flex items-center gap-2' },
-                e('span', { className: 'text-purple-400' }, '🤝'),
-                'वंश संबंध कैलकुलेटर (Relationship Calculator)'
-              ),
-              e('p', { className: 'text-xs text-slate-400 mt-1' }, 'किन्हीं 2 वंशावली सदस्यों का चयन करें और उनके बीच का सटीक संबंध (नाता) देखें')
-            ),
 
-            /* Selectors Grid */
-            e('div', { className: 'grid grid-cols-1 md:grid-cols-5 gap-4 items-center' },
-              /* Person 1 Selector */
-              e('div', { className: 'md:col-span-2 flex flex-col gap-1.5' },
-                e('label', { className: 'text-xs font-bold text-indigo-300' }, 'प्रथम सदस्य (Person 1):'),
-                e('select', {
-                  value: relPerson1Id,
-                  onChange: ev => setRelPerson1Id(ev.target.value),
-                  className: 'w-full p-3 bg-navy-950 border-2 border-indigo-500/40 rounded-xl text-white font-bold text-xs outline-none focus:border-indigo-400'
-                },
-                  e('option', { value: '' }, '-- पहला सदस्य चुनें (Select Person 1) --'),
-                  members.map(m => e('option', { key: m.Person_ID, value: m.Person_ID }, `${m.Full_Name} (Gen P${m.Generation_Level})`))
-                )
-              ),
-
-              /* Swap Button */
-              e('div', { className: 'md:col-span-1 flex justify-center' },
-                e('button', {
-                  onClick: () => {
-                    const temp = relPerson1Id;
-                    setRelPerson1Id(relPerson2Id);
-                    setRelPerson2Id(temp);
-                  },
-                  className: 'w-12 h-12 rounded-full bg-navy-900 border-2 border-slate-700 text-slate-300 hover:text-white hover:border-purple-400 flex items-center justify-center text-lg font-black shadow-lg transition-transform active:scale-95'
-                }, '⇄')
-              ),
-
-              /* Person 2 Selector */
-              e('div', { className: 'md:col-span-2 flex flex-col gap-1.5' },
-                e('label', { className: 'text-xs font-bold text-purple-300' }, 'द्वितीय सदस्य (Person 2):'),
-                e('select', {
-                  value: relPerson2Id,
-                  onChange: ev => setRelPerson2Id(ev.target.value),
-                  className: 'w-full p-3 bg-navy-950 border-2 border-purple-500/40 rounded-xl text-white font-bold text-xs outline-none focus:border-purple-400'
-                },
-                  e('option', { value: '' }, '-- दूसरा सदस्य चुनें (Select Person 2) --'),
-                  members.map(m => e('option', { key: m.Person_ID, value: m.Person_ID }, `${m.Full_Name} (Gen P${m.Generation_Level})`))
-                )
-              )
-            ),
-
-            /* Action Button */
-            e('div', { className: 'flex justify-center mt-2' },
-              e('button', {
-                onClick: () => {
-                  const res = calculateRelationship(relPerson1Id, relPerson2Id);
-                  setRelResult(res);
-                },
-                className: 'px-8 py-3 rounded-2xl btn-gradient text-white font-black text-sm uppercase tracking-wider shadow-xl hover:scale-105 transition-all'
-              }, '🔍 संबंध जानें (Calculate Relation)')
-            ),
-
-            /* Relation Result Cards */
-            relResult && e('div', { className: 'mt-4 p-5 rounded-2xl bg-navy-950 border-2 border-purple-500/50 shadow-2xl flex flex-col gap-4 animate-fadeIn' },
-              e('div', { className: 'text-center' },
-                e('span', { className: 'text-[11px] font-extrabold px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 uppercase tracking-widest' }, 'सटीक वंशावली नाता (Calculated Relationship)'),
-                e('h3', { className: 'text-xl sm:text-2xl font-black text-amber-400 mt-2' }, relResult.hindiTitle)
-              ),
-
-              /* Visual Lineage Path Bridge */
-              relResult.path && relResult.path.length > 0 && e('div', { className: 'pt-4 border-t border-slate-800/80' },
-                e('h4', { className: 'text-xs font-bold text-slate-400 mb-3 text-center uppercase tracking-wider' }, 'वंशावली कनेक्शन ब्रिज (Lineage Connection Bridge):'),
-                e('div', { className: 'flex flex-wrap items-center justify-center gap-2 sm:gap-3' },
-                  relResult.path.map((m, idx) => e('div', { key: m.Person_ID, className: 'flex items-center gap-2' },
-                    e('div', { className: 'flex items-center gap-2 px-3 py-2 rounded-xl bg-navy-900 border border-slate-800 shadow-md' },
-                      e(AvatarWithPreview, { src: m.Profile_Image, name: m.Full_Name, className: 'w-8 h-8 rounded-full object-cover border border-purple-400/40' }),
-                      e('div', null,
-                        e('div', { className: 'text-xs font-bold text-white' }, m.Full_Name),
-                        e('div', { className: 'text-[9px] text-purple-300 font-mono' }, `Gen P${m.Generation_Level}`)
-                      )
-                    ),
-                    idx < relResult.path.length - 1 && e('span', { className: 'text-purple-400 font-black text-sm' }, '➔')
-                  ))
-                )
-              )
-            )
-          ),
 
           /* TAB 7: 5-GENERATION TREE */
           activeTab === 'tree' && (()=>{
@@ -2718,135 +2541,6 @@
       }
     })();
   </script>
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const container = document.getElementById('canvas-3d-bg');
-      if (!container) return;
 
-      let scene, camera, renderer, particles, linesMesh;
-      const particleCount = window.innerWidth < 768 ? 45 : 85;
-      const maxDistance = window.innerWidth < 768 ? 90 : 130;
-      const positions = new Float32Array(particleCount * 3);
-      const velocities = [];
-
-      let mouseX = 0, mouseY = 0;
-      let targetX = 0, targetY = 0;
-
-      function init3D() {
-        if (typeof THREE === 'undefined') return;
-
-        scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
-        camera.position.z = 220;
-
-        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        container.appendChild(renderer.domElement);
-
-        for (let i = 0; i < particleCount; i++) {
-          const x = (Math.random() - 0.5) * 400;
-          const y = (Math.random() - 0.5) * 400;
-          const z = (Math.random() - 0.5) * 200;
-
-          positions[i * 3] = x;
-          positions[i * 3 + 1] = y;
-          positions[i * 3 + 2] = z;
-
-          velocities.push({
-            x: (Math.random() - 0.5) * 0.35,
-            y: (Math.random() - 0.5) * 0.35,
-            z: (Math.random() - 0.5) * 0.15
-          });
-        }
-
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-        const pMaterial = new THREE.PointsMaterial({
-          color: 0x8b5cf6,
-          size: 3.5,
-          transparent: true,
-          opacity: 0.85
-        });
-
-        particles = new THREE.Points(geometry, pMaterial);
-        scene.add(particles);
-
-        const linesGeometry = new THREE.BufferGeometry();
-        const lineMaterial = new THREE.LineBasicMaterial({
-          color: 0x5c6cff,
-          transparent: true,
-          opacity: 0.25
-        });
-        linesMesh = new THREE.LineSegments(linesGeometry, lineMaterial);
-        scene.add(linesMesh);
-
-        window.addEventListener('mousemove', (e) => {
-          mouseX = (e.clientX - window.innerWidth / 2) * 0.05;
-          mouseY = (e.clientY - window.innerHeight / 2) * 0.05;
-        });
-
-        window.addEventListener('resize', () => {
-          camera.aspect = window.innerWidth / window.innerHeight;
-          camera.updateProjectionMatrix();
-          renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        animate();
-      }
-
-      function animate() {
-        requestAnimationFrame(animate);
-
-        targetX += (mouseX - targetX) * 0.05;
-        targetY += (mouseY - targetY) * 0.05;
-
-        camera.position.x = targetX;
-        camera.position.y = -targetY;
-        camera.lookAt(scene.position);
-
-        const pos = particles.geometry.attributes.position.array;
-        const linePositions = [];
-
-        for (let i = 0; i < particleCount; i++) {
-          pos[i * 3] += velocities[i].x;
-          pos[i * 3 + 1] += velocities[i].y;
-          pos[i * 3 + 2] += velocities[i].z;
-
-          if (pos[i * 3] < -200 || pos[i * 3] > 200) velocities[i].x *= -1;
-          if (pos[i * 3 + 1] < -200 || pos[i * 3 + 1] > 200) velocities[i].y *= -1;
-          if (pos[i * 3 + 2] < -100 || pos[i * 3 + 2] > 100) velocities[i].z *= -1;
-
-          for (let j = i + 1; j < particleCount; j++) {
-            const dx = pos[i * 3] - pos[j * 3];
-            const dy = pos[i * 3 + 1] - pos[j * 3 + 1];
-            const dz = pos[i * 3 + 2] - pos[j * 3 + 2];
-            const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-
-            if (dist < maxDistance) {
-              linePositions.push(pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2]);
-              linePositions.push(pos[j * 3], pos[j * 3 + 1], pos[j * 3 + 2]);
-            }
-          }
-        }
-
-        particles.geometry.attributes.position.needsUpdate = true;
-
-        linesMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
-
-        renderer.render(scene, camera);
-      }
-
-      if (typeof THREE !== 'undefined') {
-        init3D();
-      } else {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-        script.onload = init3D;
-        document.head.appendChild(script);
-      }
-    });
-  </script>
 </body>
 </html>
