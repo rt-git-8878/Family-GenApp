@@ -20,15 +20,32 @@
       theme: {
         extend: {
           colors: {
-            navy: {
-              950: '#050B20',
-              900: '#0C1838',
-              800: '#14244E',
-              700: '#1E3266',
+            maroon: {
+              950: '#100714',
+              900: '#1B0B20',
+              800: '#270F2E',
+              700: '#3D1546',
+              600: '#5C1A4A',
             },
-            primary: '#5C6CFF',
-            secondary: '#8B5CF6',
-            accent: '#38BDF8',
+            amber: {
+              500: '#D97706',
+              400: '#F59E0B',
+              300: '#FBBF24',
+              200: '#FDE68A',
+              100: '#FEF3C7',
+              50: '#FFFBEB',
+            },
+            cream: '#FAF5EF',
+            heritage: '#881337',
+            navy: {
+              950: '#100714',
+              900: '#1B0B20',
+              800: '#270F2E',
+              700: '#3D1546',
+            },
+            primary: '#D97706',
+            secondary: '#BE123C',
+            accent: '#F59E0B',
             birthday: '#F59E0B',
           }
         }
@@ -37,7 +54,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <!-- Standalone React 18 & ReactDOM 18 Local Bundle with CDN Fallback -->
   <script src="./vendor/react.bundle.js"></script>
@@ -50,9 +67,9 @@
 
   <style>
     body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #050B20;
-      color: #F8FAFC;
+      font-family: 'Poppins', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #100714;
+      color: #FAF5EF;
       -webkit-tap-highlight-color: transparent;
     }
     @keyframes fadeIn {
@@ -73,22 +90,30 @@
     .animate-successBounce { animation: successBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
     
     .glass-card {
-      background: linear-gradient(135deg, rgba(12, 24, 56, 0.98) 0%, rgba(8, 16, 40, 0.99) 100%);
-      border: 1px solid rgba(92, 108, 255, 0.25);
+      background: linear-gradient(135deg, rgba(27, 11, 32, 0.98) 0%, rgba(16, 7, 20, 0.99) 100%);
+      border: 1px solid rgba(217, 119, 6, 0.28);
       border-radius: 24px;
-      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6);
     }
-    .btn-gradient {
-      background: linear-gradient(135deg, #5C6CFF 0%, #8B5CF6 100%);
-      box-shadow: 0 8px 20px -6px rgba(92, 108, 255, 0.45);
+    .glass-card-hover {
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .btn-gradient:hover {
-      background: linear-gradient(135deg, #4A5BFF 0%, #7C4DFF 100%);
-      box-shadow: 0 12px 25px -4px rgba(92, 108, 255, 0.6);
+    .glass-card-hover:hover {
+      transform: translateY(-4px);
+      border-color: rgba(245, 158, 11, 0.55);
+      box-shadow: 0 16px 36px -8px rgba(136, 19, 55, 0.45);
+    }
+    .btn-gradient, .btn-warm {
+      background: linear-gradient(135deg, #D97706 0%, #BE123C 100%);
+      box-shadow: 0 8px 20px -6px rgba(217, 119, 6, 0.45);
+    }
+    .btn-gradient:hover, .btn-warm:hover {
+      background: linear-gradient(135deg, #F59E0B 0%, #E11D48 100%);
+      box-shadow: 0 12px 25px -4px rgba(245, 158, 11, 0.6);
     }
     
     .tree-connector-line {
-      border-left: 1.5px dashed rgba(92, 108, 255, 0.4);
+      border-left: 1.5px dashed rgba(217, 119, 6, 0.4);
     }
 
     .modal-backdrop {
@@ -99,13 +124,13 @@
       align-items: center;
       justify-content: center;
       padding: 1rem;
-      background-color: rgba(5, 11, 32, 0.85);
+      background-color: rgba(16, 7, 20, 0.88);
     }
 
   </style>
 </head>
 </head>
-<body class="bg-[#050B20] text-slate-100 antialiased selection:bg-indigo-500 selection:text-white overflow-x-hidden min-h-screen">
+<body class="bg-[#100714] text-slate-100 antialiased selection:bg-amber-500 selection:text-white overflow-x-hidden min-h-screen">
 
   <div id="root">
     <div class="min-h-screen flex flex-col items-center justify-center p-4 text-center">
@@ -587,6 +612,19 @@
     function App() {
       const [treeSourceData, setTreeSourceData] = useState([]);
       const [dbConnected, setDbConnected] = useState(false);
+
+      // Multilingual State (Hindi & English)
+      const [lang, setLang] = useState(() => {
+        try { return localStorage.getItem('familygen_lang') || 'hi'; } catch(e) { return 'hi'; }
+      });
+
+      const toggleLang = () => {
+        const nextLang = lang === 'hi' ? 'en' : 'hi';
+        setLang(nextLang);
+        try { localStorage.setItem('familygen_lang', nextLang); } catch(e){}
+      };
+
+      const t = (hiStr, enStr) => (lang === 'en' ? enStr : hiStr);
 
       // Pending Birth Requests State
       const [pendingRequests, setPendingRequests] = useState([]);
@@ -1495,64 +1533,78 @@
           `🔔 ${toastMsg}`
         ),
 
-        /* Header with Responsive Hamburger Menu */
-        e('header', { className: 'sticky top-0 z-40 bg-navy-950/95 border-b border-slate-800 px-4 py-3 max-w-6xl mx-auto w-full flex items-center justify-between' },
-          e('div', { className: 'flex items-center gap-3' },
-            /* Mobile Hamburger Toggle Button */
-            e('button', {
-              onClick: () => setIsMobileMenuOpen(true),
-              className: 'p-2 rounded-xl bg-navy-900 border border-slate-800 text-slate-300 hover:text-white md:hidden text-lg font-black min-h-[44px] min-w-[44px] flex items-center justify-center'
-            }, '☰'),
+        /* Desktop Header & Language Toggle */
+        e('header', { className: 'sticky top-0 z-40 bg-navy-950/90 backdrop-blur-md border-b border-amber-500/30 px-4 py-3 shadow-xl' },
+          e('div', { className: 'max-w-6xl mx-auto flex items-center justify-between' },
+            e('div', { className: 'flex items-center gap-3' },
+              /* Mobile Hamburger Toggle Button */
+              e('button', {
+                onClick: () => setIsMobileMenuOpen(true),
+                className: 'p-2 rounded-xl bg-navy-900 border border-amber-500/30 text-amber-300 hover:text-white md:hidden text-lg font-black min-h-[44px] min-w-[44px] flex items-center justify-center'
+              }, '☰'),
 
-            e('img', { src: './FamilyFavicon.gif', alt: 'Logo', className: 'w-9 h-9 object-contain rounded-xl border border-primary/40 shadow-md bg-navy-900 p-0.5' }),
-            e('div', null,
-              e('h1', { className: 'text-sm sm:text-base font-black text-white leading-tight' }, 'Family-GenApp'),
-              e('div', { className: 'flex items-center gap-1.5 mt-0.5' },
-                e('span', { className: `text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${isSuperAdmin ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : (isAdmin ? 'bg-indigo-500/20 text-indigo-300' : 'bg-slate-800 text-slate-400')}` },
-                  isSuperAdmin ? '👑 SUPER ADMIN' : (isAdmin ? '⚡ ADMIN' : '👤 MEMBER')
+              e('img', { src: './FamilyFavicon.gif', alt: 'Logo', className: 'w-9 h-9 object-contain rounded-xl border border-amber-500/40 shadow-md bg-navy-900 p-0.5' }),
+              e('div', null,
+                e('h1', { className: 'text-sm sm:text-base font-black text-white leading-tight tracking-wide flex items-center gap-2' },
+                  'Family-GenApp',
+                  e('span', { className: 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 hidden sm:inline' }, t('पारिवारिक वंशावली', 'Family Tree'))
                 ),
-                (isAdmin && dbConnected) && e('span', { className: 'text-[9px] font-bold px-1.5 py-0.2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded flex items-center gap-1' },
-                  e('span', { className: 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse' }),
-                  'DB Live'
+                e('div', { className: 'flex items-center gap-1.5 mt-0.5' },
+                  e('span', { className: `text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${isSuperAdmin ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : (isAdmin ? 'bg-indigo-500/20 text-indigo-300' : 'bg-slate-800 text-slate-400')}` },
+                    isSuperAdmin ? '👑 SUPER ADMIN' : (isAdmin ? '⚡ ADMIN' : '👤 MEMBER')
+                  ),
+                  (isAdmin && dbConnected) && e('span', { className: 'text-[9px] font-bold px-1.5 py-0.2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded flex items-center gap-1' },
+                    e('span', { className: 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse' }),
+                    'DB Live'
+                  )
                 )
               )
+            ),
+
+            e('div', { className: 'flex items-center gap-2 sm:gap-3' },
+              /* Language Switcher Pill */
+              e('button', {
+                onClick: toggleLang,
+                className: 'px-3 py-1.5 rounded-xl bg-amber-950/60 border border-amber-500/40 text-amber-300 hover:text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all'
+              },
+                e('span', null, '🌐'),
+                e('span', null, lang === 'hi' ? 'English' : 'हिंदी')
+              ),
+
+              e('button', {
+                onClick: () => setShowRequestModal(true),
+                className: 'px-3 sm:px-3.5 py-2 rounded-xl btn-warm text-white text-xs font-bold border border-amber-400/50 shadow-md min-h-[40px] flex items-center gap-1 hover:scale-105 transition-all'
+              },
+                e('span', { className: 'text-sm' }, '➕'),
+                e('span', { className: 'hidden sm:inline' }, t('सदस्य जोड़ें', 'Add Member')),
+                e('span', { className: 'sm:hidden' }, t('जोड़ें', 'Add'))
+              ),
+
+              e('div', { className: 'text-right hidden sm:block' },
+                e('div', { className: 'text-xs font-bold text-white flex items-center justify-end gap-1.5' },
+                  e('span', { className: 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse' }),
+                  currentUser ? currentUser.full_name : ''
+                )
+              ),
+              e('button', {
+                onClick: handleLogout,
+                className: 'px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black shadow-md border border-rose-400 min-h-[40px] transition-all'
+              }, t('साइन आउट', 'Sign Out'))
             )
-          ),
-
-          e('div', { className: 'flex items-center gap-2 sm:gap-3' },
-            e('button', {
-              onClick: () => setShowRequestModal(true),
-              className: 'px-3 sm:px-3.5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold border border-indigo-400 shadow-md hover:bg-indigo-500 min-h-[40px] flex items-center gap-1'
-            },
-              e('span', { className: 'text-sm' }, '➕'),
-              e('span', { className: 'hidden sm:inline' }, 'Request New Member'),
-              e('span', { className: 'sm:hidden' }, 'Request')
-            ),
-
-            e('div', { className: 'text-right hidden sm:block' },
-              e('div', { className: 'text-xs font-bold text-white flex items-center justify-end gap-1.5' },
-                e('span', { className: 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse' }),
-                currentUser ? currentUser.full_name : ''
-              )
-            ),
-            e('button', {
-              onClick: handleLogout,
-              className: 'px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black shadow-md border border-rose-400 min-h-[40px] transition-all'
-            }, 'Sign Out')
           )
         ),
 
         /* SLIDE-OUT MOBILE NAVIGATION DRAWER OVERLAY */
         isMobileMenuOpen && e('div', { className: 'fixed inset-0 z-50 bg-navy-950/95 flex animate-fadeIn md:hidden' },
-          e('div', { className: 'w-4/5 max-w-xs bg-navy-900 border-r border-slate-800 h-full p-5 flex flex-col justify-between overflow-y-auto animate-fadeIn' },
+          e('div', { className: 'w-4/5 max-w-xs bg-navy-900 border-r border-amber-500/30 h-full p-5 flex flex-col justify-between overflow-y-auto animate-fadeIn' },
             e('div', { className: 'flex flex-col gap-5' },
               /* Drawer Header */
               e('div', { className: 'flex items-center justify-between pb-3 border-b border-slate-800' },
                 e('div', { className: 'flex items-center gap-2.5' },
-                  e('img', { src: './FamilyFavicon.gif', alt: 'Logo', className: 'w-8 h-8 object-contain rounded-xl border border-primary/40 bg-navy-900 p-0.5' }),
+                  e('img', { src: './FamilyFavicon.gif', alt: 'Logo', className: 'w-8 h-8 object-contain rounded-xl border border-amber-500/40 bg-navy-900 p-0.5' }),
                   e('div', null,
                     e('div', { className: 'text-sm font-black text-white' }, 'Family-GenApp'),
-                    e('div', { className: 'text-[10px] text-emerald-400 flex items-center gap-1 font-bold' },
+                    e('div', { className: 'text-[10px] text-amber-400 flex items-center gap-1 font-bold' },
                       e('span', { className: 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse' }),
                       '🟢 ONLINE'
                     )
@@ -1565,96 +1617,96 @@
               ),
 
               /* User Profile Badge */
-              currentUser && e('div', { className: 'p-3 rounded-2xl bg-navy-950 border border-slate-800' },
+              currentUser && e('div', { className: 'p-3 rounded-2xl bg-navy-950 border border-amber-500/30' },
                 e('div', { className: 'text-xs font-bold text-white' }, currentUser.full_name),
-                e('div', { className: 'text-[10px] text-slate-400 mt-1 font-mono' }, `Mobile: +91 ${currentUser.mobile_number}`)
+                e('div', { className: 'text-[10px] text-amber-300 mt-1 font-mono' }, `Mobile: +91 ${currentUser.mobile_number}`)
               ),
 
               /* Navigation Links List */
               e('nav', { className: 'flex flex-col gap-1.5' },
                 e('button', {
                   onClick: () => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); },
-                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-between ${activeTab === 'dashboard' ? 'bg-primary text-white' : 'text-slate-300 hover:bg-slate-800/60'}`
-                }, '📊 डैशबोर्ड'),
+                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-between ${activeTab === 'dashboard' ? 'bg-amber-600 text-white' : 'text-slate-300 hover:bg-slate-800/60'}`
+                }, t('📊 डैशबोर्ड', '📊 Dashboard')),
 
                 isSuperAdmin && e('button', {
                   onClick: () => { setActiveTab('registered_users'); setIsMobileMenuOpen(false); },
                   className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-between ${activeTab === 'registered_users' ? 'bg-emerald-600 text-white' : 'text-emerald-300 bg-emerald-950/40 border border-emerald-500/30'}`
                 },
-                  `👥 पंजीकृत यूज़र्स`,
+                  t('👥 पंजीकृत यूज़र्स', '👥 Registered Users'),
                   e('span', { className: 'px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-black' }, `${users.filter(u=>u.is_online).length}/${users.length}`)
                 ),
 
                 e('button', {
                   onClick: () => { setActiveTab('directory'); setIsMobileMenuOpen(false); },
-                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-between ${activeTab === 'directory' ? 'bg-primary text-white' : 'text-slate-300 hover:bg-slate-800/60'}`
-                }, `📂 निर्देशिका (${members.length})`),
+                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-between ${activeTab === 'directory' ? 'bg-amber-600 text-white' : 'text-slate-300 hover:bg-slate-800/60'}`
+                }, t(`📂 निर्देशिका (${members.length})`, `📂 Directory (${members.length})`)),
 
                 e('button', {
                   onClick: () => { setActiveTab('hierarchy_tree'); setIsMobileMenuOpen(false); },
-                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold ${activeTab === 'hierarchy_tree' ? 'bg-primary text-white' : 'text-slate-300 hover:bg-slate-800/60'}`
-                }, '🌲 संपूर्ण वंशावली वृक्ष'),
+                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold ${activeTab === 'hierarchy_tree' ? 'bg-amber-600 text-white' : 'text-slate-300 hover:bg-slate-800/60'}`
+                }, t('🌲 संपूर्ण वंशावली वृक्ष', '🌲 Lineage Tree')),
 
                 isSuperAdmin && e('button', {
                   onClick: () => { setActiveTab('pending_requests'); setIsMobileMenuOpen(false); },
                   className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-between ${activeTab === 'pending_requests' ? 'bg-amber-600 text-white' : 'text-amber-300 bg-amber-950/40 border border-amber-500/30'}`
                 },
-                  '⏳ लंबित अनुरोध',
+                  t('⏳ लंबित अनुरोध', '⏳ Pending Requests'),
                   pendingCount > 0 && e('span', { className: 'px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black' }, pendingCount)
                 ),
 
                 isSuperAdmin && e('button', {
                   onClick: () => { setActiveTab('roles'); setIsMobileMenuOpen(false); },
                   className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold ${activeTab === 'roles' ? 'bg-amber-600 text-white' : 'text-amber-400 hover:bg-slate-800/60'}`
-                }, '👑 रोल मैनेजमेंट'),
+                }, t('👑 रोल मैनेजमेंट', '👑 Role Management')),
 
                 isAdmin && e('button', {
                   onClick: () => { setActiveTab('audit'); setIsMobileMenuOpen(false); },
                   className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold ${activeTab === 'audit' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800/60'}`
-                }, '📜 ऑडिट लॉग्स'),
+                }, t('📜 ऑडिट लॉग्स', '📜 Security Audit Logs')),
 
                 e('button', {
                   onClick: () => { setActiveTab('tree'); setIsMobileMenuOpen(false); },
-                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold ${activeTab === 'tree' ? 'bg-primary text-white' : 'text-slate-300 hover:bg-slate-800/60'}`
-                }, '🌳 5-Gen Tree')
+                  className: `w-full text-left px-4 py-3 rounded-xl text-xs font-bold ${activeTab === 'tree' ? 'bg-amber-600 text-white' : 'text-slate-300 hover:bg-slate-800/60'}`
+                }, t('🌳 5-Gen Tree', '🌳 5-Gen Tree'))
               )
             ),
 
             e('button', {
               onClick: () => { setIsMobileMenuOpen(false); handleLogout(); },
               className: 'w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs shadow-md border border-rose-400 transition-all'
-            }, 'Sign Out')
+            }, t('साइन आउट', 'Sign Out'))
           ),
           e('div', { onClick: () => setIsMobileMenuOpen(false), className: 'flex-1 h-full' })
         ),
 
         /* Desktop Navigation Bar */
-        e('div', { className: 'bg-navy-900/60 border-b border-slate-800 px-4 py-2 hidden md:block' },
+        e('div', { className: 'bg-navy-900/80 border-b border-amber-500/30 px-4 py-2 hidden md:block backdrop-blur' },
           e('div', { className: 'max-w-6xl mx-auto flex items-center gap-2 overflow-x-auto' },
-            e('button', { onClick: () => setActiveTab('dashboard'), className: `px-4 py-2 rounded-xl text-xs font-bold ${activeTab === 'dashboard' ? 'bg-primary text-white' : 'text-slate-400 hover:text-white'}` }, '📊 डैशबोर्ड'),
+            e('button', { onClick: () => setActiveTab('dashboard'), className: `px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'dashboard' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-300 hover:text-white'}` }, t('📊 डैशबोर्ड', '📊 Dashboard')),
             
             e('button', {
               onClick: () => setActiveTab('registered_users'),
-              className: `px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 ${activeTab === 'registered_users' || activeTab === 'roles' ? 'bg-emerald-600 text-white' : 'text-emerald-300 hover:text-white'}`
+              className: `px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${activeTab === 'registered_users' || activeTab === 'roles' ? 'bg-emerald-600 text-white shadow-md' : 'text-emerald-300 hover:text-white'}`
             },
-              `👥 पंजीकृत यूज़र्स (${users.length})`,
+              t(`👥 पंजीकृत यूज़र्स (${users.length})`, `👥 Registered Accounts (${users.length})`),
               users.filter(u => u.is_online).length > 0 && e('span', { className: 'px-1.5 py-0.2 rounded-full bg-emerald-500 text-white text-[10px] font-black' }, `🟢 ${users.filter(u => u.is_online).length}`)
             ),
 
-            e('button', { onClick: () => setActiveTab('directory'), className: `px-4 py-2 rounded-xl text-xs font-bold ${activeTab === 'directory' ? 'bg-primary text-white' : 'text-slate-400 hover:text-white'}` }, `📂 निर्देशिका (${members.length})`),
-            e('button', { onClick: () => setActiveTab('hierarchy_tree'), className: `px-4 py-2 rounded-xl text-xs font-bold ${activeTab === 'hierarchy_tree' ? 'bg-primary text-white' : 'text-slate-400 hover:text-white'}` }, '🌲 संपूर्ण वंशावली वृक्ष'),
+            e('button', { onClick: () => setActiveTab('directory'), className: `px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'directory' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-300 hover:text-white'}` }, t(`📂 निर्देशिका (${members.length})`, `📂 Directory (${members.length})`)),
+            e('button', { onClick: () => setActiveTab('hierarchy_tree'), className: `px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'hierarchy_tree' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-300 hover:text-white'}` }, t('🌲 संपूर्ण वंशावली वृक्ष', '🌲 Lineage Tree')),
             
             isSuperAdmin && e('button', {
               onClick: () => setActiveTab('pending_requests'),
-              className: `px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 ${activeTab === 'pending_requests' ? 'bg-amber-600 text-white' : 'text-amber-300 bg-amber-950/40 border border-amber-500/30'}`
+              className: `px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${activeTab === 'pending_requests' ? 'bg-amber-600 text-white shadow-md' : 'text-amber-300 bg-amber-950/40 border border-amber-500/30'}`
             },
-              '⏳ लंबित अनुरोध',
+              t('⏳ लंबित अनुरोध', '⏳ Pending Requests'),
               pendingCount > 0 && e('span', { className: 'px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-black' }, pendingCount)
             ),
 
-            isSuperAdmin && e('button', { onClick: () => setActiveTab('roles'), className: `px-4 py-2 rounded-xl text-xs font-bold ${activeTab === 'roles' ? 'bg-amber-600 text-white' : 'text-amber-400'}` }, '👑 रोल मैनेजमेंट'),
-            isAdmin && e('button', { onClick: () => setActiveTab('audit'), className: `px-4 py-2 rounded-xl text-xs font-bold ${activeTab === 'audit' ? 'bg-indigo-600 text-white' : 'text-slate-400'}` }, '📜 ऑडिट लॉग्स'),
-            e('button', { onClick: () => setActiveTab('tree'), className: `px-4 py-2 rounded-xl text-xs font-bold ${activeTab === 'tree' ? 'bg-primary text-white' : 'text-slate-400'}` }, '🌳 5-Gen Tree')
+            isSuperAdmin && e('button', { onClick: () => setActiveTab('roles'), className: `px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'roles' ? 'bg-amber-600 text-white shadow-md' : 'text-amber-400'}` }, t('👑 रोल मैनेजमेंट', '👑 Role Management')),
+            isAdmin && e('button', { onClick: () => setActiveTab('audit'), className: `px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'audit' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-300'}` }, t('📜 ऑडिट लॉग्स', '📜 Security Audit Logs')),
+            e('button', { onClick: () => setActiveTab('tree'), className: `px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'tree' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-300'}` }, '🌳 5-Gen Tree')
           )
         ),
 
@@ -1663,121 +1715,138 @@
           
           /* TAB 1: DASHBOARD */
           activeTab === 'dashboard' && e('div', { className: 'flex flex-col gap-6 animate-fadeIn' },
+            /* Top Quick Stats Grid */
             e('div', { className: 'grid grid-cols-2 md:grid-cols-4 gap-4' },
-              /* Stat Card 1: Registered Users Card (Clickable from Any Login) */
+              /* Stat Card 1: Registered Users Card */
               e('div', {
                 onClick: () => setActiveTab('registered_users'),
-                className: 'glass-card p-5 cursor-pointer hover:border-emerald-400/60 hover:scale-[1.02] transition-all shadow-lg border-emerald-500/30 group'
+                className: 'glass-card glass-card-hover p-5 cursor-pointer border-amber-500/30 group'
               },
                 e('div', { className: 'flex items-center justify-between' },
-                  e('div', { className: 'text-xs font-bold text-emerald-300 uppercase' }, 'Registered Users'),
-                  e('span', { className: 'text-base font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' }, `🟢 ${users.filter(u => u.is_online).length} Online`)
+                  e('div', { className: 'text-xs font-bold text-amber-300 uppercase tracking-wider' }, t('पंजीकृत यूज़र्स', 'Registered Users')),
+                  e('span', { className: 'text-base font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' }, `🟢 ${users.filter(u => u.is_online).length}`)
                 ),
-                e('div', { className: 'text-4xl font-black text-white mt-1.5 font-mono' }, users.length),
-                e('div', { className: 'text-[10px] text-emerald-300/90 font-semibold mt-1 group-hover:underline' }, 'View Registered Users ➔')
+                e('div', { className: 'text-4xl font-black text-white mt-2 font-mono' }, users.length),
+                e('div', { className: 'text-[11px] text-amber-300 font-semibold mt-1.5 group-hover:underline flex items-center gap-1' },
+                  t('खाते देखें', 'View Accounts'),
+                  e('span', null, '➔')
+                )
               ),
 
               /* Stat Card 2: Birthdays This Month */
               e('div', {
                 onClick: () => { setShowBirthdayModal(true); setBirthdaySearchQuery(''); },
-                className: 'glass-card p-5 cursor-pointer hover:border-amber-400/60 hover:scale-[1.02] transition-all relative overflow-hidden group shadow-lg'
+                className: 'glass-card glass-card-hover p-5 cursor-pointer relative overflow-hidden group border-amber-500/30'
               },
                 e('div', { className: 'flex items-center justify-between' },
-                  e('div', { className: 'text-xs font-bold text-amber-300 uppercase' }, 'Birthdays This Month'),
+                  e('div', { className: 'text-xs font-bold text-amber-300 uppercase tracking-wider' }, t('जन्मदिन (इस माह)', 'Birthdays This Month')),
                   e('span', { className: 'text-lg' }, '🎂')
                 ),
-                e('div', { className: 'text-4xl font-black text-amber-400 mt-1.5 font-mono' }, birthdaysThisMonth.length),
-                e('div', { className: 'text-[10px] text-amber-200/90 font-semibold mt-1 group-hover:underline' }, `Month: ${currentMonthNameEng} • Details ➔`)
-              ),
-
-              /* Stat Card 3: "कुल गांव वंशावली सदस्य 177" (Clickable -> Redirects to Directory Tab) */
-              e('div', {
-                onClick: () => setActiveTab('directory'),
-                className: 'glass-card p-5 cursor-pointer hover:border-indigo-400/60 hover:scale-[1.02] transition-all border-indigo-500/30 group shadow-lg'
-              },
-                e('div', { className: 'flex items-center justify-between' },
-                  e('div', { className: 'text-xs font-bold text-indigo-300 uppercase' }, 'कुल गांव वंशावली सदस्य'),
-                  e('span', { className: 'text-base' }, '📂')
-                ),
-                e('div', { className: 'text-4xl font-black text-white mt-1.5 font-mono' }, members.length),
-                e('div', { className: 'text-[10px] text-indigo-300/90 font-semibold mt-1 group-hover:underline' }, '📂 View Directory (177) ➔')
-              ),
-
-              /* Stat Card 4: "वंश पीढ़ियाँ (Generations)" (Clickable -> Redirects to Lineage Tree Tab) */
-              e('div', {
-                onClick: () => setActiveTab('hierarchy_tree'),
-                className: 'glass-card p-5 cursor-pointer hover:border-teal-400/60 hover:scale-[1.02] transition-all border-teal-500/30 group shadow-lg'
-              },
-                e('div', { className: 'flex items-center justify-between' },
-                  e('div', { className: 'text-xs font-bold text-teal-300 uppercase' }, 'वंश पीढ़ियाँ (Generations)'),
-                  e('span', { className: 'text-base' }, '🌲')
-                ),
-                e('div', { className: 'text-4xl font-black text-secondary mt-1.5 font-mono' }, '8'),
-                e('div', { className: 'text-[10px] text-teal-300/90 font-semibold mt-1 group-hover:underline' }, '🌲 View Lineage Tree ➔')
-              )
-            ),
-
-            /* Super Admin Insights & Recent Registrations Widgets */
-            isSuperAdmin && e('div', { className: 'grid grid-cols-1 md:grid-cols-3 gap-6' },
-              /* User Insights Widget */
-              e('div', { className: 'glass-card p-5 md:col-span-1 border-l-4 border-l-emerald-500' },
-                e('h3', { className: 'text-sm font-black text-white uppercase tracking-wider mb-3 flex items-center justify-between' },
-                  e('span', null, '📊 Super Admin User Insights'),
-                  e('span', { className: 'text-xs font-bold text-emerald-400' }, `Online: ${users.filter(u=>u.is_online).length}`)
-                ),
-                e('div', { className: 'flex flex-col gap-2 text-xs font-semibold' },
-                  e('div', { className: 'flex justify-between items-center p-2 rounded-xl bg-navy-950/80 border border-slate-800' },
-                    e('span', { className: 'text-slate-300' }, 'Total Registered Users'),
-                    e('span', { className: 'font-mono font-bold text-white' }, users.length)
-                  ),
-                  e('div', { className: 'flex justify-between items-center p-2 rounded-xl bg-emerald-950/30 border border-emerald-500/30' },
-                    e('span', { className: 'text-emerald-300 flex items-center gap-1.5' },
-                      e('span', { className: 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse' }),
-                      'Online Users (🟢)'
-                    ),
-                    e('span', { className: 'font-mono font-bold text-emerald-400' }, users.filter(u=>u.is_online).length)
-                  ),
-                  e('div', { className: 'flex justify-between items-center p-2 rounded-xl bg-slate-950/40 border border-slate-800' },
-                    e('span', { className: 'text-slate-400 flex items-center gap-1.5' },
-                      e('span', { className: 'w-2 h-2 rounded-full bg-slate-500' }),
-                      'Offline Users (⚪)'
-                    ),
-                    e('span', { className: 'font-mono font-bold text-slate-400' }, users.filter(u=>!u.is_online).length)
-                  ),
-                  e('div', { className: 'flex justify-between items-center p-2 rounded-xl bg-indigo-950/30 border border-indigo-500/30' },
-                    e('span', { className: 'text-indigo-300' }, 'Admins & Super Admins'),
-                    e('span', { className: 'font-mono font-bold text-indigo-300' }, users.filter(u=>u.role==='ADMIN'||u.role==='SUPER_ADMIN').length)
-                  ),
-                  e('div', { className: 'flex justify-between items-center p-2 rounded-xl bg-amber-950/30 border border-amber-500/30' },
-                    e('span', { className: 'text-amber-300' }, 'Members'),
-                    e('span', { className: 'font-mono font-bold text-amber-300' }, users.filter(u=>u.role==='MEMBER').length)
-                  )
+                e('div', { className: 'text-4xl font-black text-amber-400 mt-2 font-mono' }, birthdaysThisMonth.length),
+                e('div', { className: 'text-[11px] text-amber-200 font-semibold mt-1.5 group-hover:underline flex items-center gap-1' },
+                  `Month: ${currentMonthNameEng}`,
+                  e('span', null, '➔')
                 )
               ),
 
-              /* Recent Registrations Widget */
-              e('div', { className: 'glass-card p-5 md:col-span-2 border-l-4 border-l-indigo-500' },
-                e('div', { className: 'flex items-center justify-between mb-3' },
-                  e('h3', { className: 'text-sm font-black text-white uppercase tracking-wider' }, '🆕 Recent Registrations'),
-                  e('button', { onClick: () => setActiveTab('registered_users'), className: 'text-xs text-primary font-bold hover:underline' }, 'View All Users ➔')
+              /* Stat Card 3: Lineage Members */
+              e('div', {
+                onClick: () => setActiveTab('directory'),
+                className: 'glass-card glass-card-hover p-5 cursor-pointer border-amber-500/30 group'
+              },
+                e('div', { className: 'flex items-center justify-between' },
+                  e('div', { className: 'text-xs font-bold text-amber-300 uppercase tracking-wider' }, t('कुल वंशावली सदस्य', 'Lineage Members')),
+                  e('span', { className: 'text-base' }, '📂')
                 ),
-                e('div', { className: 'flex flex-col gap-2' },
-                  users.slice(0, 4).map(u => e('div', { key: u.id, className: 'p-3 rounded-xl bg-navy-950/80 border border-slate-800 flex items-center justify-between text-xs' },
-                    e('div', { className: 'flex items-center gap-3' },
-                      e('span', { className: 'text-lg' }, u.is_online ? '🟢' : '⚪'),
-                      e('div', null,
-                        e('div', { className: 'font-bold text-white flex items-center gap-2' },
-                          u.full_name,
-                          e('span', { className: `text-[9px] font-black px-1.5 py-0.2 rounded ${u.role === 'SUPER_ADMIN' ? 'bg-amber-500/20 text-amber-300' : 'bg-indigo-500/20 text-indigo-300'}` }, u.role)
-                        ),
-                        e('div', { className: 'text-[11px] text-slate-400 font-mono' }, u.email)
-                      )
+                e('div', { className: 'text-4xl font-black text-white mt-2 font-mono' }, members.length),
+                e('div', { className: 'text-[11px] text-amber-300 font-semibold mt-1.5 group-hover:underline flex items-center gap-1' },
+                  t('निर्देशिका (177)', 'Directory (177)'),
+                  e('span', null, '➔')
+                )
+              ),
+
+              /* Stat Card 4: Generations */
+              e('div', {
+                onClick: () => setActiveTab('hierarchy_tree'),
+                className: 'glass-card glass-card-hover p-5 cursor-pointer border-amber-500/30 group'
+              },
+                e('div', { className: 'flex items-center justify-between' },
+                  e('div', { className: 'text-xs font-bold text-amber-300 uppercase tracking-wider' }, t('वंश पीढ़ियाँ', 'Lineage Generations')),
+                  e('span', { className: 'text-base' }, '🌲')
+                ),
+                e('div', { className: 'text-4xl font-black text-amber-400 mt-2 font-mono' }, '8'),
+                e('div', { className: 'text-[11px] text-amber-300 font-semibold mt-1.5 group-hover:underline flex items-center gap-1' },
+                  t('वंशावली वृक्ष', 'View Family Tree'),
+                  e('span', null, '➔')
+                )
+              )
+            ),
+
+            /* Family Highlights & What's New Section Grid */
+            e('div', { className: 'grid grid-cols-1 md:grid-cols-3 gap-6' },
+              /* Highlight Card: Family Heritage Spotlight */
+              e('div', { className: 'glass-card glass-card-hover p-6 md:col-span-2 border-l-4 border-l-amber-500 flex flex-col justify-between' },
+                e('div', null,
+                  e('div', { className: 'flex items-center justify-between mb-3' },
+                    e('span', { className: 'text-xs font-extrabold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-widest' },
+                      t('🏛️ वंश परिचय एवं गौरव', '🏛️ Lineage Heritage Spotlight')
                     ),
-                    e('div', { className: 'text-right' },
-                      e('div', { className: 'text-slate-300 font-mono text-[11px]' }, `+91 ${u.mobile_number}`),
-                      e('div', { className: 'text-[10px] text-slate-500' }, u.registration_date ? u.registration_date.split('T')[0] : '2026-01-01')
+                    e('span', { className: 'text-xs font-bold text-amber-400/90 font-mono' }, '8 Generations • 177 Members')
+                  ),
+                  e('h2', { className: 'text-xl sm:text-2xl font-black text-white tracking-wide mb-2' },
+                    t('तिवारी परिवार वंशावली पोर्टल', 'Tiwari Lineage Ancestral Portal')
+                  ),
+                  e('p', { className: 'text-xs sm:text-sm text-slate-300 leading-relaxed font-medium mb-4' },
+                    t(
+                      'हमारी पावन वंशावली रीवा/मध्य प्रदेश की गौरवशाली विरासत को संजोए हुए है। प्रथम पीढ़ी (रामचन्द्र जी) से लेकर आधुनिक युवा पीढ़ियों तक 177 सदस्यों का डिजिटल संग्रह!',
+                      'Preserving the rich cultural heritage of the Tiwari lineage originating from Rewa, MP. Digitally archiving 177 lineage members across 8 generations!'
                     )
-                  ))
+                  ),
+                  e('div', { className: 'flex flex-wrap gap-2 text-xs font-bold' },
+                    e('span', { className: 'px-2.5 py-1 rounded-xl bg-navy-950 border border-amber-500/30 text-amber-300' }, '👑 Gen P1 Ancestral Legend'),
+                    e('span', { className: 'px-2.5 py-1 rounded-xl bg-navy-950 border border-amber-500/30 text-amber-200' }, '🌳 Gen P2 Lineage Tree'),
+                    e('span', { className: 'px-2.5 py-1 rounded-xl bg-navy-950 border border-amber-500/30 text-amber-100' }, '🍃 Gen P3-P8 Modern Era')
+                  )
+                ),
+                e('div', { className: 'mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-bold' },
+                  e('span', { className: 'text-amber-300' }, t('अपने पूर्वजों का इतिहास खोजें', 'Explore Ancestral Lineage History')),
+                  e('button', {
+                    onClick: () => setActiveTab('hierarchy_tree'),
+                    className: 'px-4 py-2 rounded-xl btn-warm text-white shadow hover:scale-105 transition-all'
+                  }, t('ट्री खोलें ➔', 'Open Tree ➔'))
+                )
+              ),
+
+              /* What's New Feed Section */
+              e('div', { className: 'glass-card glass-card-hover p-6 border-l-4 border-l-rose-500 flex flex-col justify-between' },
+                e('div', null,
+                  e('h3', { className: 'text-base font-black text-white uppercase tracking-wider mb-4 flex items-center justify-between pb-2 border-b border-slate-800' },
+                    e('span', null, t('📰 नया क्या है - अपडेट्स', "📰 What's New & Feed")),
+                    e('span', { className: 'text-[10px] font-bold px-2 py-0.5 bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded-full' }, 'Live')
+                  ),
+                  e('div', { className: 'flex flex-col gap-3 text-xs font-medium' },
+                    e('div', { className: 'p-3 rounded-2xl bg-navy-950 border border-amber-500/20 flex flex-col gap-1' },
+                      e('div', { className: 'font-bold text-amber-300 text-xs flex items-center gap-1.5' },
+                        e('span', null, '👶'),
+                        t('नवीन सदस्य अनुरोध स्वीकृति', 'Member Request Approved')
+                      ),
+                      e('p', { className: 'text-[11px] text-slate-300' }, t('वान्या तिवारी को आधिकारिक वंशावली में शामिल किया गया।', 'Vanya Tiwari added to official lineage tree.'))
+                    ),
+                    e('div', { className: 'p-3 rounded-2xl bg-navy-950 border border-amber-500/20 flex flex-col gap-1' },
+                      e('div', { className: 'font-bold text-amber-300 text-xs flex items-center gap-1.5' },
+                        e('span', null, '🎂'),
+                        t('जन्मदिन शुभकामनाएं', 'Upcoming Celebrations')
+                      ),
+                      e('p', { className: 'text-[11px] text-slate-300' }, `${birthdaysThisMonth.length} ${t('सदस्यों का जन्मदिन इस महीने है!', 'family members celebrating birthdays this month!')}`)
+                    ),
+                    e('div', { className: 'p-3 rounded-2xl bg-navy-950 border border-amber-500/20 flex flex-col gap-1' },
+                      e('div', { className: 'font-bold text-amber-300 text-xs flex items-center gap-1.5' },
+                        e('span', null, '📜'),
+                        t('सुरक्षा एवं ऑडिट सिंक', 'Security & Audit Active')
+                      ),
+                      e('p', { className: 'text-[11px] text-slate-300' }, t('सभी लॉगिन गतिविधियां एवं सिस्टम चेंज ट्रैक हो रहे हैं।', 'All sign-ins and role changes logged safely.'))
+                    )
+                  )
                 )
               )
             ),
