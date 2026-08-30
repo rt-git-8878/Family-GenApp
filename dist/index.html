@@ -2608,8 +2608,8 @@
           )
         ),
 
-        /* MODAL 4: EDIT MEMBER (Super Admin Only) */
-        showEditMemberModal && isSuperAdmin && editingMember && e('div', { className: 'modal-backdrop animate-fadeIn' },
+        /* MODAL 4: EDIT MEMBER (Super Admin & Registered Members) */
+        showEditMemberModal && currentUser && editingMember && e('div', { className: 'modal-backdrop animate-fadeIn' },
           e('div', { className: 'glass-card w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto border border-indigo-500/40 shadow-2xl' },
             e('div', { className: 'flex items-center justify-between mb-4 pb-3 border-b border-slate-800' },
               e('h3', { className: 'text-lg font-black text-white flex items-center gap-2' },
