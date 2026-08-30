@@ -799,8 +799,32 @@
       const [formCurrentCity, setFormCurrentCity] = useState('');
       const [formOccupation, setFormOccupation] = useState('');
       const [formFatherSearch, setFormFatherSearch] = useState('');
-      const [formSelectedFather, setFormSelectedFather] = useState(null);
       const [formPhotoData, setFormPhotoData] = useState('./default_avatar.png');
+      const [formHousePhotos, setFormHousePhotos] = useState([]);
+
+      const handleHousePhotosUpload = (ev) => {
+        const files = Array.from(ev.target.files || []);
+        if (!files.length) return;
+        const remainingSlots = 5 - formHousePhotos.length;
+        if (remainingSlots <= 0) {
+          alert(lang === 'hi' ? 'आप अधिकतम 5 मकान/घर की तस्वीरें ही अपलोड कर सकते हैं।' : 'You can upload a maximum of 5 house photos.');
+          return;
+        }
+        const filesToProcess = files.slice(0, remainingSlots);
+        filesToProcess.forEach(file => {
+          compressImageFile(file, (base64) => {
+            setFormHousePhotos(prev => {
+              if (prev.length >= 5) return prev;
+              return [...prev, base64];
+            });
+          });
+        });
+        ev.target.value = '';
+      };
+
+      const removeHousePhoto = (index) => {
+        setFormHousePhotos(prev => prev.filter((_, idx) => idx !== index));
+      };
 
       // Sync state with localStorage & API
       useEffect(() => {
@@ -1187,6 +1211,7 @@
             fatherId: formSelectedFather.Person_ID,
             fatherName: formSelectedFather.Full_Name,
             photoData: formPhotoData,
+            housePhotos: formHousePhotos,
             requestedBy: currentUser ? `${currentUser.mobile_number} (${currentUser.full_name})` : 'Registered Member'
           })
         })
@@ -1209,6 +1234,7 @@
               setFormSelectedFather(null);
               setFormFatherSearch('');
               setFormPhotoData('./default_avatar.png');
+              setFormHousePhotos([]);
               refreshDataFromDb();
             } else {
               alert('Failed to submit request: ' + (resData.message || 'Unknown server error'));
@@ -1248,14 +1274,14 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            reason: rejectionReasonInput || 'Not meeting criteria',
+            reason: rejectionReasonInput.trim(),
             rejectedBy: `${currentUser.mobile_number} (Rohit Tiwari)`
           })
         })
           .then(res => res.json())
           .then(resData => {
             if (resData.success) {
-              showToast(`Your member request for ${selectedRequestForReject.child_name} has been rejected.`);
+              showToast(`Member request for ${selectedRequestForReject.child_name} rejected.`);
               setShowRejectModal(false);
               setSelectedRequestForReject(null);
               setRejectionReasonInput('');
@@ -1285,6 +1311,7 @@
             occupation: formOccupation.trim(),
             fatherId: formSelectedFather.Person_ID,
             photoData: formPhotoData,
+            housePhotos: formHousePhotos,
             addedBy: `${currentUser.mobile_number} (Rohit Tiwari)`
           })
         })
@@ -2002,6 +2029,7 @@
                         e('th', { className: 'py-2 px-3' }, 'Child Name'),
                         e('th', { className: 'py-2 px-3' }, 'DOB'),
                         e('th', { className: 'py-2 px-3' }, 'Selected Father'),
+                        e('th', { className: 'py-2 px-3' }, 'House Photos'),
                         e('th', { className: 'py-2 px-3' }, 'Requested By'),
                         e('th', { className: 'py-2 px-3' }, 'Status'),
                         e('th', { className: 'py-2 px-3 text-right' }, 'Action')
@@ -2015,6 +2043,11 @@
                         e('td', { className: 'py-3 px-3 font-bold text-white' }, r.child_name),
                         e('td', { className: 'py-3 px-3 text-indigo-300 font-mono' }, r.dob),
                         e('td', { className: 'py-3 px-3 text-slate-300 font-bold' }, r.father_name),
+                        e('td', { className: 'py-3 px-3' },
+                          (r.house_photos && r.house_photos.length > 0) ? e('div', { className: 'flex -space-x-2 overflow-hidden' },
+                            r.house_photos.map((hp, hIdx) => e(AvatarWithPreview, { key: hIdx, src: hp, name: `House Photo ${hIdx + 1}`, className: 'inline-block h-8 w-8 rounded-lg object-cover ring-2 ring-amber-500/50' }))
+                          ) : e('span', { className: 'text-[10px] text-slate-500 font-mono' }, 'None')
+                        ),
                         e('td', { className: 'py-3 px-3 text-slate-400 text-[11px]' }, r.requested_by),
                         e('td', { className: 'py-3 px-3' },
                           e('span', { className: `px-2 py-0.5 rounded text-[10px] font-black ${r.status === 'PENDING' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : (r.status === 'APPROVED' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40')}` }, r.status)
@@ -2324,6 +2357,41 @@
                 )
               ),
 
+              /* Optional Field: Your House Photo (Maximum 5 Photos) */
+              e('div', { className: 'flex flex-col gap-1.5 p-3 rounded-2xl bg-navy-950 border border-amber-500/30' },
+                e('div', { className: 'flex items-center justify-between' },
+                  e('label', { className: 'text-xs font-bold text-amber-300 flex items-center gap-1.5' },
+                    e('span', null, '🏠'),
+                    t('मकान/घर की फोटो (Your House Photo - Optional)', 'Your House Photo (Optional)')
+                  ),
+                  e('span', { className: 'text-[10px] font-black text-amber-400 font-mono px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/40' },
+                    `${formHousePhotos.length}/5 photos`
+                  )
+                ),
+                e('p', { className: 'text-[11px] text-slate-400 font-medium' },
+                  t('आप अपने घर/मकान की अधिकतम 5 तस्वीरें अपलोड कर सकते हैं।', 'Upload maximum 5 photos of your house.')
+                ),
+
+                formHousePhotos.length < 5 && e('input', {
+                  type: 'file',
+                  accept: 'image/*',
+                  multiple: true,
+                  onChange: handleHousePhotosUpload,
+                  className: 'w-full p-2 bg-navy-900 border border-amber-500/40 rounded-xl text-slate-300 text-xs min-h-[44px] cursor-pointer'
+                }),
+
+                formHousePhotos.length > 0 && e('div', { className: 'grid grid-cols-5 gap-2 mt-2' },
+                  formHousePhotos.map((photo, idx) => e('div', { key: idx, className: 'relative group aspect-square rounded-xl overflow-hidden border border-amber-500/50 bg-navy-900 shadow-md' },
+                    e(AvatarWithPreview, { src: photo, name: `House Photo ${idx + 1}`, className: 'w-full h-full object-cover' }),
+                    e('button', {
+                      type: 'button',
+                      onClick: () => removeHousePhoto(idx),
+                      className: 'absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center font-bold text-[10px] shadow'
+                    }, '✕')
+                  ))
+                )
+              ),
+
               e('div', { className: 'flex gap-3 mt-2' },
                 e('button', { type: 'button', onClick: () => setShowRequestModal(false), className: 'w-1/2 py-3 rounded-xl bg-navy-900 text-slate-300 font-bold' }, 'Cancel'),
                 e('button', {
@@ -2415,6 +2483,41 @@
                   },
                     e('span', null, f.Full_Name),
                     e('span', { className: 'text-[10px] opacity-80' }, `Generation P${f.Generation_Level}`)
+                  ))
+                )
+              ),
+
+              /* Optional Field: Your House Photo (Maximum 5 Photos) */
+              e('div', { className: 'flex flex-col gap-1.5 p-3 rounded-2xl bg-navy-950 border border-amber-500/30' },
+                e('div', { className: 'flex items-center justify-between' },
+                  e('label', { className: 'text-xs font-bold text-amber-300 flex items-center gap-1.5' },
+                    e('span', null, '🏠'),
+                    t('मकान/घर की फोटो (Your House Photo - Optional)', 'Your House Photo (Optional)')
+                  ),
+                  e('span', { className: 'text-[10px] font-black text-amber-400 font-mono px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/40' },
+                    `${formHousePhotos.length}/5 photos`
+                  )
+                ),
+                e('p', { className: 'text-[11px] text-slate-400 font-medium' },
+                  t('आप अपने घर/मकान की अधिकतम 5 तस्वीरें अपलोड कर सकते हैं।', 'Upload maximum 5 photos of your house.')
+                ),
+
+                formHousePhotos.length < 5 && e('input', {
+                  type: 'file',
+                  accept: 'image/*',
+                  multiple: true,
+                  onChange: handleHousePhotosUpload,
+                  className: 'w-full p-2 bg-navy-900 border border-amber-500/40 rounded-xl text-slate-300 text-xs min-h-[44px] cursor-pointer'
+                }),
+
+                formHousePhotos.length > 0 && e('div', { className: 'grid grid-cols-5 gap-2 mt-2' },
+                  formHousePhotos.map((photo, idx) => e('div', { key: idx, className: 'relative group aspect-square rounded-xl overflow-hidden border border-amber-500/50 bg-navy-900 shadow-md' },
+                    e(AvatarWithPreview, { src: photo, name: `House Photo ${idx + 1}`, className: 'w-full h-full object-cover' }),
+                    e('button', {
+                      type: 'button',
+                      onClick: () => removeHousePhoto(idx),
+                      className: 'absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center font-bold text-[10px] shadow'
+                    }, '✕')
                   ))
                 )
               ),

@@ -1003,7 +1003,7 @@ app.get('/api/pending-requests', (req, res) => {
 });
 
 app.post('/api/pending-requests', (req, res) => {
-  const { childName, dob, fatherId, fatherName, photoData, requestedBy, currentCity, occupation } = req.body;
+  const { childName, dob, fatherId, fatherName, photoData, requestedBy, currentCity, occupation, housePhotos } = req.body;
   if (!childName || !dob || !fatherId) {
     return res.status(400).json({ success: false, message: 'कृपया सभी आवश्यक विवरण भरें (Child Name, DOB, and Father Selection are required)' });
   }
@@ -1020,6 +1020,7 @@ app.post('/api/pending-requests', (req, res) => {
     father_id: fatherId,
     father_name: fatherName,
     photo_data: photoData || './default_avatar.png',
+    house_photos: Array.isArray(housePhotos) ? housePhotos.slice(0, 5) : [],
     requested_by: requestedBy || 'Registered Member',
     request_date: new Date().toISOString().replace('T', ' ').substring(0, 19),
     status: 'PENDING',
@@ -1090,6 +1091,7 @@ app.post('/api/pending-requests/:id/approve', (req, res) => {
     current_city: reqItem.current_city || '',
     occupation: reqItem.occupation || '',
     profile_image: reqItem.photo_data || './default_avatar.png',
+    house_photos: reqItem.house_photos || [],
     marriage_note: null,
     marriages_count: 1,
     generation_level: childGen,
@@ -1170,7 +1172,7 @@ app.post('/api/pending-requests/:id/reject', (req, res) => {
 
 // 7. POST /api/members/direct-add (Super Admin Direct Addition)
 app.post('/api/members/direct-add', (req, res) => {
-  const { childName, dob, fatherId, photoData, addedBy, currentCity, occupation } = req.body;
+  const { childName, dob, fatherId, photoData, addedBy, currentCity, occupation, housePhotos } = req.body;
   const db = loadDbStore();
 
   let finalName = appendTiwariSurname(childName);
@@ -1192,6 +1194,7 @@ app.post('/api/members/direct-add', (req, res) => {
     current_city: currentCity || '',
     occupation: occupation || '',
     profile_image: photoData || './default_avatar.png',
+    house_photos: Array.isArray(housePhotos) ? housePhotos.slice(0, 5) : [],
     marriage_note: null,
     marriages_count: 1,
     generation_level: childGen,
