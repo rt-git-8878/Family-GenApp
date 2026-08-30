@@ -39,6 +39,8 @@ app.use(express.static(path.join(__dirname, 'dist')));
 
 const DB_STORE_PATH = path.join(__dirname, 'db/database_store.json');
 const globalUserCache = new Map();
+const globalPendingRequestsCache = new Map();
+const globalMembersCache = new Map();
 
 // Helper to load database store with serverless memory cache sync
 function loadDbStore() {
@@ -64,9 +66,39 @@ function loadDbStore() {
     }
   });
 
-  // Sync memory cache
+  // Sync memory cache for users
   data.users.forEach(u => {
     if (u.email) globalUserCache.set(u.email.trim().toLowerCase(), u);
+  });
+
+  // Merge in-memory cached pending_requests so serverless instances never lose pending requests
+  globalPendingRequestsCache.forEach((reqItem, reqId) => {
+    const idx = data.pending_requests.findIndex(existing => existing.id === reqId);
+    if (idx !== -1) {
+      data.pending_requests[idx] = reqItem;
+    } else {
+      data.pending_requests.unshift(reqItem);
+    }
+  });
+
+  // Sync memory cache for pending_requests
+  data.pending_requests.forEach(r => {
+    if (r.id) globalPendingRequestsCache.set(r.id, r);
+  });
+
+  // Merge in-memory cached members so serverless instances never lose member updates
+  globalMembersCache.forEach((memberItem, memberId) => {
+    const idx = data.members.findIndex(m => m.id === memberId);
+    if (idx !== -1) {
+      data.members[idx] = memberItem;
+    } else {
+      data.members.push(memberItem);
+    }
+  });
+
+  // Sync memory cache for members
+  data.members.forEach(m => {
+    if (m.id) globalMembersCache.set(m.id, m);
   });
 
   return data;
@@ -1051,6 +1083,7 @@ app.post('/api/pending-requests', (req, res) => {
     date_time: new Date().toISOString().replace('T', ' ').substring(0, 19)
   });
 
+  globalPendingRequestsCache.set(newReq.id, newReq);
   saveDbStore(db);
   res.json({ success: true, data: newReq });
 });
@@ -1084,6 +1117,7 @@ app.post('/api/pending-edit-requests', (req, res) => {
   };
 
   db.pending_requests.unshift(editReq);
+  globalPendingRequestsCache.set(editReq.id, editReq);
 
   // Notification for Admin
   db.notifications.unshift({
@@ -1163,6 +1197,8 @@ app.post('/api/pending-requests/:id/approve', (req, res) => {
       date_time: new Date().toISOString().replace('T', ' ').substring(0, 19)
     });
 
+    globalPendingRequestsCache.set(reqId, db.pending_requests[reqIdx]);
+    if (updatedMember) globalMembersCache.set(updatedMember.id, updatedMember);
     saveDbStore(db);
     return res.json({ success: true, member: updatedMember, request: db.pending_requests[reqIdx] });
   }
@@ -1196,11 +1232,13 @@ app.post('/api/pending-requests/:id/approve', (req, res) => {
 
   // Insert into members table
   db.members.push(newMember);
+  globalMembersCache.set(newMemberId, newMember);
 
   // Mark request APPROVED
   db.pending_requests[reqIdx].status = 'APPROVED';
   db.pending_requests[reqIdx].approved_by = approvedBy || 'Rohit Tiwari (Super Admin)';
   db.pending_requests[reqIdx].approval_date = new Date().toISOString().replace('T', ' ').substring(0, 19);
+  globalPendingRequestsCache.set(reqId, db.pending_requests[reqIdx]);
 
   // User Notification
   db.notifications.unshift({
@@ -1241,6 +1279,7 @@ app.post('/api/pending-requests/:id/reject', (req, res) => {
   db.pending_requests[reqIdx].rejection_reason = reason || 'Not meeting village criteria';
   db.pending_requests[reqIdx].approved_by = rejectedBy || 'Rohit Tiwari (Super Admin)';
   db.pending_requests[reqIdx].approval_date = new Date().toISOString().replace('T', ' ').substring(0, 19);
+  globalPendingRequestsCache.set(reqId, db.pending_requests[reqIdx]);
 
   // User Notification
   db.notifications.unshift({
@@ -1298,6 +1337,7 @@ app.post('/api/members/direct-add', (req, res) => {
   };
 
   db.members.push(newMember);
+  globalMembersCache.set(newMemberId, newMember);
 
   // Audit Log
   db.audit_logs.unshift({
@@ -1346,6 +1386,7 @@ app.put('/api/members/:id', (req, res) => {
   if (profile_image !== undefined) db.members[idx].profile_image = profile_image;
   if (house_photos !== undefined && Array.isArray(house_photos)) db.members[idx].house_photos = house_photos.slice(0, 5);
 
+  globalMembersCache.set(memberId, db.members[idx]);
   saveDbStore(db);
 
   // Audit Log

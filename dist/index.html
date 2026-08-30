@@ -627,7 +627,12 @@
       const t = (hiStr, enStr) => (lang === 'en' ? enStr : hiStr);
 
       // Pending Birth Requests State
-      const [pendingRequests, setPendingRequests] = useState([]);
+      const [pendingRequests, setPendingRequests] = useState(() => {
+        try {
+          const saved = localStorage.getItem('familygen_pending_requests');
+          return saved ? JSON.parse(saved) : [];
+        } catch(e) { return []; }
+      });
 
       // Fetch Tree & Pending Requests from Database REST API
       const refreshDataFromDb = () => {
@@ -644,8 +649,17 @@
         fetch(`${API_BASE_URL}/pending-requests`)
           .then(res => res.ok ? res.json() : null)
           .then(resData => {
-            if (resData && resData.success) {
-              setPendingRequests(resData.data);
+            if (resData && resData.success && Array.isArray(resData.data)) {
+              setPendingRequests(prev => {
+                const combined = [...resData.data];
+                prev.forEach(pr => {
+                  if (pr.id && !combined.some(cr => cr.id === pr.id)) {
+                    combined.unshift(pr);
+                  }
+                });
+                try { localStorage.setItem('familygen_pending_requests', JSON.stringify(combined)); } catch(e){}
+                return combined;
+              });
             }
           })
           .catch(() => {});
@@ -1328,10 +1342,14 @@
       };
 
       // WORKFLOW HANDLER 4: DIRECT ADD MEMBER BY SUPER ADMIN
-      const handleDirectAddSubmit = (ev) => {
+      const handleDirectAddMemberSubmit = (ev) => {
         ev.preventDefault();
-        if (!formChildName || !formDob || !formSelectedFather) {
-          alert('कृपया सभी आवश्यक विवरण भरें');
+        if (!formChildName || formChildName.trim().length < 2) {
+          alert('सदस्य का नाम कम से कम 2 अक्षरों का होना चाहिए (Name minimum 2 characters)');
+          return;
+        }
+        if (!formSelectedFather) {
+          alert('पिता का चयन करें (Father selection required)');
           return;
         }
 
@@ -1342,13 +1360,13 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             childName: finalFormattedName,
-            dob: formDob,
+            dob: formDob || '',
             currentCity: formCurrentCity.trim(),
             occupation: formOccupation.trim(),
             fatherId: formSelectedFather.Person_ID,
             photoData: formPhotoData,
             housePhotos: formHousePhotos,
-            addedBy: `${currentUser.mobile_number} (Rohit Tiwari)`
+            addedBy: `${currentUser.mobile_number} (${currentUser.full_name})`
           })
         })
           .then(res => res.json())
@@ -1363,6 +1381,7 @@
               setFormSelectedFather(null);
               setFormFatherSearch('');
               setFormPhotoData('./default_avatar.png');
+              setFormHousePhotos([]);
               refreshDataFromDb();
             }
           })
@@ -1430,6 +1449,13 @@
                 showToast(`Member Edit Request Submitted for ${editingMember.Full_Name}. Pending Super Admin Approval.`);
                 setShowEditMemberModal(false);
                 setEditingMember(null);
+                if (resData.data) {
+                  setPendingRequests(prev => {
+                    const next = [resData.data, ...prev.filter(p => p.id !== resData.data.id)];
+                    try { localStorage.setItem('familygen_pending_requests', JSON.stringify(next)); } catch(e){}
+                    return next;
+                  });
+                }
                 refreshDataFromDb();
               } else {
                 alert('Failed to submit edit request: ' + (resData.message || 'Unknown error'));
