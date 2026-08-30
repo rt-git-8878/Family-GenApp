@@ -1055,6 +1055,60 @@ app.post('/api/pending-requests', (req, res) => {
   res.json({ success: true, data: newReq });
 });
 
+// 4B. POST /api/pending-edit-requests (Member Edit Request by Registered User)
+app.post('/api/pending-edit-requests', (req, res) => {
+  const { personId, fullName, dob, currentCity, occupation, profileImage, housePhotos, requestedBy } = req.body;
+  if (!personId || !fullName) {
+    return res.status(400).json({ success: false, message: 'Person ID and Full Name are required for edit request' });
+  }
+
+  const db = loadDbStore();
+  let formattedName = appendTiwariSurname(fullName);
+
+  const editReq = {
+    id: `REQ_${String(db.pending_requests.length + 1).padStart(3, '0')}`,
+    request_type: 'EDIT',
+    target_person_id: personId,
+    child_name: formattedName,
+    dob: dob || '',
+    current_city: currentCity || '',
+    occupation: occupation || '',
+    photo_data: profileImage || './default_avatar.png',
+    house_photos: Array.isArray(housePhotos) ? housePhotos.slice(0, 5) : [],
+    requested_by: requestedBy || 'Registered Member',
+    request_date: new Date().toISOString().replace('T', ' ').substring(0, 19),
+    status: 'PENDING',
+    rejection_reason: null,
+    approved_by: null,
+    approval_date: null
+  };
+
+  db.pending_requests.unshift(editReq);
+
+  // Notification for Admin
+  db.notifications.unshift({
+    id: `NOTIF_${Date.now()}`,
+    recipient_mobile: 'SUPER_ADMIN',
+    message: `Member Details Edit Request Submitted for ${formattedName}`,
+    created_at: new Date().toISOString(),
+    is_read: false
+  });
+
+  // Audit Log
+  db.audit_logs.unshift({
+    id: `LOG_${String(db.audit_logs.length + 1).padStart(3, '0')}`,
+    action_type: 'Member Edit Request Submitted',
+    user_modified: `${personId} (${formattedName})`,
+    old_role: 'N/A',
+    new_role: 'PENDING_EDIT',
+    changed_by: requestedBy || 'Registered Member',
+    date_time: new Date().toISOString().replace('T', ' ').substring(0, 19)
+  });
+
+  saveDbStore(db);
+  res.json({ success: true, data: editReq });
+});
+
 // 5. POST /api/pending-requests/:id/approve (Super Admin Approval)
 app.post('/api/pending-requests/:id/approve', (req, res) => {
   const reqId = req.params.id;
@@ -1071,7 +1125,49 @@ app.post('/api/pending-requests/:id/approve', (req, res) => {
     return res.status(400).json({ success: false, message: 'Request already processed' });
   }
 
-  // Find father to derive generation level
+  // A. IF MEMBER EDIT REQUEST
+  if (reqItem.request_type === 'EDIT') {
+    const memberIdx = db.members.findIndex(m => m.id === reqItem.target_person_id);
+    let updatedMember = null;
+    if (memberIdx !== -1) {
+      let finalName = appendTiwariSurname(reqItem.child_name);
+      db.members[memberIdx].full_name = finalName;
+      db.members[memberIdx].raw_name = finalName;
+      if (reqItem.dob) db.members[memberIdx].dob = reqItem.dob;
+      if (reqItem.current_city !== undefined) db.members[memberIdx].current_city = reqItem.current_city;
+      if (reqItem.occupation !== undefined) db.members[memberIdx].occupation = reqItem.occupation;
+      if (reqItem.photo_data) db.members[memberIdx].profile_image = reqItem.photo_data;
+      if (reqItem.house_photos && Array.isArray(reqItem.house_photos)) db.members[memberIdx].house_photos = reqItem.house_photos;
+      updatedMember = db.members[memberIdx];
+    }
+
+    db.pending_requests[reqIdx].status = 'APPROVED';
+    db.pending_requests[reqIdx].approved_by = approvedBy || 'Rohit Tiwari (Super Admin)';
+    db.pending_requests[reqIdx].approval_date = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+    db.notifications.unshift({
+      id: `NOTIF_${Date.now()}`,
+      recipient_mobile: reqItem.requested_by,
+      message: `Your edit request for ${reqItem.child_name} has been approved.`,
+      created_at: new Date().toISOString(),
+      is_read: false
+    });
+
+    db.audit_logs.unshift({
+      id: `LOG_${String(db.audit_logs.length + 1).padStart(3, '0')}`,
+      action_type: 'Member Edit Request Approved',
+      user_modified: `${reqItem.target_person_id} (${reqItem.child_name})`,
+      old_role: 'PENDING_EDIT',
+      new_role: 'APPROVED_EDIT',
+      changed_by: approvedBy || 'Rohit Tiwari (Super Admin)',
+      date_time: new Date().toISOString().replace('T', ' ').substring(0, 19)
+    });
+
+    saveDbStore(db);
+    return res.json({ success: true, member: updatedMember, request: db.pending_requests[reqIdx] });
+  }
+
+  // B. IF NEW MEMBER ADDITION REQUEST
   const father = db.members.find(m => m.id === reqItem.father_id);
   const fatherGen = father ? (father.generation_level || 1) : 1;
   const childGen = fatherGen + 1;

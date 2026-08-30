@@ -1372,7 +1372,7 @@
           });
       };
 
-      // WORKFLOW HANDLER 5: EDIT MEMBER BY SUPER ADMIN
+      // WORKFLOW HANDLER 5: EDIT MEMBER (Super Admin Direct Update OR Member Approval Request)
       const handleUpdateMemberSubmit = (ev) => {
         ev.preventDefault();
         if (!editingMember) return;
@@ -1382,30 +1382,61 @@
           return;
         }
 
-        fetch(`${API_BASE_URL}/members/${editingMember.Person_ID}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            full_name: editingMember.Full_Name,
-            dob: editingMember.DOB,
-            father_id: editingMember.Father_ID,
-            current_city: editingMember.Current_City || '',
-            occupation: editingMember.Occupation || '',
-            profile_image: editingMember.Profile_Image,
-            house_photos: editingMember.house_photos || [],
-            updatedBy: `${currentUser.mobile_number} (${currentUser.full_name})`
+        if (isSuperAdmin) {
+          // Direct DB update for Super Admin
+          fetch(`${API_BASE_URL}/members/${editingMember.Person_ID}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              full_name: editingMember.Full_Name,
+              dob: editingMember.DOB,
+              father_id: editingMember.Father_ID,
+              current_city: editingMember.Current_City || '',
+              occupation: editingMember.Occupation || '',
+              profile_image: editingMember.Profile_Image,
+              house_photos: editingMember.house_photos || [],
+              updatedBy: currentUser ? `${currentUser.mobile_number} (${currentUser.full_name})` : 'Super Admin'
+            })
           })
-        })
-          .then(res => res.json())
-          .then(resData => {
-            if (resData.success) {
-              showToast(`Member ${editingMember.Full_Name} Updated Successfully!`);
-              setShowEditMemberModal(false);
-              setEditingMember(null);
-              refreshDataFromDb();
-            }
+            .then(res => res.json())
+            .then(resData => {
+              if (resData.success) {
+                showToast(`Member ${editingMember.Full_Name} Updated Successfully!`);
+                setShowEditMemberModal(false);
+                setEditingMember(null);
+                refreshDataFromDb();
+              }
+            })
+            .catch(() => alert('Failed to update member'));
+        } else {
+          // Request for Approval for Regular Members / Admins
+          fetch(`${API_BASE_URL}/pending-edit-requests`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              personId: editingMember.Person_ID,
+              fullName: editingMember.Full_Name,
+              dob: editingMember.DOB,
+              currentCity: editingMember.Current_City || '',
+              occupation: editingMember.Occupation || '',
+              profileImage: editingMember.Profile_Image,
+              housePhotos: editingMember.house_photos || [],
+              requestedBy: currentUser ? `${currentUser.mobile_number} (${currentUser.full_name})` : 'Registered Member'
+            })
           })
-          .catch(() => alert('Failed to update member'));
+            .then(res => res.json())
+            .then(resData => {
+              if (resData.success) {
+                showToast(`Member Edit Request Submitted for ${editingMember.Full_Name}. Pending Super Admin Approval.`);
+                setShowEditMemberModal(false);
+                setEditingMember(null);
+                refreshDataFromDb();
+              } else {
+                alert('Failed to submit edit request: ' + (resData.message || 'Unknown error'));
+              }
+            })
+            .catch(() => alert('Failed to submit edit request'));
+        }
       };
 
       // LOGIN SCREEN (Email-Based OTP Login Portal)
@@ -1973,7 +2004,7 @@
                   )
                 ),
 
-                isSuperAdmin && e('button', {
+                currentUser && e('button', {
                   onClick: () => { setEditingMember(m); setShowEditMemberModal(true); },
                   className: 'px-3 py-1.5 rounded-lg bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500 hover:text-white font-bold text-xs border border-indigo-500/30'
                 }, '✏️ Edit Member')
@@ -2054,18 +2085,19 @@
           /* TAB 4: PENDING MEMBER REQUESTS (SUPER ADMIN ONLY) */
           activeTab === 'pending_requests' && isSuperAdmin && e('div', { className: 'flex flex-col gap-6 animate-fadeIn' },
             e('div', { className: 'glass-card p-6 border-l-4 border-l-amber-400' },
-              e('h2', { className: 'text-lg font-black text-white mb-1' }, '⏳ Pending Member Addition Requests'),
-              e('p', { className: 'text-xs text-slate-400 mb-4' }, 'समीक्षा करें और नये बच्चे/सदस्य को आधिकारिक वंशावली में शामिल करें'),
+              e('h2', { className: 'text-lg font-black text-white mb-1' }, '⏳ Pending Member Addition & Edit Requests'),
+              e('p', { className: 'text-xs text-slate-400 mb-4' }, 'समीक्षा करें और नये बच्चे/सदस्य विवरण को आधिकारिक वंशावली में शामिल करें'),
 
               pendingRequests.length > 0 ? (
                 e('div', { className: 'overflow-x-auto' },
                   e('table', { className: 'w-full text-left text-xs border-collapse' },
                     e('thead', null,
                       e('tr', { className: 'border-b border-slate-800 text-slate-400 uppercase font-bold text-[10px]' },
+                        e('th', { className: 'py-2 px-3' }, 'Type'),
                         e('th', { className: 'py-2 px-3' }, 'Photo'),
-                        e('th', { className: 'py-2 px-3' }, 'Child Name'),
+                        e('th', { className: 'py-2 px-3' }, 'Member Name'),
                         e('th', { className: 'py-2 px-3' }, 'DOB'),
-                        e('th', { className: 'py-2 px-3' }, 'Selected Father'),
+                        e('th', { className: 'py-2 px-3' }, 'Father / City'),
                         e('th', { className: 'py-2 px-3' }, 'House Photos'),
                         e('th', { className: 'py-2 px-3' }, 'Requested By'),
                         e('th', { className: 'py-2 px-3' }, 'Status'),
@@ -2075,11 +2107,16 @@
                     e('tbody', { className: 'divide-y divide-slate-800/60 font-medium' },
                       pendingRequests.map(r => e('tr', { key: r.id, className: 'hover:bg-navy-800/40' },
                         e('td', { className: 'py-3 px-3' },
+                          e('span', { className: `px-2 py-0.5 rounded text-[10px] font-black ${r.request_type === 'EDIT' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'}` },
+                            r.request_type === 'EDIT' ? '✏️ EDIT' : '🆕 ADD'
+                          )
+                        ),
+                        e('td', { className: 'py-3 px-3' },
                           e(AvatarWithPreview, { src: r.photo_data || DEFAULT_AVATAR, name: r.child_name, className: 'w-10 h-10 rounded-full object-cover border border-amber-400/50' })
                         ),
                         e('td', { className: 'py-3 px-3 font-bold text-white' }, r.child_name),
-                        e('td', { className: 'py-3 px-3 text-indigo-300 font-mono' }, r.dob),
-                        e('td', { className: 'py-3 px-3 text-slate-300 font-bold' }, r.father_name),
+                        e('td', { className: 'py-3 px-3 text-indigo-300 font-mono' }, r.dob || 'N/A'),
+                        e('td', { className: 'py-3 px-3 text-slate-300 font-bold' }, r.father_name || r.current_city || 'N/A'),
                         e('td', { className: 'py-3 px-3' },
                           (r.house_photos && r.house_photos.length > 0) ? e('div', { className: 'flex -space-x-2 overflow-hidden' },
                             r.house_photos.map((hp, hIdx) => e(AvatarWithPreview, { key: hIdx, src: hp, name: `House Photo ${hIdx + 1}`, className: 'inline-block h-8 w-8 rounded-lg object-cover ring-2 ring-amber-500/50' }))
