@@ -900,12 +900,15 @@
 
       // Filtered Fathers for Searchable Autocomplete Dropdown
       const filteredFathers = useMemo(() => {
-        if (!formFatherSearch.trim()) return members;
-        const q = formFatherSearch.toLowerCase().trim();
-        return members.filter(m => 
-          m.Full_Name.toLowerCase().includes(q) || 
-          m.Raw_Name.toLowerCase().includes(q)
-        );
+        if (!members || !Array.isArray(members)) return [];
+        const query = (formFatherSearch || '').trim().toLowerCase();
+        if (!query) return members;
+        return members.filter(m => {
+          if (!m) return false;
+          const fn = String(m.Full_Name || m.full_name || '').toLowerCase();
+          const rn = String(m.Raw_Name || m.raw_name || '').toLowerCase();
+          return fn.includes(query) || rn.includes(query);
+        });
       }, [formFatherSearch, members]);
 
       // DYNAMIC BIRTHDAYS THIS MONTH CALCULATION LOGIC
@@ -2380,13 +2383,13 @@
                   className: 'w-full p-2 bg-navy-900 border border-amber-500/40 rounded-xl text-slate-300 text-xs min-h-[44px] cursor-pointer'
                 }),
 
-                formHousePhotos.length > 0 && e('div', { className: 'grid grid-cols-5 gap-2 mt-2' },
-                  formHousePhotos.map((photo, idx) => e('div', { key: idx, className: 'relative group aspect-square rounded-xl overflow-hidden border border-amber-500/50 bg-navy-900 shadow-md' },
-                    e(AvatarWithPreview, { src: photo, name: `House Photo ${idx + 1}`, className: 'w-full h-full object-cover' }),
+                (formHousePhotos && formHousePhotos.length > 0) && e('div', { className: 'grid grid-cols-5 gap-2 mt-2' },
+                  formHousePhotos.map((photo, idx) => e('div', { key: idx, className: 'relative aspect-square rounded-xl overflow-hidden border border-amber-500/50 bg-navy-900 shadow-md' },
+                    e('img', { src: photo, alt: `House Photo ${idx + 1}`, className: 'w-full h-full object-cover' }),
                     e('button', {
                       type: 'button',
                       onClick: () => removeHousePhoto(idx),
-                      className: 'absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center font-bold text-[10px] shadow'
+                      className: 'absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center font-bold text-[10px] shadow z-10'
                     }, '✕')
                   ))
                 )
@@ -2510,13 +2513,13 @@
                   className: 'w-full p-2 bg-navy-900 border border-amber-500/40 rounded-xl text-slate-300 text-xs min-h-[44px] cursor-pointer'
                 }),
 
-                formHousePhotos.length > 0 && e('div', { className: 'grid grid-cols-5 gap-2 mt-2' },
-                  formHousePhotos.map((photo, idx) => e('div', { key: idx, className: 'relative group aspect-square rounded-xl overflow-hidden border border-amber-500/50 bg-navy-900 shadow-md' },
-                    e(AvatarWithPreview, { src: photo, name: `House Photo ${idx + 1}`, className: 'w-full h-full object-cover' }),
+                (formHousePhotos && formHousePhotos.length > 0) && e('div', { className: 'grid grid-cols-5 gap-2 mt-2' },
+                  formHousePhotos.map((photo, idx) => e('div', { key: idx, className: 'relative aspect-square rounded-xl overflow-hidden border border-amber-500/50 bg-navy-900 shadow-md' },
+                    e('img', { src: photo, alt: `House Photo ${idx + 1}`, className: 'w-full h-full object-cover' }),
                     e('button', {
                       type: 'button',
                       onClick: () => removeHousePhoto(idx),
-                      className: 'absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center font-bold text-[10px] shadow'
+                      className: 'absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center font-bold text-[10px] shadow z-10'
                     }, '✕')
                   ))
                 )
@@ -2696,7 +2699,36 @@
       );
     }
 
-        ReactDOM.createRoot(document.getElementById('root')).render(e(App));
+        class ErrorBoundary extends React.Component {
+          constructor(props) {
+            super(props);
+            this.state = { hasError: false, error: null };
+          }
+          static getDerivedStateFromError(error) {
+            return { hasError: true, error };
+          }
+          componentDidCatch(error, errorInfo) {
+            console.error("React Error Boundary Caught Error:", error, errorInfo);
+          }
+          render() {
+            if (this.state.hasError) {
+              return e('div', { className: 'min-h-screen flex flex-col items-center justify-center p-6 text-center bg-[#100714] text-white' },
+                e('div', { className: 'glass-card p-8 max-w-md border-amber-500/50 shadow-2xl flex flex-col items-center gap-4' },
+                  e('div', { className: 'w-16 h-16 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 flex items-center justify-center text-2xl font-black' }, '⚠️'),
+                  e('h2', { className: 'text-xl font-black text-white' }, 'An unexpected UI error occurred'),
+                  e('p', { className: 'text-xs text-slate-300 font-medium' }, String(this.state.error?.message || this.state.error)),
+                  e('button', {
+                    onClick: () => { this.setState({ hasError: false, error: null }); window.location.reload(); },
+                    className: 'px-6 py-3 rounded-xl btn-warm text-white font-bold text-xs shadow-lg uppercase tracking-wider'
+                  }, '🔄 Reload Portal')
+                )
+              );
+            }
+            return this.props.children;
+          }
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(e(ErrorBoundary, null, e(App)));
       } catch(err) {
         console.error('FATAL_BOOT_ERROR:', err);
         document.getElementById('root').innerHTML = `
