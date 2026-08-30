@@ -2361,31 +2361,21 @@
                 )
               ),
 
-              /* Optional Field: Your House Photo (Maximum 5 Photos) */
-              e('div', { className: 'flex flex-col gap-1.5 p-3 rounded-2xl bg-navy-950 border border-amber-500/30' },
-                e('div', { className: 'flex items-center justify-between' },
-                  e('label', { className: 'text-xs font-bold text-amber-300 flex items-center gap-1.5' },
-                    e('span', null, '🏠'),
-                    t('मकान/घर की फोटो (Your House Photo - Optional)', 'Your House Photo (Optional)')
-                  ),
-                  e('span', { className: 'text-[10px] font-black text-amber-400 font-mono px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/40' },
-                    `${formHousePhotos.length}/5 photos`
-                  )
+              /* Your House Photo (Maximum 5 Photos) */
+              e('div', null,
+                e('div', { className: 'flex items-center justify-between mb-1' },
+                  e('label', { className: 'font-bold text-slate-300' }, 'मकान/घर की फोटो (Your House Photo)'),
+                  e('span', { className: 'text-[11px] text-slate-400 font-mono' }, `${(formHousePhotos || []).length}/5 photos`)
                 ),
-                e('p', { className: 'text-[11px] text-slate-400 font-medium' },
-                  t('आप अपने घर/मकान की अधिकतम 5 तस्वीरें अपलोड कर सकते हैं।', 'Upload maximum 5 photos of your house.')
-                ),
-
-                formHousePhotos.length < 5 && e('input', {
+                (formHousePhotos || []).length < 5 && e('input', {
                   type: 'file',
                   accept: 'image/*',
                   multiple: true,
                   onChange: handleHousePhotosUpload,
-                  className: 'w-full p-2 bg-navy-900 border border-amber-500/40 rounded-xl text-slate-300 text-xs min-h-[44px] cursor-pointer'
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-slate-300 text-xs min-h-[44px] cursor-pointer'
                 }),
-
                 (formHousePhotos && formHousePhotos.length > 0) && e('div', { className: 'grid grid-cols-5 gap-2 mt-2' },
-                  formHousePhotos.map((photo, idx) => e('div', { key: idx, className: 'relative aspect-square rounded-xl overflow-hidden border border-amber-500/50 bg-navy-900 shadow-md' },
+                  formHousePhotos.map((photo, idx) => e('div', { key: idx, className: 'relative aspect-square rounded-xl overflow-hidden border border-slate-700 bg-navy-950 shadow-md' },
                     e('img', { src: photo, alt: `House Photo ${idx + 1}`, className: 'w-full h-full object-cover' }),
                     e('button', {
                       type: 'button',
@@ -2491,31 +2481,21 @@
                 )
               ),
 
-              /* Optional Field: Your House Photo (Maximum 5 Photos) */
-              e('div', { className: 'flex flex-col gap-1.5 p-3 rounded-2xl bg-navy-950 border border-amber-500/30' },
-                e('div', { className: 'flex items-center justify-between' },
-                  e('label', { className: 'text-xs font-bold text-amber-300 flex items-center gap-1.5' },
-                    e('span', null, '🏠'),
-                    t('मकान/घर की फोटो (Your House Photo - Optional)', 'Your House Photo (Optional)')
-                  ),
-                  e('span', { className: 'text-[10px] font-black text-amber-400 font-mono px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/40' },
-                    `${formHousePhotos.length}/5 photos`
-                  )
+              /* Your House Photo (Maximum 5 Photos) */
+              e('div', null,
+                e('div', { className: 'flex items-center justify-between mb-1' },
+                  e('label', { className: 'font-bold text-slate-300' }, 'मकान/घर की फोटो (Your House Photo)'),
+                  e('span', { className: 'text-[11px] text-slate-400 font-mono' }, `${(formHousePhotos || []).length}/5 photos`)
                 ),
-                e('p', { className: 'text-[11px] text-slate-400 font-medium' },
-                  t('आप अपने घर/मकान की अधिकतम 5 तस्वीरें अपलोड कर सकते हैं।', 'Upload maximum 5 photos of your house.')
-                ),
-
-                formHousePhotos.length < 5 && e('input', {
+                (formHousePhotos || []).length < 5 && e('input', {
                   type: 'file',
                   accept: 'image/*',
                   multiple: true,
                   onChange: handleHousePhotosUpload,
-                  className: 'w-full p-2 bg-navy-900 border border-amber-500/40 rounded-xl text-slate-300 text-xs min-h-[44px] cursor-pointer'
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-slate-300 text-xs min-h-[44px] cursor-pointer'
                 }),
-
                 (formHousePhotos && formHousePhotos.length > 0) && e('div', { className: 'grid grid-cols-5 gap-2 mt-2' },
-                  formHousePhotos.map((photo, idx) => e('div', { key: idx, className: 'relative aspect-square rounded-xl overflow-hidden border border-amber-500/50 bg-navy-900 shadow-md' },
+                  formHousePhotos.map((photo, idx) => e('div', { key: idx, className: 'relative aspect-square rounded-xl overflow-hidden border border-slate-700 bg-navy-950 shadow-md' },
                     e('img', { src: photo, alt: `House Photo ${idx + 1}`, className: 'w-full h-full object-cover' }),
                     e('button', {
                       type: 'button',
