@@ -1034,6 +1034,14 @@ app.get('/api/pending-requests', (req, res) => {
   });
 });
 
+app.delete('/api/pending-requests/clear-all', (req, res) => {
+  const db = loadDbStore();
+  db.pending_requests = [];
+  globalPendingRequestsCache.clear();
+  saveDbStore(db);
+  res.json({ success: true, message: 'All pending requests cleared' });
+});
+
 app.post('/api/pending-requests', (req, res) => {
   const { childName, dob, fatherId, fatherName, photoData, requestedBy, currentCity, occupation, housePhotos } = req.body;
   if (!childName || !dob || !fatherId) {

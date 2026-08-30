@@ -1341,6 +1341,26 @@
           .catch(() => alert('Failed to reject request'));
       };
 
+      // WORKFLOW HANDLER 3B: CLEAR ALL PENDING REQUESTS (Super Admin Only)
+      const handleClearAllPendingRequests = () => {
+        if (!confirm('क्या आप निश्चित रूप से सभी लंबित अनुरोधों को हटाना चाहते हैं? (Are you sure you want to delete all pending request entries?)')) return;
+        fetch(`${API_BASE_URL}/pending-requests/clear-all`, { method: 'DELETE' })
+          .then(res => res.json())
+          .then(resData => {
+            if (resData.success) {
+              setPendingRequests([]);
+              try { localStorage.removeItem('familygen_pending_requests'); } catch(e){}
+              showToast('All Pending Request Entries Deleted Successfully!');
+              refreshDataFromDb();
+            }
+          })
+          .catch(() => {
+            setPendingRequests([]);
+            try { localStorage.removeItem('familygen_pending_requests'); } catch(e){}
+            showToast('Pending Requests Cleared!');
+          });
+      };
+
       // WORKFLOW HANDLER 4: DIRECT ADD MEMBER BY SUPER ADMIN
       const handleDirectAddMemberSubmit = (ev) => {
         ev.preventDefault();
@@ -2111,8 +2131,16 @@
           /* TAB 4: PENDING MEMBER REQUESTS (SUPER ADMIN ONLY) */
           activeTab === 'pending_requests' && isSuperAdmin && e('div', { className: 'flex flex-col gap-6 animate-fadeIn' },
             e('div', { className: 'glass-card p-6 border-l-4 border-l-amber-400' },
-              e('h2', { className: 'text-lg font-black text-white mb-1' }, '⏳ Pending Member Addition & Edit Requests'),
-              e('p', { className: 'text-xs text-slate-400 mb-4' }, 'समीक्षा करें और नये बच्चे/सदस्य विवरण को आधिकारिक वंशावली में शामिल करें'),
+              e('div', { className: 'flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800/80' },
+                e('div', null,
+                  e('h2', { className: 'text-lg font-black text-white mb-1' }, '⏳ Pending Member Addition & Edit Requests'),
+                  e('p', { className: 'text-xs text-slate-400' }, 'समीक्षा करें और नये बच्चे/सदस्य विवरण को आधिकारिक वंशावली में शामिल करें')
+                ),
+                pendingRequests.length > 0 && e('button', {
+                  onClick: handleClearAllPendingRequests,
+                  className: 'px-3 py-1.5 rounded-lg bg-rose-600/20 text-rose-300 hover:bg-rose-600 hover:text-white font-bold text-xs border border-rose-500/40 shadow transition-all flex items-center gap-1.5'
+                }, '🗑️ Clear All Entries')
+              ),
 
               pendingRequests.length > 0 ? (
                 e('div', { className: 'overflow-x-auto' },
