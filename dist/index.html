@@ -827,6 +827,38 @@
         setFormHousePhotos(prev => prev.filter((_, idx) => idx !== index));
       };
 
+      const handleEditHousePhotosUpload = (ev) => {
+        const files = Array.from(ev.target.files || []);
+        if (!files.length || !editingMember) return;
+        const currentPhotos = editingMember.house_photos || [];
+        const remainingSlots = 5 - currentPhotos.length;
+        if (remainingSlots <= 0) {
+          alert(lang === 'hi' ? 'आप अधिकतम 5 मकान/घर की तस्वीरें ही अपलोड कर सकते हैं।' : 'You can upload a maximum of 5 house photos.');
+          return;
+        }
+        const filesToProcess = files.slice(0, remainingSlots);
+        filesToProcess.forEach(file => {
+          compressImageFile(file, (base64) => {
+            setEditingMember(prev => {
+              if (!prev) return prev;
+              const prevPhotos = prev.house_photos || [];
+              if (prevPhotos.length >= 5) return prev;
+              return { ...prev, house_photos: [...prevPhotos, base64] };
+            });
+          });
+        });
+        ev.target.value = '';
+      };
+
+      const removeEditHousePhoto = (index) => {
+        if (!editingMember) return;
+        setEditingMember(prev => {
+          if (!prev) return prev;
+          const prevPhotos = prev.house_photos || [];
+          return { ...prev, house_photos: prevPhotos.filter((_, idx) => idx !== index) };
+        });
+      };
+
       // Sync state with localStorage & API
       useEffect(() => {
         try { localStorage.setItem('familygen_users', JSON.stringify(users)); } catch(e){}
@@ -1360,6 +1392,7 @@
             current_city: editingMember.Current_City || '',
             occupation: editingMember.Occupation || '',
             profile_image: editingMember.Profile_Image,
+            house_photos: editingMember.house_photos || [],
             updatedBy: `${currentUser.mobile_number} (${currentUser.full_name})`
           })
         })
@@ -2618,6 +2651,31 @@
                     e('span', { className: 'text-xs font-bold text-emerald-400 block' }, '✓ Live Photo Preview'),
                     e('span', { className: 'text-[10px] text-slate-400' }, 'Photo ready to save in database')
                   )
+                )
+              ),
+
+              /* 6. Your House Photo (Maximum 5 Photos) */
+              e('div', null,
+                e('div', { className: 'flex items-center justify-between mb-1' },
+                  e('label', { className: 'font-bold text-slate-300' }, 'मकान/घर की फोटो (Your House Photo)'),
+                  e('span', { className: 'text-[11px] text-slate-400 font-mono' }, `${((editingMember && editingMember.house_photos) || []).length}/5 photos`)
+                ),
+                ((editingMember && editingMember.house_photos) || []).length < 5 && e('input', {
+                  type: 'file',
+                  accept: 'image/*',
+                  multiple: true,
+                  onChange: handleEditHousePhotosUpload,
+                  className: 'w-full p-3 bg-navy-950 border border-slate-700 rounded-xl text-slate-300 text-xs min-h-[44px] cursor-pointer'
+                }),
+                (editingMember && editingMember.house_photos && editingMember.house_photos.length > 0) && e('div', { className: 'grid grid-cols-5 gap-2 mt-2' },
+                  editingMember.house_photos.map((photo, idx) => e('div', { key: idx, className: 'relative aspect-square rounded-xl overflow-hidden border border-slate-700 bg-navy-950 shadow-md' },
+                    e('img', { src: photo, alt: `House Photo ${idx + 1}`, className: 'w-full h-full object-cover' }),
+                    e('button', {
+                      type: 'button',
+                      onClick: () => removeEditHousePhoto(idx),
+                      className: 'absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center font-bold text-[10px] shadow z-10'
+                    }, '✕')
+                  ))
                 )
               ),
 

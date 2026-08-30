@@ -1221,7 +1221,7 @@ app.post('/api/members/direct-add', (req, res) => {
 // 8. PUT /api/members/:id (Super Admin Edit Member)
 app.put('/api/members/:id', (req, res) => {
   const memberId = req.params.id;
-  const { full_name, dob, father_id, current_city, occupation, profile_image, updatedBy } = req.body;
+  const { full_name, dob, father_id, current_city, occupation, profile_image, house_photos, updatedBy } = req.body;
   const db = loadDbStore();
 
   const idx = db.members.findIndex(m => m.id === memberId);
@@ -1248,6 +1248,7 @@ app.put('/api/members/:id', (req, res) => {
   if (current_city !== undefined) db.members[idx].current_city = current_city;
   if (occupation !== undefined) db.members[idx].occupation = occupation;
   if (profile_image !== undefined) db.members[idx].profile_image = profile_image;
+  if (house_photos !== undefined && Array.isArray(house_photos)) db.members[idx].house_photos = house_photos.slice(0, 5);
 
   saveDbStore(db);
 
